@@ -1,0 +1,330 @@
+/* TrashTrack — Login Form Styles */
+/* Matched 1:1 to trashtrack-register.css */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green-dark: #588157;
+  --green-mid: #A3B18A;
+  --green-light: #d4e6c3;
+  --green-xlight: #eef5e7;
+  --bg: #eef3e8;
+  --white: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #cddbc4;
+  --input-bg: #f8faf5;
+  --shadow: 0 24px 64px rgba(88,129,87,0.18);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(88,129,87,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88,129,87,0.06) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+/* ── CARD ── */
+.card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  background: var(--green-mid);
+  padding: 2.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--green-dark);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1c2b1b;
+}
+
+.left-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.headline {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.18;
+  color: #1c2b1b;
+  margin-bottom: 1rem;
+}
+
+.subtext {
+  font-size: 0.845rem;
+  color: #2e4a2d;
+  line-height: 1.65;
+  max-width: 230px;
+}
+
+.stats {
+  display: flex;
+  gap: 1.8rem;
+}
+
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.stat-label {
+  font-size: 0.76rem;
+  color: #2e4a2d;
+  margin-top: 2px;
+}
+
+/* ── RIGHT PANEL ── */
+.right {
+  padding: 2.2rem 2.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.form-subtitle {
+  font-size: 0.825rem;
+  color: var(--muted);
+  margin-bottom: 1.6rem;
+}
+
+/* ── FORM PANEL ── */
+.form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  flex: 1;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+
+label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── INPUTS ── */
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap .icon {
+  position: absolute;
+  left: 11px;
+  width: 17px;
+  height: 17px;
+  pointer-events: none;
+}
+
+.input-wrap .eye {
+  position: absolute;
+  right: 11px;
+  cursor: pointer;
+  color: var(--muted);
+  width: 17px;
+  height: 17px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.62rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input-wrap input { padding-left: 2.2rem; }
+.input-wrap.has-eye input { padding-right: 2.2rem; }
+
+input::placeholder { color: #b0bda8; }
+
+input:focus {
+  border-color: var(--green-dark);
+  box-shadow: 0 0 0 3px rgba(88,129,87,0.11);
+}
+
+/* ── ROLE SELECTOR ── */
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+/* hide the actual radio */
+.role-selector input[type="radio"] { display: none; }
+
+.role-option {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  text-align: center;
+  background: var(--input-bg);
+  display: block;
+  font-weight: normal;
+}
+
+.role-option:hover {
+  border-color: var(--green-mid);
+  background: var(--white);
+}
+
+/* selected state via JS class */
+.role-option.selected {
+  border-color: var(--green-dark);
+  background: var(--green-xlight);
+  box-shadow: 0 0 0 3px rgba(88,129,87,0.11);
+}
+
+/* also support native :has() for radio checked state */
+input[type="radio"]:checked + .role-option {
+  border-color: var(--green-dark);
+  background: var(--green-xlight);
+  box-shadow: 0 0 0 3px rgba(88,129,87,0.11);
+}
+
+.role-emoji {
+  font-size: 1.3rem;
+  margin-bottom: 0.25rem;
+  line-height: 1;
+}
+
+.role-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.role-option.selected .role-name {
+  color: var(--green-dark);
+}
+
+/* ── BUTTONS ── */
+.btn-row {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.72rem 1.1rem;
+  border-radius: 11px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--green-dark);
+  color: #fff;
+  flex: 2;
+}
+
+.btn-primary:hover {
+  background: #4a6f47;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(88,129,87,0.32);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+/* ── SIGN IN LINK ── */
+.signin-row {
+  text-align: center;
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.signin-row a {
+  color: var(--green-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signin-row a:hover { text-decoration: underline; }
+
+/* ── ANIMATION ── */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 660px) {
+  .card { grid-template-columns: 1fr 1fr; }
+}
