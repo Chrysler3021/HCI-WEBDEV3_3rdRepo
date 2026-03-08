@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — ZamboCollect</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ============================== -->
+<!--        APP SHELL               -->
+<!-- ============================== -->
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="logo-mark">🗑</div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Administration</div>
+      <a href="admin-dashboard.html" class="nav-item active">
+        <span class="nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="admin-users.html" class="nav-item">
+        <span class="nav-icon">👥</span> User Management
+      </a>
+      <a href="admin-system.html" class="nav-item">
+        <span class="nav-icon">📋</span> System Logs
+      </a>
+      <a href="admin-reports.html" class="nav-item">
+        <span class="nav-icon">📊</span> City-wide Analytics
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="user-info">
+        <div class="user-avatar">⚙️</div>
+        <div>
+          <div class="user-name">Admin User</div>
+          <div class="user-role">System Administrator</div>
+        </div>
+      </a>
+      <a href="login.html" class="nav-item" style="margin-top:8px;color:var(--red);">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Admin Dashboard</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn">🔔 <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">0</span></a>
+      </div>
+    </div>
+
+    <!-- =========== ADMIN DASHBOARD =========== -->
+    <div class="page active">
+      <div class="page-header">
+        <h1>System Overview</h1>
+        <p>City-wide waste management monitoring and administration.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-green">
+          <div class="stat-icon">�</div>
+          <div>
+            <div class="stat-num" style="color:var(--green);">98</div>
+            <div class="stat-label">Barangays Active</div>
+          </div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🗑</div>
+          <div>
+            <div class="stat-num" style="color:var(--blue);">1,247</div>
+            <div class="stat-label">Total City Waste (Tons)</div>
+          </div>
+        </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon">👮</div>
+          <div>
+            <div class="stat-num" style="color:var(--yellow);">87</div>
+            <div class="stat-label">Verified Officers</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">⏱️</div>
+          <div>
+            <div class="stat-num" style="color:var(--green);">99.8%</div>
+            <div class="stat-label">System Uptime</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- City Heatmap -->
+      <div class="card" style="margin-bottom:32px;">
+        <div class="card-title">City Heatmap</div>
+        <div class="map-placeholder" style="height:400px;background:linear-gradient(135deg,#f8f9f8 0%,#e9ecef 100%);border:2px dashed #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;">
+          <div style="text-align:center;">
+            <div style="font-size:48px;margin-bottom:16px;">🗺️</div>
+            <div>City-wide waste density map</div>
+            <div style="font-size:14px;margin-top:8px;">98 Barangays • Real-time data visualization</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">System Health Monitor</div>
+          <div class="health-monitor">
+            <div class="health-item">
+              <div class="health-label">Server Status</div>
+              <div class="health-status status-good">
+                <span class="status-dot"></span>
+                Online
+              </div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Database</div>
+              <div class="health-status status-good">
+                <span class="status-dot"></span>
+                Healthy
+              </div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">API Response</div>
+              <div class="health-status status-good">
+                <span class="status-dot"></span>
+                < 200ms
+              </div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Storage</div>
+              <div class="health-status status-warning">
+                <span class="status-dot"></span>
+                78% Used
+              </div>
+            </div>
+            <div class="health-item">
+              <div class="health-label">Backup</div>
+              <div class="health-status status-good">
+                <span class="status-dot"></span>
+                Last: 2 hours ago
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recent Activity</div>
+          <div class="activity-log">
+            <div class="activity-item">
+              <div class="activity-time">10:30 AM</div>
+              <div class="activity-desc">New user registration: Maria Santos (Barangay Officer)</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time">10:15 AM</div>
+              <div class="activity-desc">Report #RPT-2025-0384 approved by Officer Garcia</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time">9:45 AM</div>
+              <div class="activity-desc">KYC verification completed for Juan dela Cruz</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time">9:30 AM</div>
+              <div class="activity-desc">Collection completed at Rio Hondo Bridge</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time">9:00 AM</div>
+              <div class="activity-desc">System backup completed successfully</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
