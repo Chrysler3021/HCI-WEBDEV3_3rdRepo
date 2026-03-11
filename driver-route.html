@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Route — ZamboCollect</title>
+<link rel="stylesheet" href="driver.css">
+</head>
+<body>
+
+<!-- ============================== -->
+<!--        APP SHELL               -->
+<!-- ============================== -->
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="logo-mark">🗑</div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="driver-dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="driver-route.html" class="nav-item active">
+        <span class="nav-icon">🗺</span> Daily Route
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📋</span> Assigned Tasks
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🚛</span> Vehicle Status
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="user-info">
+        <div class="user-avatar">🚛</div>
+        <div>
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-role">Collection Driver</div>
+        </div>
+      </a>
+      <a href="login.html" class="nav-item" style="margin-top:8px;color:var(--red);">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Daily Route</div>
+      <div class="topbar-right">
+        <a href="driver-dashboard.html" class="topbar-btn">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- =========== DAILY ROUTE =========== -->
+    <div class="page active">
+      <div class="page-header">
+        <h1>Today's Collection Route</h1>
+        <p>Barangay Rio Hondo collection sequence for March 8, 2026.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-green">
+          <div class="stat-icon">📍</div>
+          <div>
+            <div class="stat-num" style="color:var(--green);">12</div>
+            <div class="stat-label">Stops Completed</div>
+          </div>
+        </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon">⏳</div>
+          <div>
+            <div class="stat-num" style="color:var(--yellow);">8</div>
+            <div class="stat-label">Remaining Stops</div>
+          </div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🚛</div>
+          <div>
+            <div class="stat-num" style="color:var(--blue);">85%</div>
+            <div class="stat-label">Truck Capacity</div>
+          </div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-icon">⏰</div>
+          <div>
+            <div class="stat-num" style="color:var(--orange);">2.5h</div>
+            <div class="stat-label">Estimated Time Left</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Route Sequence</div>
+        <div class="route-sequence">
+          <div class="route-stop completed">
+            <div class="stop-number">1</div>
+            <div class="stop-content">
+              <div class="stop-address">Pasonanca Road, near McDonald's</div>
+              <div class="stop-details">Plastic & Bottles • Completed at 8:15 AM</div>
+            </div>
+            <div class="stop-status">
+              <span class="badge badge-green">Collected</span>
+            </div>
+          </div>
+          <div class="route-stop completed">
+            <div class="stop-number">2</div>
+            <div class="stop-content">
+              <div class="stop-address">Sta. Cruz District</div>
+              <div class="stop-details">General Waste • Completed at 9:30 AM</div>
+            </div>
+            <div class="stop-status">
+              <span class="badge badge-green">Collected</span>
+            </div>
+          </div>
+          <div class="route-stop active">
+            <div class="stop-number">3</div>
+            <div class="stop-content">
+              <div class="stop-address">Rio Hondo Bridge</div>
+              <div class="stop-details">Hazardous Waste • Next stop - 10:45 AM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-green">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">4</div>
+            <div class="stop-content">
+              <div class="stop-address">Talisay Road</div>
+              <div class="stop-details">Organic Waste • Scheduled 11:15 AM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">5</div>
+            <div class="stop-content">
+              <div class="stop-address">San Jose Road</div>
+              <div class="stop-details">Plastic & Bottles • Scheduled 11:45 AM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">6</div>
+            <div class="stop-content">
+              <div class="stop-address">Mabini Street</div>
+              <div class="stop-details">General Waste • Scheduled 12:30 PM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">7</div>
+            <div class="stop-content">
+              <div class="stop-address">Rizal Avenue</div>
+              <div class="stop-details">Hazardous Waste • Scheduled 1:00 PM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">8</div>
+            <div class="stop-content">
+              <div class="stop-address">Bonifacio Drive</div>
+              <div class="stop-details">Organic Waste • Scheduled 1:30 PM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">9</div>
+            <div class="stop-content">
+              <div class="stop-address">Del Pilar Street</div>
+              <div class="stop-details">Plastic & Bottles • Scheduled 2:00 PM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+          <div class="route-stop">
+            <div class="stop-number">10</div>
+            <div class="stop-content">
+              <div class="stop-address">Burgos Avenue</div>
+              <div class="stop-details">General Waste • Scheduled 2:30 PM</div>
+            </div>
+            <div class="stop-actions">
+              <a href="#" class="btn-small btn-outline">Mark as Collected</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
