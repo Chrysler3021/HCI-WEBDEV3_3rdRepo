@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Performance — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="../ZamboCollect css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark">🗑</div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip">⚙️ Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon">🏙</span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon">🗺</span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon">📋</span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon">🏘</span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon">👥</span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item active"><span class="nav-icon">🚛</span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon">📊</span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar">⚙️</div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Driver Performance</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn">🔔 <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <h1>Driver Performance</h1>
+          <p>Collection efficiency across all active drivers in Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn export">📄 Export PDF</a>
+          <a href="#" class="topbar-btn export">📊 Export CSV</a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card stat-green"><span class="stat-icon">🚛</span><div class="stat-num green">34</div><div class="stat-label">Active Today</div></div>
+        <div class="stat-card stat-blue"><span class="stat-icon">📦</span><div class="stat-num blue">4,821</div><div class="stat-label">Bags Collected (Week)</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon">📈</span><div class="stat-num green">87%</div><div class="stat-label">Avg Efficiency</div><span class="stat-trend trend-up">↑ 2.1%</span></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon">⏸</span><div class="stat-num yellow">6</div><div class="stat-label">On Leave / Standby</div></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:24px;">
+        <!-- Top performers -->
+        <div class="card">
+          <div class="card-title">🏆 Top Performers — This Week</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(88,129,87,0.05);border-radius:10px;border:1px solid var(--primary-tint);">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">1</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Rodel Macaraeg</div><div style="font-size:11px;color:var(--muted);">Truck #04 · Rio Hondo</div></div>
+              <div style="text-align:right;"><div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:var(--primary);">92%</div><div style="font-size:11px;color:var(--muted);">162 bags</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">2</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Carlo Dimacali</div><div style="font-size:11px;color:var(--muted);">Truck #07 · Rio Hondo</div></div>
+              <div style="text-align:right;"><div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:var(--primary);">87%</div><div style="font-size:11px;color:var(--muted);">143 bags</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">3</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Tony Bernardo</div><div style="font-size:11px;color:var(--muted);">Truck #02 · Guiwan</div></div>
+              <div style="text-align:right;"><div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:var(--primary);">85%</div><div style="font-size:11px;color:var(--muted);">138 bags</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Efficiency overview bar -->
+        <div class="card">
+          <div class="card-title">City-Wide Efficiency by Barangay</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="efficiency-row">
+              <span class="eff-name">Guiwan</span>
+              <div class="eff-track"><div class="eff-fill" style="width:95%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">95%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Sta. Cruz</span>
+              <div class="eff-track"><div class="eff-fill" style="width:91%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">91%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Rio Hondo</span>
+              <div class="eff-track"><div class="eff-fill" style="width:89%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">89%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Tetuan</span>
+              <div class="eff-track"><div class="eff-fill" style="width:88%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">88%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Canelar</span>
+              <div class="eff-track"><div class="eff-fill" style="width:84%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">84%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Talon-talon</span>
+              <div class="eff-track"><div class="eff-fill" style="width:82%;background:var(--primary);"></div></div>
+              <span class="eff-val text-green">82%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Pasonanca</span>
+              <div class="eff-track"><div class="eff-fill yellow" style="width:76%;"></div></div>
+              <span class="eff-val text-yellow">76%</span>
+            </div>
+            <div class="efficiency-row">
+              <span class="eff-name">Tumaga</span>
+              <div class="eff-track"><div class="eff-fill red" style="width:62%;"></div></div>
+              <span class="eff-val text-red">62%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full driver table -->
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active">All Drivers</a>
+          <a href="#" class="filter-chip">🟢 On Route</a>
+          <a href="#" class="filter-chip">⏸ Standby</a>
+          <a href="#" class="filter-chip">🔴 On Leave</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search driver or barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Driver</th><th>Barangay</th><th>Truck</th><th>Routes (Week)</th><th>Bags Collected</th><th>Efficiency</th><th>Stops Completed</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="col-strong">Rodel Macaraeg</td><td>Rio Hondo</td><td>Truck #04</td><td>5</td><td>162</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill" style="width:92%;"></div></div><span class="fw-700 text-green">92%</span></div></td><td>58 / 63</td><td><span class="badge badge-green">On Route</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Carlo Dimacali</td><td>Rio Hondo</td><td>Truck #07</td><td>5</td><td>143</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill" style="width:87%;"></div></div><span class="fw-700 text-green">87%</span></div></td><td>50 / 57</td><td><span class="badge badge-green">On Route</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Tony Bernardo</td><td>Guiwan</td><td>Truck #02</td><td>5</td><td>138</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill" style="width:85%;"></div></div><span class="fw-700 text-green">85%</span></div></td><td>48 / 56</td><td><span class="badge badge-green">On Route</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Mark Alvarado</td><td>Canelar</td><td>Truck #11</td><td>4</td><td>98</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill yellow" style="width:74%;"></div></div><span class="fw-700 text-yellow">74%</span></div></td><td>37 / 50</td><td><span class="badge badge-yellow">On Leave</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Rex Navarro</td><td>Tetuan</td><td>Truck #09</td><td>5</td><td>120</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill" style="width:82%;"></div></div><span class="fw-700 text-green">82%</span></div></td><td>44 / 54</td><td><span class="badge badge-green">On Route</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Jose Reyes</td><td>Tumaga</td><td>Truck #06</td><td>3</td><td>71</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-track"><div class="progress-fill red" style="width:61%;"></div></div><span class="fw-700 text-red">61%</span></div></td><td>28 / 46</td><td><span class="badge badge-muted">Standby</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info">Showing 6 of 112 drivers</div>
+          <div class="page-btns">
+            <div class="page-btn">‹</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users &amp; Accounts — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="../ZamboCollect css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark">🗑</div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip">⚙️ Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon">🏙</span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon">🗺</span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon">📋</span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon">🏘</span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item active"><span class="nav-icon">👥</span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item"><span class="nav-icon">🚛</span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon">📊</span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar">⚙️</div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Users &amp; Accounts</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn">🔔 <span class="notif-badge">3</span></a>
+        <a href="#" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <h1>Users &amp; Accounts</h1>
+          <p>Manage all system accounts across Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn primary">+ Create Officer Account</a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-blue"><span class="stat-icon">👥</span><div class="stat-num blue">19,284</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon">🏛</span><div class="stat-num yellow">98</div><div class="stat-label">Officers</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon">🚛</span><div class="stat-num green">112</div><div class="stat-label">Drivers</div></div>
+        <div class="stat-card stat-sage"><span class="stat-icon">👤</span><div class="stat-num sage">19,074</div><div class="stat-label">Citizens</div></div>
+      </div>
+
+      <div class="notice red">
+        <span class="notice-icon">⚠️</span>
+        <span><strong style="color:var(--red);">Admin access:</strong> You can only create Officer accounts. Driver accounts are created by the assigned Officer per barangay. Citizens self-register.</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active">All</a>
+          <a href="#" class="filter-chip">🏛 Officers</a>
+          <a href="#" class="filter-chip">🚛 Drivers</a>
+          <a href="#" class="filter-chip">👤 Citizens</a>
+          <a href="#" class="filter-chip">⏳ KYC Pending</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search name, email, barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Barangay</th>
+              <th>Created By</th>
+              <th>KYC Status</th>
+              <th>Account Status</th>
+              <th>Joined</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="col-strong">Maria Santos</td><td><span class="badge badge-officer">🏛 Officer</span></td><td>Rio Hondo</td><td>Admin</td><td>—</td><td><span class="badge badge-green">Active</span></td><td>Jan 5, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a><a href="#" class="action-btn danger">Suspend</a></td></tr>
+            <tr><td class="col-strong">Pedro Cruz</td><td><span class="badge badge-officer">🏛 Officer</span></td><td>Canelar</td><td>Admin</td><td>—</td><td><span class="badge badge-green">Active</span></td><td>Jan 5, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a><a href="#" class="action-btn danger">Suspend</a></td></tr>
+            <tr><td class="col-strong">Ana Ramos</td><td><span class="badge badge-officer">🏛 Officer</span></td><td>Guiwan</td><td>Admin</td><td>—</td><td><span class="badge badge-green">Active</span></td><td>Mar 1, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a><a href="#" class="action-btn danger">Suspend</a></td></tr>
+            <tr><td class="col-strong">Rodel Macaraeg</td><td><span class="badge badge-driver">🚛 Driver</span></td><td>Rio Hondo</td><td>Officer (Santos)</td><td>—</td><td><span class="badge badge-green">Active</span></td><td>Feb 12, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Carlo Dimacali</td><td><span class="badge badge-driver">🚛 Driver</span></td><td>Rio Hondo</td><td>Officer (Santos)</td><td>—</td><td><span class="badge badge-green">Active</span></td><td>Feb 12, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Juan dela Cruz</td><td><span class="badge badge-citizen">👤 Citizen</span></td><td>Rio Hondo</td><td>Self-registered</td><td><span class="badge badge-yellow">Pending</span></td><td><span class="badge badge-yellow">KYC Pending</span></td><td>Mar 10, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Ana Santos</td><td><span class="badge badge-citizen">👤 Citizen</span></td><td>Canelar</td><td>Self-registered</td><td><span class="badge badge-green">Verified</span></td><td><span class="badge badge-green">Active</span></td><td>Feb 28, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-strong">Mark Alvarado</td><td><span class="badge badge-driver">🚛 Driver</span></td><td>Canelar</td><td>Officer (Cruz)</td><td>—</td><td><span class="badge badge-yellow">On Leave</span></td><td>Feb 15, 2025</td><td style="display:flex;gap:6px;"><a href="#" class="action-btn">View</a></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info">Showing 8 of 19,284 users</div>
+          <div class="page-btns">
+            <div class="page-btn">‹</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">3</div>
+            <div class="page-btn" style="width:auto;padding:0 8px;">…</div>
+            <div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
