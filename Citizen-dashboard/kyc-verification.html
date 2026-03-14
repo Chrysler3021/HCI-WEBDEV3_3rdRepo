@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KYC Verification — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="kyc1.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark">🗑</div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">👤 Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item"><span class="nav-icon">📝</span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon">📋</span>My Reports</a>
+      <a href="map-view.html" class="nav-item"><span class="nav-icon">🗺</span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="kyc-verification.html" class="nav-item active"><span class="nav-icon">🪪</span>KYC Verification<span class="nav-badge">1</span></a>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon">🔔</span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon">👤</span>My Profile</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">🧑</div>
+        <div>
+          <div class="user-name">Juan dela Cruz</div>
+          <div class="user-role">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-title">KYC Verification</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn">🔔 <span class="notif-badge">3</span></a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <h1>Identity Verification (KYC)</h1>
+        <p>Verify your identity to unlock full access to ZamboCollect features in Zamboanga City.</p>
+      </div>
+
+      <!-- Progress stepper -->
+      <div class="stepper">
+        <div class="step done">
+          <div class="step-num done">✓</div>
+          <div class="step-label">Register</div>
+        </div>
+        <div class="step active">
+          <div class="step-num active">2</div>
+          <div class="step-label">Submit KYC</div>
+        </div>
+        <div class="step">
+          <div class="step-num pending">3</div>
+          <div class="step-label">Officer Review</div>
+        </div>
+        <div class="step">
+          <div class="step-num pending">✓</div>
+          <div class="step-label">Verified</div>
+        </div>
+      </div>
+
+      <!-- KYC status banner -->
+      <div class="kyc-banner">
+        <div class="kyc-icon">🪪</div>
+        <div class="kyc-banner-body">
+          <h3>Verification Pending Submission</h3>
+          <p>Submit your government-issued ID and selfie. Your barangay officer will review within 24–48 hours.</p>
+        </div>
+        <span class="status-badge status-pending">⏳ Not Submitted</span>
+      </div>
+
+      <div class="grid-2">
+
+        <!-- Left column: personal info -->
+        <div>
+          <div class="card">
+            <div class="card-title">👤 Personal Information</div>
+
+            <div class="form-group">
+              <label>Full Name <span style="color:var(--muted2); font-weight:400;">(as it appears on your ID)</span></label>
+              <input type="text" placeholder="Juan dela Cruz" />
+            </div>
+
+            <div class="form-group">
+              <label>Barangay</label>
+              <select>
+                <option value="">— Select your barangay —</option>
+                <option>Barangay Arena Blanco</option>
+                <option>Barangay Canelar</option>
+                <option>Barangay Guiwan</option>
+                <option>Barangay La Paz</option>
+                <option>Barangay Pasonanca</option>
+                <option selected>Barangay Rio Hondo</option>
+                <option>Barangay Sta. Cruz</option>
+                <option>Barangay Talon-talon</option>
+                <option>Barangay Taluksangay</option>
+                <option>Barangay Tetuan</option>
+                <option>Barangay Tumaga</option>
+                <option>Barangay Victoria</option>
+                <option>Other Zamboanga City Barangays</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Complete Address</label>
+              <input type="text" placeholder="House no., street, Zamboanga City" />
+            </div>
+
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="tel" placeholder="09XXXXXXXXX" />
+            </div>
+
+            <!-- ID type picker (CSS radio chips) -->
+            <div class="form-group">
+              <label>Type of Government ID</label>
+              <div class="id-type-grid">
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="philsys" checked />
+                  <span class="chip-icon">🪪</span>
+                  <span class="chip-label">PhilSys ID</span>
+                </label>
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="passport" />
+                  <span class="chip-icon">📘</span>
+                  <span class="chip-label">Passport</span>
+                </label>
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="license" />
+                  <span class="chip-icon">🚗</span>
+                  <span class="chip-label">Driver's License</span>
+                </label>
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="sss" />
+                  <span class="chip-icon">🏛</span>
+                  <span class="chip-label">SSS / GSIS</span>
+                </label>
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="voters" />
+                  <span class="chip-icon">🗳</span>
+                  <span class="chip-label">Voter's ID</span>
+                </label>
+                <label class="id-chip">
+                  <input type="radio" name="id_type" value="other" />
+                  <span class="chip-icon">📄</span>
+                  <span class="chip-label">Other Valid ID</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requirements checklist -->
+          <div class="card">
+            <div class="card-title">📋 Submission Requirements</div>
+            <div class="req-list">
+              <div class="req-item">
+                <span class="req-icon">🪪</span>
+                <span>One (1) valid government-issued photo ID — front side, clear and unobstructed</span>
+              </div>
+              <div class="req-item">
+                <span class="req-icon">🤳</span>
+                <span>Selfie holding your ID beside your face — both must be clearly visible</span>
+              </div>
+              <div class="req-item">
+                <span class="req-icon">📍</span>
+                <span>Must be a registered resident of a Zamboanga City barangay</span>
+              </div>
+              <div class="req-item">
+                <span class="req-icon">📸</span>
+                <span>Photos must be JPG or PNG, max 5 MB each, no filters or edits</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: document uploads -->
+        <div>
+
+          <!-- Government ID upload -->
+          <div class="card">
+            <div class="card-title">📄 Government ID — Front</div>
+
+            <label class="upload-zone">
+              <input type="file" accept="image/*" />
+              <span class="upload-icon">🪪</span>
+              <h4>Upload ID Front</h4>
+              <p>Take or upload a photo of your valid ID<br>JPG, PNG — max 5 MB</p>
+              <span class="upload-hint">Choose File</span>
+            </label>
+
+            <div class="privacy-note">
+              <span class="lock-icon">🔒</span>
+              <span>Your ID image is encrypted and only accessible to your assigned barangay officer for verification purposes.</span>
+            </div>
+          </div>
+
+          <!-- Selfie upload -->
+          <div class="card">
+            <div class="card-title">🤳 Selfie Holding ID</div>
+
+            <label class="upload-zone">
+              <input type="file" accept="image/*" />
+              <span class="upload-icon">📷</span>
+              <h4>Upload Selfie with ID</h4>
+              <p>Hold your ID beside your face.<br>Both your face and ID must be clearly visible.</p>
+              <span class="upload-hint">Choose File</span>
+            </label>
+
+            <div class="privacy-note">
+              <span class="lock-icon">🔒</span>
+              <span>Selfie images are used solely for identity matching and are not shared with third parties.</span>
+            </div>
+          </div>
+
+          <!-- Verification note -->
+          <div class="card" style="background: var(--primary-glow); border-color: var(--primary-tint);">
+            <div class="card-title" style="color:var(--primary);">ℹ️ What happens next?</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.7;">
+              After submission, your barangay officer for <strong>Rio Hondo</strong> will review your documents within <strong>24–48 hours</strong>. You'll receive a notification once your KYC is approved or if any corrections are needed.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Action buttons -->
+      <div class="btn-row">
+        <a href="citizen-dashboard.html" class="btn-cancel">Cancel</a>
+        <button class="btn-submit" type="button">
+          Submit for Verification →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
