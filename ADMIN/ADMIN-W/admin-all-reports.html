@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Reports — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark">🗑</div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip">⚙️ Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon">🏙</span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon">🗺</span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item active"><span class="nav-icon">📋</span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon">🏘</span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon">👥</span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item"><span class="nav-icon">🚛</span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon">📊</span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar">⚙️</div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">All Reports</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn">🔔 <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <h1>All Reports</h1>
+          <p>City-wide view of all submitted trash reports — Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn export">📄 Export PDF</a>
+          <a href="#" class="topbar-btn export">📊 Export CSV</a>
+        </div>
+      </div>
+
+      <!-- Summary chips -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);">
+          <span style="font-size:16px;">📋</span><div><div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1;">2,451</div><div style="font-size:11px;color:var(--muted);">Total Active</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);">
+          <span style="font-size:16px;">⏳</span><div><div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--yellow);line-height:1;">487</div><div style="font-size:11px;color:var(--muted);">Pending</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);">
+          <span style="font-size:16px;">✅</span><div><div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--blue);line-height:1;">391</div><div style="font-size:11px;color:var(--muted);">Approved</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);">
+          <span style="font-size:16px;">🎉</span><div><div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--primary);line-height:1;">1,532</div><div style="font-size:11px;color:var(--muted);">Collected</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);">
+          <span style="font-size:16px;">❌</span><div><div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--red);line-height:1;">41</div><div style="font-size:11px;color:var(--muted);">Rejected</div></div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active">All</a>
+          <a href="#" class="filter-chip">⏳ Pending</a>
+          <a href="#" class="filter-chip">✅ Approved</a>
+          <a href="#" class="filter-chip">🎉 Collected</a>
+          <a href="#" class="filter-chip">❌ Rejected</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search ID, location, citizen…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Barangay</th>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Priority</th>
+              <th>Citizen</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="col-id">#RPT-390</td><td>Rio Hondo</td><td>Waterfront Area</td><td><span style="font-size:12px;">🏠 Household</span></td><td><span class="badge badge-sage">Normal</span></td><td>Ana Reyes</td><td>Mar 13</td><td><span class="badge badge-yellow">Pending</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-389</td><td>Canelar</td><td>Market Street</td><td><span style="font-size:12px;">🏪 Commercial</span></td><td><span class="badge badge-yellow">Urgent</span></td><td>Ben Santos</td><td>Mar 13</td><td><span class="badge badge-yellow">Pending</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-388</td><td>Guiwan</td><td>Pasonanca Rd.</td><td><span style="font-size:12px;">⚠️ Illegal Dump</span></td><td><span class="badge badge-red">Critical</span></td><td>Cora Lim</td><td>Mar 12</td><td><span class="badge badge-blue">Approved</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-387</td><td>Tetuan</td><td>Tetuan Public Mkt.</td><td><span style="font-size:12px;">🏪 Commercial</span></td><td><span class="badge badge-yellow">Urgent</span></td><td>Diana Gomez</td><td>Mar 12</td><td><span class="badge badge-blue">Approved</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-384</td><td>Rio Hondo</td><td>Pasonanca Rd.</td><td><span style="font-size:12px;">🏠 Household</span></td><td><span class="badge badge-sage">Normal</span></td><td>Juan Cruz</td><td>Mar 12</td><td><span class="badge badge-green">Collected</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-382</td><td>Sta. Cruz</td><td>Sta. Cruz Wharf</td><td><span style="font-size:12px;">⚠️ Illegal Dump</span></td><td><span class="badge badge-red">Critical</span></td><td>Elma Ramos</td><td>Mar 11</td><td><span class="badge badge-green">Collected</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-380</td><td>Talon-talon</td><td>Talon-talon Bridge</td><td><span style="font-size:12px;">🏗️ Construction</span></td><td><span class="badge badge-sage">Normal</span></td><td>Felix Moro</td><td>Mar 11</td><td><span class="badge badge-green">Collected</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+            <tr><td class="col-id">#RPT-378</td><td>Tumaga</td><td>Tumaga River</td><td><span style="font-size:12px;">☢️ Hazardous</span></td><td><span class="badge badge-red">Critical</span></td><td>Grace Tan</td><td>Mar 10</td><td><span class="badge badge-red">Rejected</span></td><td><a href="#" class="action-btn">View</a></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info">Showing 8 of 2,451 reports</div>
+          <div class="page-btns">
+            <div class="page-btn">‹</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">3</div>
+            <div class="page-btn" style="width:auto;padding:0 8px;">…</div>
+            <div class="page-btn">98</div>
+            <div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
