@@ -1,0 +1,1630 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Surface hierarchy */
+  --bg:       #F8F9F8;
+  --bg2:      #F8F9F8;
+  --surface:  #FFFFFF;
+  --surface2: #FFFFFF;
+  --surface3: #F8F9F8;
+
+  /* Borders */
+  --border:   #E0E0E0;
+  --border2:  #D0D0D0;
+
+  /* Brand greens */
+  --green:        #588157;
+  --green-light:  #6B9E6B;
+  --green-dim:    #4A6B4A;
+  --green-glow:   rgba(88,129,87,0.08);
+  --green-tint:   rgba(88,129,87,0.12);
+
+  /* Secondary sage */
+  --sage:         #A3B18A;
+  --sage-light:   #B5C2A8;
+  --sage-dim:     #8F9E7A;
+
+  /* Status colors */
+  --yellow:    #ca8a04;
+  --yellow-bg: rgba(202,138,4,0.08);
+  --red:       #dc2626;
+  --red-bg:    rgba(220,38,38,0.08);
+  --blue:      #2563eb;
+  --blue-bg:   rgba(37,99,235,0.08);
+  --orange:    #ea580c;
+
+  /* Text */
+  --text:    #111b11;
+  --text2:   #3d5c3d;
+  --muted:   #7a9a7a;
+  --muted2:  #9db89d;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,50,0,0.06), 0 1px 2px rgba(0,50,0,0.04);
+  --shadow:    0 4px 12px rgba(0,50,0,0.08), 0 2px 4px rgba(0,50,0,0.05);
+  --shadow-lg: 0 16px 48px rgba(0,50,0,0.10), 0 4px 12px rgba(0,50,0,0.06);
+}
+
+/* ===================================================
+   RESET (from base.css)
+   =================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===================================================
+   APP SHELL (from base.css)
+   =================================================== */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ===================================================
+   SIDEBAR (from base.css)
+   =================================================== */
+.sidebar {
+  width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.sidebar-logo .logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(88,129,87,0.3);
+}
+
+.sidebar-logo .logo-text {
+  color: var(--text);
+}
+
+.sidebar-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border2);
+}
+
+.sidebar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 24px 8px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border2);
+}
+
+/* ===================================================
+   NAV ITEMS (from base.css)
+   =================================================== */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: var(--green-glow);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* ===================================================
+   USER INFO (from base.css)
+   =================================================== */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--green-glow);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ===================================================
+   MAIN CONTENT & TOPBAR (from base.css)
+   =================================================== */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.topbar-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.2s;
+}
+
+.topbar-btn:hover {
+  background: var(--surface2);
+}
+
+/* ===================================================
+   STATS GRID (from officer.css)
+   =================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 24px;
+}
+
+.stat-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================================
+   BUTTONS (from officer.css)
+   =================================================== */
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.btn-small.btn-green {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.btn-small.btn-outline {
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===================================================
+   PAGE CONTAINER (from style.css)
+   =================================================== */
+.page {
+  display: none;
+  padding: 32px;
+}
+
+.page.active {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ===================================================
+   CARD (from style.css)
+   =================================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===================================================
+   BADGE (from style.css)
+   =================================================== */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-green {
+  background: var(--green-tint);
+  color: var(--green-dim);
+}
+
+/* ===================================================
+   ROUTE LIST — driver-dashboard.html (from style.css)
+   =================================================== */
+.route-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.route-item:last-child {
+  border-bottom: none;
+}
+
+.route-item.completed {
+  opacity: 0.6;
+}
+
+.route-item.active {
+  background: var(--green-glow);
+  margin: 0 -24px;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.route-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-address {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.route-type {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.route-time {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.route-status {
+  flex-shrink: 0;
+}
+
+.route-actions {
+  flex-shrink: 0;
+}
+
+/* ===================================================
+   ROUTE SEQUENCE — driver-route.html (from style.css)
+   =================================================== */
+.route-sequence {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.route-sequence::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 32px;
+  bottom: 32px;
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.route-stop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.route-stop:last-child {
+  border-bottom: none;
+}
+
+.route-stop.completed {
+  opacity: 0.6;
+}
+
+.route-stop.active {
+  background: var(--green-glow);
+  margin: 0 -24px;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.stop-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.route-stop.completed .stop-number {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.route-stop.active .stop-number {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--green-tint);
+}
+
+.stop-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stop-address {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.stop-details {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.stop-status {
+  flex-shrink: 0;
+}
+
+.stop-actions {
+  flex-shrink: 0;
+}
+
+/* ===================================================
+   CONTENT WRAPPER
+   =================================================== */
+.content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===================================================
+   PROFILE HEADER CARD
+   =================================================== */
+.profile-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.big-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vehicle-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: var(--green-tint);
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-meta {
+  flex: 1;
+}
+
+.profile-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.edit-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-btn:hover {
+  background: var(--surface3);
+}
+
+.report-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  border: 1px solid rgba(220,38,38,0.25);
+  background: var(--red-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-btn:hover {
+  background: rgba(220,38,38,0.14);
+}
+
+/* ===================================================
+   STAT GRID
+   =================================================== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat-grid.stat-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===================================================
+   CARDS GRID
+   =================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.info-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.info-value.highlight { color: var(--green); }
+.info-value.warn      { color: var(--yellow); }
+.info-value.danger    { color: var(--red); }
+
+/* ===================================================
+   FUEL BAR
+   =================================================== */
+.fuel-bar-wrap {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.fuel-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.fuel-pct { color: var(--green); font-weight: 600; }
+
+.fuel-bar-bg {
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.fuel-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   CHECKLIST (vehicle status)
+   =================================================== */
+.checklist {
+  display: flex;
+  flex-direction: column;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-item:last-child { border-bottom: none; }
+
+.check-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-ok   { background: var(--green); }
+.dot-warn { background: var(--yellow); }
+.dot-bad  { background: var(--red); }
+
+.check-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.check-label strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.check-label span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ===================================================
+   EXTRA BADGE VARIANTS
+   =================================================== */
+.badge-yellow {
+  background: var(--yellow-bg);
+  color: var(--yellow);
+}
+
+.badge-red {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.badge-blue {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+
+.badge-pending {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* ===================================================
+   PROGRESS BAR (tasks page)
+   =================================================== */
+.progress-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.progress-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+.progress-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+/* ===================================================
+   FILTER ROW (tasks page)
+   =================================================== */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.filter-btn {
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active-filter {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.filter-date {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ===================================================
+   TASKS TABLE
+   =================================================== */
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tasks-table th {
+  background: var(--surface3);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.tasks-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.tasks-table tr:last-child td { border-bottom: none; }
+.tasks-table tr.row-done td  { opacity: 0.55; }
+.tasks-table tr.row-inprog   { background: var(--green-glow); }
+
+.stop-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stop-done    { background: var(--green); color: #fff; }
+.stop-inprog  { background: var(--blue);  color: #fff; }
+.stop-pending { background: var(--surface3); color: var(--muted); border: 1px solid var(--border); }
+.stop-skipped { background: var(--red-bg);   color: var(--red); }
+
+.stop-address {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stop-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ===================================================
+   CONTENT WRAPPER — all driver pages
+   =================================================== */
+.content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===================================================
+   PROFILE HEADER CARD — driver-profile.html
+   =================================================== */
+.profile-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.big-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-meta { flex: 1; }
+
+.profile-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.edit-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-btn:hover { background: var(--surface3); }
+
+/* ===================================================
+   VEHICLE HEADER — driver-status.html
+   =================================================== */
+.vehicle-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.truck-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: var(--green-tint);
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vehicle-meta { flex: 1; }
+
+.vehicle-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.vehicle-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.report-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  border: 1px solid rgba(220,38,38,0.25);
+  background: var(--red-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.report-btn:hover { background: rgba(220,38,38,0.14); }
+
+/* ===================================================
+   STAT ROW — profile (3-col) & status (4-col)
+   =================================================== */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ===================================================
+   CARDS GRID & INFO ROWS — profile & status
+   =================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.info-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.info-value.highlight { color: var(--green); }
+.info-value.warn      { color: var(--yellow); }
+.info-value.danger    { color: var(--red); }
+
+/* ===================================================
+   FUEL BAR — driver-status.html
+   =================================================== */
+.fuel-bar-wrap {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.fuel-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.fuel-pct { color: var(--green); font-weight: 600; }
+
+.fuel-bar-bg {
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.fuel-bar-fill {
+  height: 100%;
+  width: 72%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   SYSTEM CHECKLIST — driver-status.html
+   =================================================== */
+.issue-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.issue-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-item:last-child { border-bottom: none; }
+
+.issue-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-ok   { background: var(--green); }
+.dot-warn { background: var(--yellow); }
+.dot-bad  { background: var(--red); }
+
+.issue-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.issue-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.issue-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.issue-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-ok   { background: var(--green-tint); color: var(--green-dim); }
+.badge-warn { background: var(--yellow-bg);  color: var(--yellow); }
+.badge-bad  { background: var(--red-bg);     color: var(--red); }
+
+/* ===================================================
+   SUMMARY ROW — driver-task.html (4-col stats)
+   =================================================== */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ===================================================
+   PROGRESS BAR — driver-task.html
+   =================================================== */
+.progress-bar-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.prog-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.prog-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.prog-fill {
+  height: 100%;
+  width: 58%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   FILTER ROW — driver-task.html
+   =================================================== */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.filter-btn {
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active-filter {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.date-label {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ===================================================
+   TASKS CARD & TABLE — driver-task.html
+   =================================================== */
+.tasks-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.tasks-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 140px 120px 110px 60px;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--surface3);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  align-items: center;
+}
+
+.task-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 140px 120px 110px 60px;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 13px;
+  color: var(--text);
+  transition: background 0.15s;
+}
+
+.task-row:last-child { border-bottom: none; }
+
+.task-row.done { opacity: 0.55; }
+
+.task-row:hover { background: var(--surface3); }
+
+.task-row.done:hover { background: var(--surface3); }
+
+/* Stop number bubbles */
+.stop-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stop-num.pending {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.stop-num.skipped {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.stop-address {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stop-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.waste-type {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.time-val {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.notes-icon {
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Task badge variants */
+.badge-done    { background: var(--green-tint); color: var(--green-dim); }
+.badge-inprog  { background: var(--blue-bg);    color: var(--blue); }
+.badge-skipped { background: var(--red-bg);     color: var(--red); }
+.badge-pending {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* ===================================================
+   STAT-ROW — driver-profile.html & driver-task.html
+   Grid container matching .stats-grid layout
+   =================================================== */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Override .stat-card flex-row when icon/num/label
+   are direct children (no inner wrapper div) */
+.stat-row .stat-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.stat-row .stat-card .stat-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.stat-row .stat-card .stat-num {
+  font-size: 28px;
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+.stat-row .stat-card .stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================================
+   CONTENT wrapper
+   =================================================== */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===================================================
+   SPACING FIX — increase gap between stat cards,
+   info cards, and section blocks
+   =================================================== */
+.stats-grid {
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.cards-grid {
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.profile-header-card,
+.vehicle-header {
+  margin-bottom: 24px;
+}
+
+.issue-card {
+  margin-top: 24px;
+}
+
+.stat-card {
+  padding: 24px 28px;
+}
