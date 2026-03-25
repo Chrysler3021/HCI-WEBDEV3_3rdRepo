@@ -1,0 +1,2097 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Layout */
+  --topbar-h: 64px;
+  --sidebar-w: 280px;
+
+  /* Surface hierarchy */
+  --bg:       #F8F9F8;
+  --bg2:      #F8F9F8;
+  --surface:  #FFFFFF;
+  --surface2: #FFFFFF;
+  --surface3: #F8F9F8;
+
+  /* Borders */
+  --border:   #E0E0E0;
+  --border2:  #D0D0D0;
+
+  /* Brand greens */
+  --green:        #588157;
+  --green-light:  #6B9E6B;
+  --green-dim:    #4A6B4A;
+  --green-glow:   rgba(88,129,87,0.08);
+  --green-tint:   rgba(88,129,87,0.12);
+
+  /* Secondary sage */
+  --sage:         #A3B18A;
+  --sage-light:   #B5C2A8;
+  --sage-dim:     #8F9E7A;
+
+  /* Status colors */
+  --yellow:    #ca8a04;
+  --yellow-bg: rgba(202,138,4,0.08);
+  --red:       #dc2626;
+  --red-bg:    rgba(220,38,38,0.08);
+  --blue:      #2563eb;
+  --blue-bg:   rgba(37,99,235,0.08);
+  --orange:    #ea580c;
+
+  /* Text */
+  --text:    #111b11;
+  --text2:   #3d5c3d;
+  --muted:   #7a9a7a;
+  --muted2:  #9db89d;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,50,0,0.06), 0 1px 2px rgba(0,50,0,0.04);
+  --shadow:    0 4px 12px rgba(0,50,0,0.08), 0 2px 4px rgba(0,50,0,0.05);
+  --shadow-lg: 0 16px 48px rgba(0,50,0,0.10), 0 4px 12px rgba(0,50,0,0.06);
+}
+
+/* ===================================================
+   RESET (from base.css)
+   =================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===================================================
+   APP SHELL (from base.css)
+   =================================================== */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ===================================================
+   SIDEBAR (from base.css)
+   =================================================== */
+.sidebar {
+  width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.sidebar-logo .logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(88,129,87,0.3);
+}
+
+.sidebar-logo .logo-text {
+  color: var(--text);
+}
+
+.sidebar-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border2);
+}
+
+.sidebar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 24px 8px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border2);
+}
+
+/* ===================================================
+   NAV ITEMS (from base.css)
+   =================================================== */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: var(--green-glow);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* ===================================================
+   USER INFO (from base.css)
+   =================================================== */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--green-glow);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ===================================================
+   MAIN CONTENT & TOPBAR (from base.css)
+   =================================================== */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.topbar-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.2s;
+}
+
+.topbar-btn:hover {
+  background: var(--surface2);
+}
+
+/* ===================================================
+   STATS GRID (from officer.css)
+   =================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 24px;
+}
+
+.stat-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================================
+   BUTTONS (from officer.css)
+   =================================================== */
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.btn-small.btn-green {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.btn-small.btn-outline {
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===================================================
+   PAGE CONTAINER (from style.css)
+   =================================================== */
+.page {
+  display: none;
+  padding: 32px;
+}
+
+.page.active {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ===================================================
+   CARD (from style.css)
+   =================================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===================================================
+   BADGE (from style.css)
+   =================================================== */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-green {
+  background: var(--green-tint);
+  color: var(--green-dim);
+}
+
+/* ===================================================
+   ROUTE LIST — driver-dashboard.html (from style.css)
+   =================================================== */
+.route-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.route-item:last-child {
+  border-bottom: none;
+}
+
+.route-item.completed {
+  opacity: 0.6;
+}
+
+.route-item.active {
+  background: var(--green-glow);
+  margin: 0 -24px;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.route-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-address {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.route-type {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.route-time {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.route-status {
+  flex-shrink: 0;
+}
+
+.route-actions {
+  flex-shrink: 0;
+}
+
+/* ===================================================
+   ROUTE SEQUENCE — driver-route.html (from style.css)
+   =================================================== */
+.route-sequence {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.route-sequence::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 32px;
+  bottom: 32px;
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.route-stop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.route-stop:last-child {
+  border-bottom: none;
+}
+
+.route-stop.completed {
+  opacity: 0.6;
+}
+
+.route-stop.active {
+  background: var(--green-glow);
+  margin: 0 -24px;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.stop-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.route-stop.completed .stop-number {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.route-stop.active .stop-number {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--green-tint);
+}
+
+.stop-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stop-address {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.stop-details {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.stop-status {
+  flex-shrink: 0;
+}
+
+.stop-actions {
+  flex-shrink: 0;
+}
+
+
+/* ===================================================
+   PROFILE HEADER CARD
+   =================================================== */
+.profile-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.big-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+
+.profile-meta {
+  flex: 1;
+}
+
+.profile-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.edit-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-btn:hover {
+  background: var(--surface3);
+}
+
+.report-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  border: 1px solid rgba(220,38,38,0.25);
+  background: var(--red-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-btn:hover {
+  background: rgba(220,38,38,0.14);
+}
+
+
+/* ===================================================
+   CARDS GRID
+   =================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.info-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.info-value.highlight { color: var(--green); }
+.info-value.warn      { color: var(--yellow); }
+
+/* ===================================================
+   FUEL BAR
+   =================================================== */
+.fuel-bar-wrap {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.fuel-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.fuel-pct { color: var(--green); font-weight: 600; }
+
+.fuel-bar-bg {
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.fuel-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   FILTER ROW (tasks page)
+   =================================================== */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.filter-btn {
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active-filter {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* ===================================================
+   TASKS CARD & TABLE — driver-task.html
+   =================================================== */.stop-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stop-address {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stop-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ===================================================
+   CONTENT WRAPPER — all driver pages
+   =================================================== */
+.content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===================================================
+   PROFILE HEADER CARD — driver-profile.html
+   =================================================== */
+.profile-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.big-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-meta { flex: 1; }
+
+.profile-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.edit-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-btn:hover { background: var(--surface3); }
+
+/* ===================================================
+   VEHICLE HEADER — driver-status.html
+   =================================================== */
+.vehicle-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.truck-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: var(--green-tint);
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vehicle-meta { flex: 1; }
+
+.vehicle-meta h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.vehicle-meta p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-glow);
+  border: 1px solid rgba(88,129,87,0.2);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-light);
+  display: inline-block;
+}
+
+.report-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  border: 1px solid rgba(220,38,38,0.25);
+  background: var(--red-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.report-btn:hover { background: rgba(220,38,38,0.14); }
+
+/* ===================================================
+   CARDS GRID & INFO ROWS — profile & status
+   =================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.info-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.info-value.highlight { color: var(--green); }
+.info-value.warn      { color: var(--yellow); }
+
+/* ===================================================
+   FUEL BAR — driver-status.html
+   =================================================== */
+.fuel-bar-wrap {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.fuel-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.fuel-pct { color: var(--green); font-weight: 600; }
+
+.fuel-bar-bg {
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.fuel-bar-fill {
+  height: 100%;
+  width: 72%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   SYSTEM CHECKLIST — driver-status.html
+   =================================================== */
+.issue-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.issue-card .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-item:last-child { border-bottom: none; }
+
+.issue-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-ok   { background: var(--green); }
+.dot-warn { background: var(--yellow); }
+.dot-bad  { background: var(--red); }
+
+.issue-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.issue-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.issue-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.issue-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-ok   { background: var(--green-tint); color: var(--green-dim); }
+.badge-warn { background: var(--yellow-bg);  color: var(--yellow); }
+.badge-bad  { background: var(--red-bg);     color: var(--red); }
+
+/* ===================================================
+   PROGRESS BAR — driver-task.html
+   =================================================== */
+.progress-bar-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.prog-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.prog-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.prog-fill {
+  height: 100%;
+  width: 58%;
+  background: var(--green);
+  border-radius: 100px;
+}
+
+/* ===================================================
+   FILTER ROW — driver-task.html
+   =================================================== */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.filter-btn {
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active-filter {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.date-label {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ===================================================
+   TASKS CARD & TABLE — driver-task.html
+   =================================================== */
+.tasks-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.tasks-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 140px 120px 110px 60px;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--surface3);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  align-items: center;
+}
+
+.task-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 140px 120px 110px 60px;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 13px;
+  color: var(--text);
+  transition: background 0.15s;
+}
+
+.task-row:last-child { border-bottom: none; }
+
+.task-row.done { opacity: 0.55; }
+
+.task-row:hover { background: var(--surface3); }
+
+.task-row.done:hover { background: var(--surface3); }
+
+/* Stop number bubbles */
+.stop-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stop-num.pending {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.stop-num.skipped {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.stop-address {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stop-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.waste-type {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.time-val {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.notes-icon {
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Task badge variants */
+.badge-done    { background: var(--green-tint); color: var(--green-dim); }
+.badge-inprog  { background: var(--blue-bg);    color: var(--blue); }
+.badge-skipped { background: var(--red-bg);     color: var(--red); }
+.badge-pending {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+
+
+/* ===================================================
+   SPACING FIX — increase gap between stat cards,
+   info cards, and section blocks
+   =================================================== */
+.stats-grid {
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.cards-grid {
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.profile-header-card,
+.vehicle-header {
+  margin-bottom: 24px;
+}
+
+.issue-card {
+  margin-top: 24px;
+}
+
+.stat-card {
+  padding: 24px 28px;
+}
+
+/* ===================================================
+   NOTIFICATIONS PAGE — notifications-driver.html
+   =================================================== */
+.page-content {
+  padding: 32px;
+}
+
+.notif-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.page-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-header-left h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.page-header-left p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+
+.unread-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.btn-ghost-sm {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: all 0.2s;
+}
+
+.btn-ghost-sm:hover {
+  background: var(--surface3);
+  color: var(--text);
+}
+
+/* Filter chips */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.filter-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.filter-chip:hover {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+}
+
+.filter-chip.active {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.3);
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* Notification group */
+.notif-group {
+  margin-bottom: 32px;
+}
+
+.notif-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Notification item */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+  margin-bottom: 6px;
+}
+
+.notif-item:hover {
+  background: var(--surface3);
+  border-color: var(--border2);
+}
+
+.notif-item.unread {
+  background: var(--green-glow);
+  border-color: rgba(88,129,87,0.18);
+}
+
+.notif-item.unread:hover {
+  background: var(--green-tint);
+}
+
+/* Icon wrap */
+.notif-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.notif-icon-wrap.green  { background: var(--green-tint); }
+.notif-icon-wrap.blue   { background: var(--blue-bg); }
+.notif-icon-wrap.yellow { background: var(--yellow-bg); }
+.notif-icon-wrap.red    { background: var(--red-bg); }
+
+/* Body */
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.notif-item.unread .notif-title {
+  color: var(--green-dim);
+}
+
+.notif-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Meta */
+.notif-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.notif-time {
+  font-size: 11px;
+  color: var(--muted2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notif-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 100px;
+}
+
+.notif-tag.green  { background: var(--green-tint);  color: var(--green-dim); }
+.notif-tag.blue   { background: var(--blue-bg);     color: var(--blue); }
+.notif-tag.yellow { background: var(--yellow-bg);   color: var(--yellow); }
+.notif-tag.red    { background: var(--red-bg);      color: var(--red); }
+
+/* Unread dot */
+.notif-item.unread .notif-time::before {
+  content: '● ';
+  color: var(--green);
+  font-size: 8px;
+  vertical-align: middle;
+}
+
+/* Topbar badge */
+.notif-badge {
+  background: var(--red);
+  color: #fff;
+  border-radius: 100px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   HAMBURGER MENU - CSS CHECKBOX HACK
+   ============================================================
+   Pure CSS implementation using hidden checkbox for state.
+   When checkbox is checked, menu appears.
+   ============================================================ */
+
+/* Hidden checkbox that stores menu state */
+#menu-toggle {
+  display: none;
+}
+
+/* Hamburger button - only visible on mobile */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 201;
+  margin-right: auto;
+}
+
+.hamburger-btn:hover {
+  background-color: var(--bg2);
+}
+
+.hamburger-btn:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* Hamburger lines */
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background-color: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hamburger animation - transform to X when checked */
+#menu-toggle:checked ~ .hamburger-btn span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+#menu-toggle:checked ~ .hamburger-btn span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+#menu-toggle:checked ~ .hamburger-btn span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile navigation menu - hidden by default */
+.mobile-nav-menu {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: var(--topbar-h);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  max-height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Show menu when checkbox is checked */
+#menu-toggle:checked ~ .mobile-nav-menu {
+  display: flex;
+}
+
+/* Menu slide animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile nav structure */
+.mobile-nav-menu nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.mobile-nav-menu ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.mobile-nav-menu li {
+  display: flex;
+}
+
+.mobile-nav-menu a {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.mobile-nav-menu a:hover {
+  background-color: var(--bg2);
+  color: var(--green);
+  border-left-color: var(--green);
+}
+
+.mobile-nav-menu a:focus {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
+}
+
+.mobile-nav-menu a.active {
+  background-color: var(--green-glow);
+  color: var(--green);
+  font-weight: 600;
+  border-left-color: var(--green);
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT — DESKTOP (≥1024px)
+   ============================================================ */
+@media (min-width: 1024px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  .mobile-nav-menu {
+    display: none !important;
+  }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    border-right: 1px solid var(--border);
+    flex-direction: column;
+  }
+  
+  .main-content {
+    margin-left: var(--sidebar-w);
+  }
+  
+  .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT — TABLET (768px–1023px)
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  .mobile-nav-menu {
+    display: none !important;
+  }
+  
+  :root { --sidebar-w: 220px; }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    border-right: 1px solid var(--border);
+    flex-direction: column;
+  }
+  
+  .main-content {
+    margin-left: var(--sidebar-w);
+  }
+  
+  .page-content { padding: 20px; }
+  .sidebar-logo { padding: 16px; }
+  .sidebar-section { padding: 12px 8px 4px; }
+  .sidebar-label { font-size: 9px; }
+  .nav-item { font-size: 12px; padding: 8px 10px; }
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT — MOBILE (≤767px)
+   ============================================================ */
+@media (max-width: 767px) {
+  .hamburger-btn {
+    display: flex !important;
+    order: -1;
+  }
+
+  .mobile-nav-menu {
+    display: none;
+  }
+
+  #menu-toggle:checked ~ .mobile-nav-menu {
+    display: flex;
+  }
+
+  .topbar {
+    position: relative;
+    gap: 12px;
+    padding: 0 16px;
+    height: 50px;
+  }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--topbar-h);
+    width: 100%;
+    height: calc(100vh - var(--topbar-h));
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 199;
+    flex-direction: column;
+  }
+  
+  #menu-toggle:checked ~ .sidebar {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 0;
+    flex: 1;
+    min-height: auto;
+  }
+  
+  .page-content {
+    padding: 16px;
+  }
+  
+  .topbar-title {
+    font-size: 15px;
+  }
+  
+  .topbar-right {
+    gap: 6px;
+  }
+  
+  .topbar-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  /* Grid adjustments */
+  .grid-2, .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Sidebar styling for mobile */
+  .sidebar-logo { padding: 16px; }
+  .sidebar-section { padding: 12px 8px 4px; }
+  .sidebar-label { font-size: 9px; }
+  .nav-item { font-size: 13px; padding: 10px 12px; }
+}
+
+/* ============================================================
+   RESPONSIVE — SMALLER SCREENS (<600px)
+   ============================================================ */
+@media (max-width: 600px) {
+  .page-content {
+    padding: 14px;
+  }
+  
+  .topbar {
+    height: 48px;
+    padding: 0 12px;
+  }
+  
+  .topbar-title {
+    font-size: 14px;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — COMPONENT-LEVEL (≤767px)
+   Dashboard, Route, Tasks, Vehicle Status, Profile, Notifications
+   ============================================================ */
+@media (max-width: 767px) {
+
+  /* --- Shared card & header --- */
+  .card { padding: 16px; border-radius: 12px; }
+  .card-title { font-size: 13px; }
+  .page-header h1 { font-size: 20px; }
+  .page-header p  { font-size: 13px; }
+
+  /* --- Stat cards: 2-column grid on mobile --- */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat-card { padding: 14px 12px; gap: 10px; }
+  .stat-num  { font-size: 22px; }
+  .stat-icon { font-size: 20px; }
+  .stat-label { font-size: 11px; }
+  .stat-trend { font-size: 10px; }
+
+  /* --- Route list (dashboard) --- */
+  .route-list { gap: 0; }
+  .route-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 0;
+  }
+  .route-info { width: 100%; }
+  .route-address { font-size: 13px; }
+  .route-type, .route-time { font-size: 11px; }
+  .route-status, .route-actions { width: 100%; }
+  .route-actions { display: flex; gap: 8px; }
+  .btn-small { padding: 7px 14px; font-size: 12px; flex: 1; text-align: center; }
+
+  /* --- Route sequence (driver-route.html) --- */
+  .route-sequence::before { left: 19px; }
+  .route-stop {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 0 14px 48px;
+    gap: 8px;
+  }
+  .stop-number { left: 6px; top: 14px; }
+  .stop-content { width: 100%; }
+  .stop-address { font-size: 13px; }
+  .stop-details { font-size: 11px; }
+  .stop-status, .stop-actions { width: 100%; }
+  .stop-actions { display: flex; gap: 8px; }
+
+  /* --- Tasks page --- */
+  .filter-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .date-label { width: 100%; margin-top: 4px; font-size: 11px; }
+  .filter-btn { font-size: 12px; padding: 5px 10px; }
+  .prog-bg { flex: 1; min-width: 0; }
+
+  /* Tasks table → card-style rows on mobile */
+  .tasks-card { border-radius: 10px; }
+  .tasks-header { display: none; } /* hide column headers */
+  .task-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 16px;
+    position: relative;
+  }
+  .task-row .stop-num {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+  }
+  .task-row > div:nth-child(2) { padding-left: 36px; }
+  .stop-address { font-size: 13px; font-weight: 600; }
+  .stop-sub { font-size: 11px; }
+  .waste-type { font-size: 12px; color: var(--muted); padding-left: 36px; }
+  .time-val   { font-size: 12px; color: var(--muted); padding-left: 36px; }
+  .task-row > div:nth-child(5) { padding-left: 36px; }
+  .notes-icon { position: absolute; top: 12px; right: 16px; font-size: 16px; }
+
+  /* --- Vehicle status page --- */
+  .vehicle-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  .truck-icon-wrap { width: 56px; height: 56px; font-size: 24px; }
+  .vehicle-meta h2 { font-size: 18px; }
+  .report-btn { width: 100%; text-align: center; padding: 10px; }
+
+  .cards-grid { grid-template-columns: 1fr; gap: 14px; }
+  .info-card { padding: 18px; }
+  .info-row { flex-direction: row; flex-wrap: wrap; }
+  .info-label { font-size: 12px; min-width: 140px; }
+  .info-value { font-size: 13px; }
+
+  .issue-card { padding: 18px; }
+  .issue-item { gap: 12px; padding: 12px 0; }
+  .issue-text strong { font-size: 13px; }
+  .issue-sub { font-size: 11px; }
+
+  /* --- Profile page --- */
+  .profile-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px;
+  }
+  .big-avatar { width: 60px; height: 60px; font-size: 20px; }
+  .profile-meta h2 { font-size: 18px; }
+  .edit-btn { width: 100%; text-align: center; padding: 10px; }
+
+  /* --- Notifications page --- */
+  .notif-page-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .page-header-right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-chips { gap: 6px; flex-wrap: wrap; }
+  .filter-chip { font-size: 12px; padding: 5px 10px; }
+  .notif-item { padding: 14px 12px; gap: 10px; }
+  .notif-icon-wrap { width: 36px; height: 36px; font-size: 16px; flex-shrink: 0; }
+  .notif-title { font-size: 13px; }
+  .notif-desc  { font-size: 12px; }
+  .notif-meta  { flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .notif-time  { font-size: 11px; }
+  .notif-tag   { font-size: 10px; padding: 2px 7px; }
+}
+
+/* ============================================================
+   RESPONSIVE — EXTRA SMALL (<480px)
+   ============================================================ */
+@media (max-width: 480px) {
+
+  /* 1-column stat grid on very small screens */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Profile & vehicle header already column; adjust avatar */
+  .big-avatar, .truck-icon-wrap { align-self: center; }
+
+  /* Notification items: stack meta below body */
+  .notif-item { flex-direction: column; gap: 8px; }
+  .notif-meta { flex-direction: row; align-items: center; justify-content: flex-start; width: 100%; }
+
+  /* Tasks filter row */
+  .filter-row { gap: 4px; }
+  .filter-btn { font-size: 11px; padding: 4px 8px; }
+
+  /* Route/stop items */
+  .btn-small { font-size: 11px; }
+}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver's Profile — ZamboCollect</title>
+    <link rel="stylesheet" href="../ZamboCollect css/driver.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard
+      </a>
+      <a href="driver-route.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-map"></i></span> Daily Route
+      </a>
+      <a href="driver-task.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Assigned Tasks
+      </a>
+      <a href="driver-status.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-truck"></i></span> Vehicle Status
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span style="margin-left:auto;background:var(--red);color:#fff;border-radius:100px;padding:0 6px;font-size:10px;font-weight:700;">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="driver-profile.html" class="nav-item active">
+        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        <div>
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-role">Collection Driver</div>
+        </div>
+      </a>
+      <div style="margin-top: 8px;">
+        <a href="Login.html" class="nav-item" style="color:var(--red);">
+          <span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="dashboard-driver.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="driver-route.html"><i class="fa-solid fa-map"></i> Daily Route</a></li>
+          <li><a href="driver-task.html"><i class="fa-solid fa-clipboard-list"></i> Assigned Tasks</a></li>
+          <li><a href="driver-status.html"><i class="fa-solid fa-truck"></i> Vehicle Status</a></li>
+          <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">My Profile</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">2</span></a>
+      </div>
+    </div>
+
+<!--======== Driver Profile ========-->
+
+    <div class="page active">
+      <div class="page-header">
+        <h1>My Profile</h1>
+        <p>Carlos Mendoza — Collection Driver, Barangay Rio Hondo.</p>
+      </div>
+
+      <div class="profile-header-card">
+        <div class="big-avatar">CM</div>
+        <div class="profile-meta">
+          <h2>Carlos Mendoza</h2>
+          <p>Employee ID: DRV-2024-011 &nbsp;&middot;&nbsp; Collection Driver</p>
+          <div class="status-badge"><span class="status-dot"></span> On Duty</div>
+        </div>
+        <button class="edit-btn">&#9998; Edit Profile</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-route"></i>️</div>
+          <div>
+            <div class="stat-num" style="color:var(--green);">142</div>
+            <div class="stat-label">Routes Completed</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div>
+            <div class="stat-num" style="color:var(--green);">98%</div>
+            <div class="stat-label">Task Completion Rate</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-calendar"></i></div>
+          <div>
+            <div class="stat-num" style="color:var(--blue);">2 yrs</div>
+            <div class="stat-label">Years of Service</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-title">Personal Information</div>
+          <div class="info-row">
+            <span class="info-label">Full name</span>
+            <span class="info-value">Carlos B. Mendoza</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Contact number</span>
+            <span class="info-value">+63 912 345 6789</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email address</span>
+            <span class="info-value">c.mendoza@zambo.gov.ph</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Date hired</span>
+            <span class="info-value">March 5, 2023</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Emergency contact</span>
+            <span class="info-value">Maria Mendoza</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Emergency number</span>
+            <span class="info-value">+63 917 654 3210</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title">Assignment Details</div>
+          <div class="info-row">
+            <span class="info-label">Barangay assignment</span>
+            <span class="info-value highlight">Rio Hondo</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Shift schedule</span>
+            <span class="info-value">6:00 AM – 2:00 PM</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Work days</span>
+            <span class="info-value">Mon – Sat</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Assigned vehicle</span>
+            <span class="info-value">GTC-Truck-04</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">License number</span>
+            <span class="info-value">N01-23-456789</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">License expiry</span>
+            <span class="info-value">Aug 14, 2026</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

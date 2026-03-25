@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City-Wide Map — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="../ZamboCollect css/admin.css" />
+  <style>
+    .map-container {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+    .map-filter-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .map-filter-btn.active, .map-filter-btn:hover {
+      background: var(--primary-glow);
+      border-color: var(--primary-tint);
+      color: var(--primary);
+    }
+    .map-body {
+      position: relative;
+      height: 420px;
+      background: linear-gradient(145deg, #d4e6c3 0%, #b8d4a0 40%, #a3c48a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .map-placeholder {
+      text-align: center;
+      color: var(--primary-dim);
+      pointer-events: none;
+      user-select: none;
+    }
+    .map-placeholder .map-icon { font-size: 52px; margin-bottom: 10px; opacity: 0.7; }
+    .map-placeholder p { font-size: 14px; font-weight: 600; opacity: 0.8; }
+    .map-placeholder small { font-size: 12px; opacity: 0.6; }
+
+    /* Hotspot pins scattered on map */
+    .map-pin {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .pin-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      animation: pulse-pin 2s infinite;
+    }
+    .pin-dot.red  { background: var(--red); }
+    .pin-dot.yellow { background: var(--yellow); }
+    .pin-dot.green { background: #588157; }
+    .pin-dot.blue { background: var(--blue); }
+    .pin-label {
+      margin-top: 4px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+    @keyframes pulse-pin {
+      0%,100% { box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+      50% { box-shadow: 0 2px 16px rgba(192,57,43,0.5); }
+    }
+
+    .map-legend {
+      display: flex; gap: 14px; align-items: center;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .map-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .hotspot-table .table-wrap {
+      margin-bottom: 0;
+    }
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .barangay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .bgy-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .bgy-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .bgy-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .bgy-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .bgy-rate { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 22px; }
+    .bgy-bar-bg { height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; margin-top: 8px; }
+    .bgy-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; }
+    .col-rate { font-family: 'Outfit', sans-serif; font-weight: 700; }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i>️ Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"   class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-gear"></i>️</div>
+        <div>
+          <div class="user-name">Admin User</div>
+          <div class="user-role">City Administrator — Zamboanga City</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-drivers.html"><i class="fa-solid fa-truck"></i> Driver Performance</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">City-Wide Map</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>City-Wide Map</h1>
+        <p>Real-time hotspot and collection status view — Zamboanga City.</p>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="map-stats-row">
+        <div class="stat-card stat-red">
+          <span class="stat-icon"><i class="fa-solid fa-fire"></i></span>
+          <div class="stat-num red">17</div>
+          <div class="stat-label">Active Hotspots</div>
+          <span class="stat-trend trend-down">↑ 4 new today</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
+          <div class="stat-num blue">34</div>
+          <div class="stat-label">Trucks On Route</div>
+          <span class="stat-trend trend-up">All operational</span>
+        </div>
+        <div class="stat-card stat-yellow">
+          <span class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+          <div class="stat-num yellow">487</div>
+          <div class="stat-label">Pending Reports</div>
+          <span class="stat-trend">Across 98 barangays</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <div class="stat-num green">91%</div>
+          <div class="stat-label">City Collection Rate</div>
+          <span class="stat-trend trend-up">↑ 1.8% vs last week</span>
+        </div>
+      </div>
+
+      <!-- Map viewer -->
+      <div class="map-container">
+        <div class="map-toolbar">
+          <span style="font-size:12px;font-weight:700;color:var(--text2);margin-right:4px;">Show:</span>
+          <button class="map-filter-btn active"><i class="fa-solid fa-fire"></i> Hotspots</button>
+          <button class="map-filter-btn"><i class="fa-solid fa-truck"></i> Trucks</button>
+          <button class="map-filter-btn"><i class="fa-solid fa-clipboard-list"></i> Reports</button>
+          <button class="map-filter-btn"><i class="fa-solid fa-circle-check"></i> Collected</button>
+          <button class="map-filter-btn"><i class="fa-solid fa-house"></i> Barangays</button>
+          <div style="margin-left:auto;display:flex;gap:8px;">
+            <button class="map-filter-btn">⊕ Zoom In</button>
+            <button class="map-filter-btn">⊖ Zoom Out</button>
+          </div>
+        </div>
+
+        <!-- Stylized map placeholder with pins -->
+        <div class="map-body">
+          <!-- Barangay pins -->
+          <div class="map-pin" style="top:20%;left:30%;">
+            <div class="pin-dot red"></div>
+            <span class="pin-label"><i class="fa-solid fa-fire"></i> Rio Hondo</span>
+          </div>
+          <div class="map-pin" style="top:38%;left:48%;">
+            <div class="pin-dot red"></div>
+            <span class="pin-label"><i class="fa-solid fa-fire"></i> Canelar</span>
+          </div>
+          <div class="map-pin" style="top:55%;left:62%;">
+            <div class="pin-dot yellow"></div>
+            <span class="pin-label"><i class="fa-solid fa-triangle-exclamation"></i> Guiwan</span>
+          </div>
+          <div class="map-pin" style="top:28%;left:60%;">
+            <div class="pin-dot yellow"></div>
+            <span class="pin-label"><i class="fa-solid fa-triangle-exclamation"></i> Tetuan</span>
+          </div>
+          <div class="map-pin" style="top:65%;left:38%;">
+            <div class="pin-dot green"></div>
+            <span class="pin-label"><i class="fa-solid fa-circle-check"></i> Sta. Cruz</span>
+          </div>
+          <div class="map-pin" style="top:45%;left:22%;">
+            <div class="pin-dot green"></div>
+            <span class="pin-label"><i class="fa-solid fa-circle-check"></i> Pasonanca</span>
+          </div>
+          <div class="map-pin" style="top:70%;left:55%;">
+            <div class="pin-dot blue"></div>
+            <span class="pin-label"><i class="fa-solid fa-truck"></i> Talon-talon</span>
+          </div>
+          <div class="map-pin" style="top:18%;left:55%;">
+            <div class="pin-dot green"></div>
+            <span class="pin-label"><i class="fa-solid fa-circle-check"></i> Tumaga</span>
+          </div>
+
+          <div class="map-placeholder">
+            <div class="map-icon"><i class="fa-solid fa-map"></i></div>
+            <p>Zamboanga City — Interactive Map</p>
+            <small>Connect a mapping service to enable live GPS tracking</small>
+          </div>
+        </div>
+
+        <div class="map-legend">
+          <span style="font-size:11px;font-weight:700;color:var(--text2);margin-right:4px;">Legend:</span>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div> Critical Hotspot</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow);"></div> Active Reports</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#588157;"></div> Collected / Clear</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--blue);"></div> Truck On Route</div>
+          <div style="margin-left:auto;font-size:11px;color:var(--muted);">Last updated: Mar 14, 2026 · 10:05 AM</div>
+        </div>
+      </div>
+
+      <!-- Hotspot table + barangay rates side by side -->
+      <div class="grid-2">
+        <!-- Hotspot table -->
+        <div class="card">
+          <div class="card-title">Active Hotspots</div>
+          <div class="table-wrap" style="margin-bottom:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Location</th>
+                  <th>Barangay</th>
+                  <th>Reports</th>
+                  <th>Priority</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Waterfront Market</td>
+                  <td>Rio Hondo</td>
+                  <td><strong style="color:var(--red);">47</strong></td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Canelar Market</td>
+                  <td>Canelar</td>
+                  <td><strong style="color:var(--red);">38</strong></td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Pasonanca Road</td>
+                  <td>Guiwan</td>
+                  <td><strong style="color:var(--yellow);">22</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Tetuan Public Market</td>
+                  <td>Tetuan</td>
+                  <td><strong style="color:var(--yellow);">19</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Tumaga River Bank</td>
+                  <td>Tumaga</td>
+                  <td><strong style="color:var(--yellow);">14</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Talon-talon Bridge</td>
+                  <td>Talon-talon</td>
+                  <td><strong style="color:var(--muted);">9</strong></td>
+                  <td><span class="badge badge-sage">Normal</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top barangay collection rates -->
+        <div class="card">
+          <div class="card-title">Barangay Collection Rates
+            <a href="admin-barangays.html" style="font-size:12px;font-weight:500;color:var(--primary);background:var(--primary-glow);padding:4px 10px;border-radius:6px;border:1px solid var(--primary-tint);">View All</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Guiwan</span>
+                <span style="font-size:13px;font-weight:700;color:var(--primary);">95%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:95%;background:var(--primary);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Sta. Cruz</span>
+                <span style="font-size:13px;font-weight:700;color:var(--primary);">92%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:92%;background:var(--primary);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Pasonanca</span>
+                <span style="font-size:13px;font-weight:700;color:var(--blue);">88%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:88%;background:var(--blue);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Tetuan</span>
+                <span style="font-size:13px;font-weight:700;color:var(--yellow);">74%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:74%;background:var(--yellow);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Canelar</span>
+                <span style="font-size:13px;font-weight:700;color:var(--yellow);">68%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:68%;background:var(--yellow);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Rio Hondo</span>
+                <span style="font-size:13px;font-weight:700;color:var(--red);">54%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:54%;background:var(--red);"></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle map filter buttons
+  document.querySelectorAll('.map-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Only toggle within the filter group, not zoom buttons
+      const isZoom = this.textContent.includes('Zoom');
+      if (!isZoom) {
+        document.querySelectorAll('.map-filter-btn:not(:last-child):not(:nth-last-child(2))').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>
