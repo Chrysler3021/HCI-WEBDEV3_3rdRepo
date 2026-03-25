@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Manage Drivers</title>
+  <link rel="stylesheet" href="officer.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html"><div class="logo-mark">🗑</div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-indicator">🏛 Officer Portal — Rio Hondo</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="officer-kyc-review.html" class="nav-item"><span class="nav-icon">🪪</span> KYC Review <span class="nav-badge badge-yellow">5</span></a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon">⏳</span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-map.html" class="nav-item"><span class="nav-icon">🗺</span> Density Map</a>
+        <a href="officer-checkpoints.html" class="nav-item"><span class="nav-icon">📍</span> Checkpoints</a>
+        <a href="officer-manage-drivers.html" class="nav-item active" aria-current="page"><span class="nav-icon">🚛</span> Manage Drivers</a>
+        <a href="officer-analytics.html" class="nav-item"><span class="nav-icon">📈</span> Analytics</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#"><div class="user-avatar">🏛</div><div><div class="user-name">Maria Santos</div><div class="user-role">Officer · Rio Hondo</div></div></a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon">🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Manage Drivers</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">🔔 <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span></a>
+        <button class="topbar-btn primary" onclick="document.getElementById('modal-addDriver').classList.remove('hidden')">+ Add Driver</button>
+      </div>
+    </div>
+
+    <div class="page active" role="main">
+      <div class="page-header">
+        <h1>Manage Drivers</h1>
+        <p>Create and manage driver accounts for Barangay Rio Hondo.</p>
+      </div>
+
+      <div class="alert alert-green" style="margin-bottom:20px;">
+        <span>🏛</span>
+        <div>Driver accounts you create are linked to <strong>Barangay Rio Hondo</strong>. You can assign them to routes and checkpoints after creation.</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <button class="btn btn-green btn-sm" onclick="document.getElementById('modal-addDriver').classList.remove('hidden')">+ Add Driver</button>
+      </div>
+
+      <!-- Driver cards (mobile-friendly) -->
+      <div class="driver-item">
+        <div class="driver-avatar">🚛</div>
+        <div class="driver-info">
+          <h4>Rodel Macaraeg</h4>
+          <p>Truck #04 · Route A — 8/12 stops</p>
+        </div>
+        <span class="badge badge-green">On Route</span>
+        <button class="cp-btn">View</button>
+      </div>
+
+      <div class="driver-item">
+        <div class="driver-avatar">🚛</div>
+        <div class="driver-info">
+          <h4>Carlo Dimacali</h4>
+          <p>Truck #07 · Route B — 5/10 stops</p>
+        </div>
+        <span class="badge badge-green">On Route</span>
+        <button class="cp-btn">View</button>
+      </div>
+
+      <div class="driver-item">
+        <div class="driver-avatar">🚛</div>
+        <div class="driver-info">
+          <h4>Mark Alvarado</h4>
+          <p>Truck #11 · No active route</p>
+        </div>
+        <span class="badge badge-muted">Standby</span>
+        <button class="cp-btn approve">Assign</button>
+      </div>
+
+      <!-- Table view (for wider screens) -->
+      <div class="card mt-24">
+        <div class="card-title">Driver Summary Table</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Truck</th>
+                <th>Status</th>
+                <th>Routes Today</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Rodel Macaraeg</strong></td>
+                <td>Truck #04</td>
+                <td><span class="badge badge-green">On Route</span></td>
+                <td>Route A — 8/12 stops</td>
+                <td><button class="cp-btn">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>Carlo Dimacali</strong></td>
+                <td>Truck #07</td>
+                <td><span class="badge badge-green">On Route</span></td>
+                <td>Route B — 5/10 stops</td>
+                <td><button class="cp-btn">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>Mark Alvarado</strong></td>
+                <td>Truck #11</td>
+                <td><span class="badge badge-muted">Standby</span></td>
+                <td>—</td>
+                <td><button class="cp-btn approve">Assign</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add Driver Modal -->
+<div class="modal-overlay hidden" id="modal-addDriver">
+  <div class="modal">
+    <div class="modal-title">Create Driver Account</div>
+    <div class="modal-sub">Create a driver account under your assigned barangay — Rio Hondo.</div>
+    <div class="form-row">
+      <div class="form-group"><label>First Name</label><input type="text" placeholder="First name"></div>
+      <div class="form-group"><label>Last Name</label><input type="text" placeholder="Last name"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="driver@example.com"></div>
+    <div class="form-group"><label>Contact Number</label><input type="tel" placeholder="09XXXXXXXXX"></div>
+    <div class="form-group"><label>Assigned Truck</label><input type="text" placeholder="e.g. Truck #05"></div>
+    <div class="form-group"><label>Temporary Password</label><input type="password" placeholder="They'll change this on first login"></div>
+    <div class="alert alert-green" style="margin-bottom:8px;">
+      <span>🏛</span>
+      <div>This driver will be assigned to <strong>Barangay Rio Hondo</strong> and linked to your officer account.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-addDriver').classList.add('hidden')" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-green btn-sm" onclick="document.getElementById('modal-addDriver').classList.add('hidden');showToast('Driver account created! Invite sent. 🚛')" style="flex:1;">Create Driver</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+  document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});});
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+</script>
+</body>
+</html>
