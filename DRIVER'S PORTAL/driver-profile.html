@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver's Profile — ZamboCollect</title>
+    <link rel="stylesheet" href="driver.css">
+</head>
+<body>
+
+<!-- ✅ Checkbox outside .app-shell — sibling of .modal-overlay -->
+<input type="checkbox" id="modal-toggle" />
+<input type="checkbox" id="confirm-profile-toggle" />
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark">🗑</div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="sidebar-portal-badge-wrap">
+      <span class="badge-sage badge-sage--driver-portal">
+        👤 Driver Portal
+      </span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item">
+        <span class="nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="driver-route.html" class="nav-item">
+        <span class="nav-icon">🗺</span> Daily Route
+      </a>
+      <a href="driver-task.html" class="nav-item">
+        <span class="nav-icon">📋</span> Assigned Tasks
+      </a>
+      <a href="driver-status.html" class="nav-item">
+        <span class="nav-icon">🚛</span> Vehicle Status
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon">🔔</span>Notifications
+        <span class="nav-notif-badge">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item active">
+        <span class="nav-icon">👤</span>My Profile
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="driver-profile.html" class="nav-item active">
+        <div class="user-avatar">👤</div>
+        <div>
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-role">Collection Driver</div>
+        </div>
+      </a>
+      <div class="sidebar-logout-wrap">
+        <a href="login.html" class="nav-item nav-item--logout">
+          <span class="nav-icon">🚪</span> Logout
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">My Profile</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn">
+          🔔 <span class="topbar-notif-badge">2</span>
+        </a>
+      </div>
+    </div>
+
+    <!--======== Driver Profile ========-->
+    <div class="page active">
+      <div class="page-header">
+        <h1>My Profile</h1>
+        <p>Carlos Mendoza — Collection Driver, Barangay Rio Hondo.</p>
+      </div>
+
+      <div class="profile-header-card">
+        <div class="big-avatar-wrap">
+          <div class="big-avatar">CM</div>
+        </div>
+
+        <div class="profile-meta">
+
+          <h2>Carlos Mendoza</h2>
+          <p>Employee ID: DRV-2024-011 <br> Collection Driver</p>
+          <div class="status-badge"><span class="status-dot"></span> On Duty</div>
+        </div>
+
+        <label for="modal-toggle" class="edit-btn">&#9998; Edit Profile</label>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-green">
+          <div class="stat-icon">🛣️</div>
+          <div>
+            <div class="stat-num stat-num--green">142</div>
+            <div class="stat-label">Routes Completed</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">✅</div>
+          <div>
+            <div class="stat-num stat-num--green">98%</div>
+            <div class="stat-label">Task Completion Rate</div>
+          </div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">📅</div>
+          <div>
+            <div class="stat-num stat-num--blue">2 yrs</div>
+            <div class="stat-label">Years of Service</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-title">Personal Information</div>
+          <div class="info-row">
+            <span class="info-label">Full name</span>
+            <span class="info-value">Carlos Berondo Mendoza</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Contact number</span>
+            <span class="info-value">+63 912 345 6789</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email address</span>
+            <span class="info-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acc1c9c2c8c3d6cd82cfcddec0c3eccbc1cdc5c082cfc3c1">[email&#160;protected]</a></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Date hired</span>
+            <span class="info-value">March 5, 2023</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Emergency contact</span>
+            <span class="info-value">Maria Magayon Mendoza</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Emergency number</span>
+            <span class="info-value">+63 917 654 3210</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title">Assignment Details</div>
+          <div class="info-row">
+            <span class="info-label">Barangay assignment</span>
+            <span class="info-value highlight">Rio Hondo</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Shift schedule</span>
+            <span class="info-value">6:00 AM – 2:00 PM</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Work days</span>
+            <span class="info-value">Mon – Sat</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Assigned vehicle</span>
+            <span class="info-value">GTC-Truck-04</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">License number</span>
+            <span class="info-value">N01-23-456789</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">License expiry</span>
+            <span class="info-value">Mar 28, 2030</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .page -->
+  </main>
+</div>
+
+<!-- ======== EDIT PROFILE MODAL ======== -->
+<div class="modal-overlay">
+  <label for="modal-toggle" class="modal-backdrop-close"></label>
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <h3>Edit Profile</h3>
+      <label for="modal-toggle" class="modal-close">✕</label>
+    </div>
+
+    <!-- Avatar editor — centered, big CM, pencil at lower-right -->
+    <div class="modal-avatar-section">
+      <div class="modal-avatar-wrap">
+        <div class="modal-avatar-circle">CM</div>
+        <label for="modal-toggle" class="avatar-edit-btn" title="Change photo">&#9998;</label>
+        <input type="file" accept="image/*" class="report-file-input" />
+      </div>
+      <span class="modal-avatar-hint">Click the pencil to change your profile photo</span>
+    </div>
+
+    <!-- Name fields -->
+    <div class="modal-section-label">Name</div>
+
+    <div class="modal-form-row">
+      <div class="modal-form-group">
+        <label>First Name</label>
+        <input type="text" value="Carlos" placeholder="First name" />
+      </div>
+      <div class="modal-form-group">
+        <label>Middle Initial <span class="label-optional">(optional)</span></label>
+        <input type="text" value="Berondo" placeholder="Middle Name"/>
+      </div>
+    </div>
+
+    <div class="modal-form-row">
+      <div class="modal-form-group">
+        <label>Last Name</label>
+        <input type="text" value="Mendoza" placeholder="Last name" />
+      </div>
+      <div class="modal-form-group">
+        <label>Suffix <span class="label-optional">(optional)</span></label>
+        <select>
+          <option value="">— None —</option>
+          <option value="Jr.">Jr.</option>
+          <option value="Sr.">Sr.</option>
+          <option value="II">II</option>
+          <option value="III">III</option>
+          <option value="IV">IV</option>
+          <option value="V">V</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="modal-divider" />
+
+    <!-- Contact fields -->
+    <div class="modal-section-label">Contact Information</div>
+
+    <div class="modal-form-group">
+      <label>Email Address</label>
+      <input type="email" value="juan.delacruz@gmail.com" placeholder="Email" />
+    </div>
+
+    <div class="modal-form-group">
+      <label>Contact Number</label>
+      <input type="tel" value="+63 912 345 6789" placeholder="Phone number" />
+    </div>
+
+    <div class="modal-form-row">
+      <div class="modal-form-group">
+        <label>Emergency Contact</label>
+        <input type="text" value="Maria Mendoza" placeholder="Contact person" />
+      </div>
+      <div class="modal-form-group">
+        <label>Emergency Number</label>
+        <input type="tel" value="+63 917 654 3210" placeholder="Emergency phone" />
+      </div>
+    </div>
+
+    <hr class="modal-divider" />
+
+    <!-- License — read only -->
+    <div class="modal-section-label">License</div>
+
+    <div class="modal-form-group">
+      <label>License Number</label>
+      <input type="text" value="N01-23-456789" readonly />
+    </div>
+
+    <div class="field-lock-note">
+      <span class="lock-icon">🔒</span>
+      <span>Your license number cannot be changed once you have been registered as a driver. Please contact your administrator if there is an error.</span>
+    </div>
+
+    <div class="modal-footer">
+      <label for="modal-toggle" class="btn-modal-cancel">Cancel</label>
+      <label for="confirm-profile-toggle" class="btn-modal-save">Save Changes</label>
+    </div>
+
+  </div><!-- end .modal-box -->
+</div><!-- end .modal-overlay -->
+
+<!-- ======== CONFIRM SAVE PROFILE MODAL ======== -->
+<div class="confirm-profile-overlay">
+  <label for="confirm-profile-toggle" class="modal-backdrop-close"></label>
+  <div class="modal-box modal-box--sm">
+
+    <div class="modal-head">
+      <h3>Confirm Changes</h3>
+      <label for="confirm-profile-toggle" class="modal-close">✕</label>
+    </div>
+
+    <div class="confirm-icon-wrap">
+      <div class="confirm-icon">💾</div>
+    </div>
+
+    <p class="confirm-title">Save your changes?</p>
+    <p class="confirm-desc">Please review your updated information before saving. Changes to your profile will be reflected across the system.</p>
+
+    <div class="modal-footer">
+      <label for="confirm-profile-toggle" class="btn-modal-cancel">Go Back</label>
+      <label for="confirm-profile-toggle" class="btn-modal-save">Yes, Save</label>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
