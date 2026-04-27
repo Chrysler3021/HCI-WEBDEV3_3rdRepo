@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Barangays — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar"><i class="fa-solid fa-gear"></i></div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users & Accounts</a></li>
+          <li><a href="admin-drivers.html"><i class="fa-solid fa-truck"></i> Driver Performance</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Manage Barangays</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <h1>Manage Barangays</h1>
+          <p>Assign officers and monitor all 98 barangays across Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-file"></i> Export PDF</a>
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-chart-bar"></i> Export CSV</a>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-house"></i></span><div class="stat-num green">98</div><div class="stat-label">Total Barangays</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-landmark"></i></span><div class="stat-num green">94</div><div class="stat-label">With Officer</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></span><div class="stat-num yellow">4</div><div class="stat-label">Unassigned</div></div>
+        <div class="stat-card stat-blue"><span class="stat-icon"><i class="fa-solid fa-truck"></i></span><div class="stat-num blue">112</div><div class="stat-label">Total Drivers</div></div>
+      </div>
+
+      <!-- Notice for unassigned -->
+      <div class="notice yellow">
+        <span class="notice-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span><strong style="color:var(--yellow);">4 barangays</strong> currently have no assigned officer. Reports from these barangays cannot be reviewed. Assign officers immediately.</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active">All (98)</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-circle-check"></i> Assigned</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-triangle-exclamation"></i> Unassigned</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-fire"></i> High Volume</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" placeholder="Search barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Barangay</th>
+              <th>Assigned Officer</th>
+              <th>Drivers</th>
+              <th>KYC Pending</th>
+              <th>Active Reports</th>
+              <th>Collection Rate</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-strong">Rio Hondo</td>
+              <td>Maria Santos</td><td>3</td>
+              <td><span class="badge badge-yellow">5</span></td>
+              <td>24</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:89%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">89%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Canelar</td>
+              <td>Pedro Cruz</td><td>2</td>
+              <td><span class="badge badge-yellow">12</span></td>
+              <td>31</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:84%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">84%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Guiwan</td>
+              <td>Ana Ramos</td><td>4</td>
+              <td><span class="badge badge-green">1</span></td>
+              <td>18</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:95%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">95%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Tetuan</td>
+              <td>Carlos Delos Reyes</td><td>3</td>
+              <td><span class="badge badge-green">3</span></td>
+              <td>22</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:88%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">88%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Sta. Cruz</td>
+              <td>Rosa Magno</td><td>2</td>
+              <td><span class="badge badge-yellow">7</span></td>
+              <td>17</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:91%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">91%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Pasonanca</td>
+              <td style="color:var(--muted);font-style:italic;">Unassigned</td><td>1</td>
+              <td>—</td>
+              <td>9</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill yellow" style="width:76%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--yellow);">76%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-yellow">No Officer</span></td>
+              <td><a href="admin-users.html" class="action-btn warn">Assign Officer</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Talon-talon</td>
+              <td>Jimmy Palacio</td><td>2</td>
+              <td><span class="badge badge-green">2</span></td>
+              <td>14</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:82%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);">82%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><a href="#" class="action-btn">Manage</a></td>
+            </tr>
+            <tr>
+              <td class="col-strong">Tumaga</td>
+              <td style="color:var(--muted);font-style:italic;">Unassigned</td><td>0</td>
+              <td>—</td>
+              <td>6</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="progress-track"><div class="progress-fill red" style="width:62%;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--red);">62%</span>
+                </div>
+              </td>
+              <td><span class="badge badge-red">No Officer</span></td>
+              <td><a href="admin-users.html" class="action-btn warn">Assign Officer</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info">Showing 8 of 98 barangays</div>
+          <div class="page-btns">
+            <div class="page-btn">‹</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">3</div>
+            <div class="page-btn" style="width:auto;padding:0 8px;">…</div>
+            <div class="page-btn">13</div>
+            <div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

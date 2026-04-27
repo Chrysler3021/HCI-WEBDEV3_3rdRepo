@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Report — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="#" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="kyc-verification.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span>KYC Verification<span class="nav-badge">1</span></a>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name">Juan dela Cruz</div>
+          <div class="user-role">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="#"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="kyc-verification.html"><i class="fa-solid fa-id-card"></i> KYC Verification</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Submit Report</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <h1>Submit a Report</h1>
+        <p>Report a trash problem in your barangay — Zamboanga City.</p>
+      </div>
+
+      <div class="grid-2">
+
+        <!-- Left column: photo + map -->
+        <div>
+
+          <!-- Photo upload -->
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-image"></i> Photo Evidence</div>
+            <label class="upload-zone">
+              <input type="file" accept="image/*" />
+              <span class="upload-icon-wrap"><i class="fa-solid fa-camera"></i></span>
+              <h4>Upload Waste Photo</h4>
+              <p>Drag &amp; drop or tap to browse<br>JPG, PNG — max 10 MB</p>
+              <span class="upload-hint">Choose File</span>
+            </label>
+          </div>
+
+          <!-- Map location -->
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-location-dot"></i> Pin Location</div>
+            <div class="map-placeholder">
+              <div class="map-road-h" style="top:38%; left:0; right:0;"></div>
+              <div class="map-road-h" style="top:68%; left:0; right:0;"></div>
+              <div class="map-road-v" style="left:30%; top:0; bottom:0;"></div>
+              <div class="map-road-v" style="left:65%; top:0; bottom:0;"></div>
+              <div class="map-pin" style="left:50%; top:50%;"><i class="fa-solid fa-location-dot"></i></div>
+              <div class="map-controls">
+                <div class="map-ctrl-btn">+</div>
+                <div class="map-ctrl-btn">−</div>
+                <div class="map-ctrl-btn"><i class="fa-solid fa-bullseye"></i></div>
+              </div>
+              <div class="map-label"><i class="fa-solid fa-location-dot"></i> Tap to repin · or use GPS detection</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right column: report form -->
+        <div class="card" style="height: fit-content;">
+          <div class="card-title">Report Details</div>
+
+          <div class="form-group">
+            <label>Location Description</label>
+            <input type="text" placeholder="e.g. Near Pasonanca Bridge, Zamboanga City" />
+          </div>
+
+          <div class="form-group">
+            <label>Barangay</label>
+            <select>
+              <option value="">— Select barangay —</option>
+              <option selected>Barangay Rio Hondo</option>
+              <option>Barangay Canelar</option>
+              <option>Barangay Pasonanca</option>
+              <option>Barangay Sta. Cruz</option>
+              <option>Barangay Guiwan</option>
+              <option>Barangay Talon-talon</option>
+              <option>Barangay Tetuan</option>
+              <option>Barangay Tumaga</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Waste Type</label>
+            <div class="waste-chips">
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="household" checked />
+                <span class="chip-icon"><i class="fa-solid fa-house"></i></span>
+                <span class="chip-label">Household</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="commercial" />
+                <span class="chip-icon"><i class="fa-solid fa-store"></i></span>
+                <span class="chip-label">Commercial</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="construction" />
+                <span class="chip-icon"><i class="fa-solid fa-helmet-safety"></i>️</span>
+                <span class="chip-label">Construction</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="hazardous" />
+                <span class="chip-icon"><i class="fa-solid fa-radiation"></i>️</span>
+                <span class="chip-label">Hazardous</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="other" />
+                <span class="chip-icon"><i class="fa-solid fa-box"></i></span>
+                <span class="chip-label">Other</span>
+              </label>
+            </div>
+          </div>
+
+          
+
+          <div class="form-group">
+            <label>Description <span style="color:var(--muted2); font-weight:400;">(optional)</span></label>
+            <textarea placeholder="Describe the trash problem — size, smell, hazard level, how long it's been there…"></textarea>
+          </div>
+
+          <button class="btn-submit" type="button">Submit Report →</button>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
