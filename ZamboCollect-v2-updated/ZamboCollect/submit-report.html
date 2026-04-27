@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Report — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="map-view.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name">Juan dela Cruz</div>
+          <div class="user-role">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="map-view.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Submit Report</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <h1>Submit a Report</h1>
+        <p>Report a trash problem in your barangay — Zamboanga City.</p>
+      </div>
+
+      <div class="grid-2">
+
+        <!-- Left column: photo + map -->
+        <div>
+
+          <!-- Photo capture -->
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-camera"></i> Photo Evidence</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <!-- Take Photo (primary) -->
+              <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:2px solid var(--primary);border-radius:14px;background:linear-gradient(135deg,rgba(88,129,87,0.06),rgba(163,177,138,0.08));padding:22px 16px;cursor:pointer;text-align:center;position:relative;overflow:hidden;transition:all 0.2s;">
+                <input type="file" accept="image/*" capture="environment" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" />
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#A3B18A);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(88,129,87,0.3);">
+                  <i class="fa-solid fa-camera" style="color:#fff;font-size:1.3rem;"></i>
+                </div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--text);">Take Photo</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">Open camera directly — recommended</div>
+                </div>
+                <span style="background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:0.3px;">RECOMMENDED</span>
+              </label>
+              <!-- Upload from gallery (secondary) -->
+              <label style="display:flex;align-items:center;gap:12px;border:1.5px dashed var(--border);border-radius:12px;background:var(--surface2);padding:14px 16px;cursor:pointer;position:relative;overflow:hidden;transition:all 0.2s;">
+                <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" />
+                <div style="width:38px;height:38px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <i class="fa-solid fa-image" style="color:var(--muted);font-size:1rem;"></i>
+                </div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">Upload from Gallery</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:1px;">JPG, PNG — max 10 MB</div>
+                </div>
+              </label>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);">
+              <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i>
+              Tip: Take the photo on-site for accurate location tagging
+            </div>
+          </div>
+
+          <!-- Map location -->
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-location-dot"></i> Pin Location</div>
+            <div class="map-placeholder">
+              <div class="map-road-h" style="top:38%; left:0; right:0;"></div>
+              <div class="map-road-h" style="top:68%; left:0; right:0;"></div>
+              <div class="map-road-v" style="left:30%; top:0; bottom:0;"></div>
+              <div class="map-road-v" style="left:65%; top:0; bottom:0;"></div>
+              <div class="map-pin" style="left:50%; top:50%;"><i class="fa-solid fa-location-dot"></i></div>
+              <div class="map-controls">
+                <div class="map-ctrl-btn">+</div>
+                <div class="map-ctrl-btn">−</div>
+                <div class="map-ctrl-btn"><i class="fa-solid fa-bullseye"></i></div>
+              </div>
+              <div class="map-label"><i class="fa-solid fa-location-dot"></i> Tap to repin · or use GPS detection</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right column: report form -->
+        <div class="card" style="height: fit-content;">
+          <div class="card-title">Report Details</div>
+
+          <div class="form-group">
+            <label>Location Description</label>
+            <input type="text" placeholder="e.g. Near Pasonanca Bridge, Zamboanga City" />
+          </div>
+
+          <div class="form-group">
+            <label>Barangay</label>
+            <select>
+              <option value="">— Select barangay —</option>
+              <option selected>Barangay Rio Hondo</option>
+              <option>Barangay Canelar</option>
+              <option>Barangay Pasonanca</option>
+              <option>Barangay Sta. Cruz</option>
+              <option>Barangay Guiwan</option>
+              <option>Barangay Talon-talon</option>
+              <option>Barangay Tetuan</option>
+              <option>Barangay Tumaga</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Waste Type</label>
+            <div class="waste-chips">
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="household" checked onchange="setUrgency('low')" />
+                <span class="chip-icon"><i class="fa-solid fa-house"></i></span>
+                <span class="chip-label">Household</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="commercial" onchange="setUrgency('medium')" />
+                <span class="chip-icon"><i class="fa-solid fa-store"></i></span>
+                <span class="chip-label">Commercial</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="construction" onchange="setUrgency('medium')" />
+                <span class="chip-icon"><i class="fa-solid fa-helmet-safety"></i>️</span>
+                <span class="chip-label">Construction</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="hazardous" onchange="setUrgency('critical')" />
+                <span class="chip-icon"><i class="fa-solid fa-radiation"></i>️</span>
+                <span class="chip-label">Hazardous</span>
+              </label>
+              <label class="waste-chip">
+                <input type="radio" name="waste" value="other" onchange="setUrgency('low')" />
+                <span class="chip-icon"><i class="fa-solid fa-box"></i></span>
+                <span class="chip-label">Other</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Urgency Level (auto-set by waste type) -->
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              Urgency Level
+              <span style="font-size:11px;font-weight:400;color:var(--muted);">— auto-set by waste type</span>
+            </label>
+            <div id="urgency-display" style="display:flex;gap:8px;margin-top:4px;">
+              <div id="urg-low" class="urgency-chip urgency-low active" onclick="selectUrgency('low')">
+                <i class="fa-solid fa-circle-check"></i> Low
+              </div>
+              <div id="urg-medium" class="urgency-chip urgency-medium" onclick="selectUrgency('medium')">
+                <i class="fa-solid fa-triangle-exclamation"></i> Medium
+              </div>
+              <div id="urg-high" class="urgency-chip urgency-high" onclick="selectUrgency('high')">
+                <i class="fa-solid fa-circle-exclamation"></i> High
+              </div>
+              <div id="urg-critical" class="urgency-chip urgency-critical" onclick="selectUrgency('critical')">
+                <i class="fa-solid fa-skull-crossbones"></i> Critical
+              </div>
+            </div>
+            <div id="urgency-hint" style="font-size:11px;color:var(--muted);margin-top:6px;">
+              <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> Household waste is set to Low urgency. You can adjust if needed.
+            </div>
+          </div>
+
+          <style>
+            .urgency-chip {
+              display:inline-flex;align-items:center;gap:5px;
+              padding:6px 12px;border-radius:100px;font-size:12px;font-weight:600;
+              border:1.5px solid transparent;cursor:pointer;transition:all 0.2s;opacity:0.45;
+            }
+            .urgency-chip.active { opacity:1; }
+            .urgency-low   { background:#f0fdf4;border-color:#bbf7d0;color:#16a34a; }
+            .urgency-medium{ background:#fffbeb;border-color:#fde68a;color:#d97706; }
+            .urgency-high  { background:#fff7ed;border-color:#fdba74;color:#ea580c; }
+            .urgency-critical{ background:#fef2f2;border-color:#fca5a5;color:#dc2626; }
+            .urgency-low.active   { background:#dcfce7;border-color:#4ade80; }
+            .urgency-medium.active{ background:#fef3c7;border-color:#fbbf24; }
+            .urgency-high.active  { background:#ffedd5;border-color:#fb923c; }
+            .urgency-critical.active{ background:#fee2e2;border-color:#f87171; }
+          </style>
+
+          <script>
+            var urgencyHints = {
+              low: 'Household waste is set to Low urgency. You can adjust if needed.',
+              medium: 'Commercial/Construction waste defaults to Medium urgency.',
+              high: 'High urgency — large-scale or blocking waste. Adjust as needed.',
+              critical: '⚠️ Hazardous waste is Critical urgency — officers will be alerted immediately.'
+            };
+            function selectUrgency(level) {
+              ['low','medium','high','critical'].forEach(function(l){
+                document.getElementById('urg-'+l).classList.remove('active');
+              });
+              document.getElementById('urg-'+level).classList.add('active');
+              document.getElementById('urgency-hint').innerHTML =
+                '<i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> ' + urgencyHints[level];
+            }
+            function setUrgency(level) {
+              selectUrgency(level);
+            }
+          </script>
+
+          <div class="form-group">
+            <label>Description <span style="color:var(--muted2); font-weight:400;">(optional)</span></label>
+            <textarea placeholder="Describe the trash problem — size, smell, hazard level, how long it's been there…"></textarea>
+          </div>
+
+          <button class="btn-submit" type="button">Submit Report →</button>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

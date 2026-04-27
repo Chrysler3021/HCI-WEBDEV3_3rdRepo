@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Driver Applications</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+
+    /* ── Filter tabs via radio ── */
+    .tab-radio { display:none; }
+
+    .tab-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .tab-label {
+      padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border);
+      background: var(--surface2); color: var(--muted); transition: all 0.15s;
+      user-select: none;
+    }
+    .tab-label:hover { border-color: var(--primary); color: var(--primary); }
+
+    #tab-all:checked   ~ .page-wrap .tab-bar label[for="tab-all"],
+    #tab-pending:checked ~ .page-wrap .tab-bar label[for="tab-pending"],
+    #tab-approved:checked ~ .page-wrap .tab-bar label[for="tab-approved"],
+    #tab-rejected:checked ~ .page-wrap .tab-bar label[for="tab-rejected"] {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+
+    /* show/hide cards by status */
+    .app-section { display: none; }
+
+    #tab-all:checked     ~ .page-wrap .section-pending,
+    #tab-all:checked     ~ .page-wrap .section-approved,
+    #tab-all:checked     ~ .page-wrap .section-rejected  { display: block; }
+    #tab-pending:checked ~ .page-wrap .section-pending   { display: block; }
+    #tab-approved:checked ~ .page-wrap .section-approved { display: block; }
+    #tab-rejected:checked ~ .page-wrap .section-rejected { display: block; }
+
+    /* ── Application cards ── */
+    .app-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .app-card-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+    }
+    .app-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #A3B18A);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; flex-shrink: 0;
+    }
+    .app-avatar.active-drv { background: linear-gradient(135deg,#2563eb,#60a5fa); }
+    .app-avatar.rejected-drv { background: linear-gradient(135deg,#9ca3af,#d1d5db); }
+    .app-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .app-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .app-details-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 10px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .det-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .det-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .app-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn-view-app {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); text-decoration: none; transition: all 0.15s;
+    }
+    .btn-view-app:hover { background: var(--surface3); border-color: var(--primary); color: var(--primary); }
+
+    .btn-do-approve {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: var(--green); color: #fff; border: none; text-decoration: none;
+      cursor: pointer;
+    }
+    .btn-do-reject {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #fff0f0; color: var(--red);
+      border: 1.5px solid var(--red); text-decoration: none; cursor: pointer;
+    }
+
+    /* ── Section dividers ── */
+    .section-heading {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted); margin: 20px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 8px; border-bottom: 1.5px solid var(--border);
+    }
+
+    /* ── Urgency pills ── */
+    .urg-low      { background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-medium   { background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-critical { background:#fee2e2; color:#dc2626; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+
+    /* ── CSS-only detail drawer via :target ── */
+    /*
+      Each "View" button is an <a href="#drawer-X">.
+      The drawer sits right below its card, hidden by default.
+      :target makes it visible.  A close link goes to #close (empty anchor at top).
+    */
+    .app-drawer {
+      display: none;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-top: none; border-radius: 0 0 14px 14px;
+      margin-top: -14px; margin-bottom: 14px;
+      padding: 0 20px 20px; overflow: hidden;
+    }
+    .app-drawer:target { display: block; }
+
+    .drawer-inner {
+      padding-top: 16px; border-top: 1.5px dashed var(--border); margin-top: 0;
+    }
+    .drawer-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .drawer-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 8px; margin-bottom: 16px;
+    }
+    .drawer-info-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 11px;
+    }
+    .drawer-info-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .drawer-info-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .doc-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .doc-box {
+      flex: 1; min-width: 110px; border: 1.5px dashed var(--border);
+      border-radius: 10px; background: var(--surface); padding: 14px 10px;
+      text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .doc-box i { font-size: 1.5rem; color: var(--muted); }
+    .doc-box .doc-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .doc-box .doc-status { font-size: 10px; font-weight: 700; color: var(--primary); }
+
+    /* Reports mini-table */
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 12px; border-radius: 10px; overflow: hidden; }
+    .mini-table thead tr { background: var(--surface3); }
+    .mini-table th { padding: 7px 10px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .mini-table td { padding: 8px 10px; border-top: 1px solid var(--border); color: var(--text); }
+    .mini-table tr:nth-child(even) td { background: var(--surface); }
+    .mini-table tr:nth-child(odd)  td { background: var(--surface2); }
+
+    .notes-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 14px; font-size: 13px;
+      color: var(--text); font-style: italic; line-height: 1.6; margin-bottom: 14px;
+    }
+
+    .drawer-actions {
+      display: flex; gap: 8px; padding-top: 12px;
+      border-top: 1.5px solid var(--border);
+    }
+    .drawer-close {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--muted); text-decoration: none;
+    }
+    .drawer-close:hover { border-color: var(--text); color: var(--text); }
+
+    /* approved card tint */
+    .card-approved { border-color: rgba(88,129,87,0.35); background: linear-gradient(135deg,#f8faf7,var(--surface)); }
+    /* rejected card tint */
+    .card-rejected  { opacity: 0.72; }
+
+    @media (max-width:600px) {
+      .app-details-grid { grid-template-columns: 1fr 1fr; }
+      .drawer-info-grid  { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CSS-only filter radios — MUST be outside app-shell to affect siblings -->
+<input type="radio" class="tab-radio" name="drv-tab" id="tab-all"      checked>
+<input type="radio" class="tab-radio" name="drv-tab" id="tab-pending">
+<input type="radio" class="tab-radio" name="drv-tab" id="tab-approved">
+<input type="radio" class="tab-radio" name="drv-tab" id="tab-rejected">
+
+<!-- hamburger toggle -->
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal — Rio Hondo</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review <span class="nav-badge badge-yellow">5</span></a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-map.html"             class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="officer-manage-drivers.html"  class="nav-item active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span> Driver Applications <span class="nav-badge badge-yellow">3</span></a>
+        <a href="officer-analytics.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div><div class="user-name">Maria Santos</div><div class="user-role">Officer · Rio Hondo</div></div>
+      </a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content" id="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Driver Applications</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- page-wrap is the sibling that tab radios control -->
+    <div class="page active page-wrap" role="main">
+
+      <div class="page-header">
+        <h1>Driver Applications</h1>
+        <p>Review and approve driver account applications for Barangay Rio Hondo.</p>
+      </div>
+
+      <!-- Filter tab bar -->
+      <div class="tab-bar">
+        <label class="tab-label" for="tab-all">All (5)</label>
+        <label class="tab-label" for="tab-pending"><i class="fa-solid fa-hourglass-half"></i> Pending (3)</label>
+        <label class="tab-label" for="tab-approved"><i class="fa-solid fa-circle-check"></i> Approved (1)</label>
+        <label class="tab-label" for="tab-rejected"><i class="fa-solid fa-circle-xmark"></i> Rejected (1)</label>
+      </div>
+
+      <!-- ══════════════════════════════════
+           PENDING
+      ══════════════════════════════════ -->
+      <div class="app-section section-pending">
+        <div class="section-heading">
+          <i class="fa-solid fa-hourglass-half" style="color:var(--yellow);"></i> Pending Applications
+        </div>
+
+        <!-- ── Pedro ── -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-avatar"><i class="fa-solid fa-circle-user"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="app-name">Pedro Alcantara</div>
+              <div class="app-meta"><i class="fa-solid fa-location-dot"></i> Barangay Rio Hondo &nbsp;·&nbsp; Applied Mar 14, 2025</div>
+            </div>
+            <span class="badge badge-yellow">Pending</span>
+          </div>
+          <div class="app-details-grid">
+            <div><div class="det-label">License Type</div><div class="det-value">Professional</div></div>
+            <div><div class="det-label">Experience</div><div class="det-value">5+ years</div></div>
+            <div><div class="det-label">Preferred Route</div><div class="det-value">Rio Hondo</div></div>
+            <div><div class="det-label">License No.</div><div class="det-value">N01-23-001234</div></div>
+          </div>
+          <div class="app-actions">
+            <a href="#drawer-pedro" class="btn-view-app"><i class="fa-solid fa-eye"></i> View Application</a>
+            <a href="#" class="btn-do-approve"><i class="fa-solid fa-check"></i> Approve</a>
+            <a href="#" class="btn-do-reject"><i class="fa-solid fa-xmark"></i> Reject</a>
+          </div>
+        </div>
+
+        <!-- Pedro drawer -->
+        <div class="app-drawer" id="drawer-pedro">
+          <div class="drawer-inner">
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Applicant Information</div>
+            <div class="drawer-info-grid">
+              <div class="drawer-info-box"><div class="drawer-info-label">Full Name</div><div class="drawer-info-value">Pedro Alcantara</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Contact</div><div class="drawer-info-value">0917 555 1234</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Type</div><div class="drawer-info-value">Professional</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License No.</div><div class="drawer-info-value">N01-23-001234</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Expiry</div><div class="drawer-info-value">Dec 2027</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Experience</div><div class="drawer-info-value">5+ years</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Preferred Route</div><div class="drawer-info-value">Rio Hondo</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Applied</div><div class="drawer-info-value">Mar 14, 2025</div></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-file-lines"></i> Submitted Documents</div>
+            <div class="doc-row">
+              <div class="doc-box"><i class="fa-solid fa-id-card"></i><span class="doc-label">Driver's License</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-face-smile"></i><span class="doc-label">Selfie w/ ID</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i><span class="doc-label">KYC Status</span><span class="doc-status" style="color:var(--green);">Verified</span></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-clipboard-list"></i> Citizen Report History</div>
+            <table class="mini-table" style="margin-bottom:16px;">
+              <thead><tr><th>ID</th><th>Location</th><th>Type</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>#381</strong></td><td>Rio Hondo Bridge</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#374</strong></td><td>Waterfront Area</td><td>Commercial</td><td><span class="urg-medium">Medium</span></td><td><span class="badge badge-blue">Approved</span></td></tr>
+                <tr><td><strong>#368</strong></td><td>Market St.</td><td>Illegal Dump</td><td><span class="urg-critical">Critical</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-comment-dots"></i> Applicant's Notes</div>
+            <div class="notes-box">"I am very passionate about keeping our barangay clean. I have experience driving trucks for 6 years and I am available full time."</div>
+
+            <div class="drawer-actions">
+              <a href="#" class="drawer-close"><i class="fa-solid fa-chevron-up"></i> Close</a>
+              <a href="#" class="btn-do-reject" style="flex:1;justify-content:center;"><i class="fa-solid fa-xmark"></i> Reject</a>
+              <a href="#" class="btn-do-approve" style="flex:2;justify-content:center;"><i class="fa-solid fa-check"></i> Approve Application</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Leonora ── -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-avatar"><i class="fa-solid fa-circle-user"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="app-name">Leonora Buenaventura</div>
+              <div class="app-meta"><i class="fa-solid fa-location-dot"></i> Barangay Rio Hondo &nbsp;·&nbsp; Applied Mar 13, 2025</div>
+            </div>
+            <span class="badge badge-yellow">Pending</span>
+          </div>
+          <div class="app-details-grid">
+            <div><div class="det-label">License Type</div><div class="det-value">Non-Professional</div></div>
+            <div><div class="det-label">Experience</div><div class="det-value">3–5 years</div></div>
+            <div><div class="det-label">Preferred Route</div><div class="det-value">Rio Hondo</div></div>
+            <div><div class="det-label">License No.</div><div class="det-value">D02-21-009876</div></div>
+          </div>
+          <div class="app-actions">
+            <a href="#drawer-leonora" class="btn-view-app"><i class="fa-solid fa-eye"></i> View Application</a>
+            <a href="#" class="btn-do-approve"><i class="fa-solid fa-check"></i> Approve</a>
+            <a href="#" class="btn-do-reject"><i class="fa-solid fa-xmark"></i> Reject</a>
+          </div>
+        </div>
+
+        <!-- Leonora drawer -->
+        <div class="app-drawer" id="drawer-leonora">
+          <div class="drawer-inner">
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Applicant Information</div>
+            <div class="drawer-info-grid">
+              <div class="drawer-info-box"><div class="drawer-info-label">Full Name</div><div class="drawer-info-value">Leonora Buenaventura</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Contact</div><div class="drawer-info-value">0929 888 5678</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Type</div><div class="drawer-info-value">Non-Professional</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License No.</div><div class="drawer-info-value">D02-21-009876</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Expiry</div><div class="drawer-info-value">Jun 2026</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Experience</div><div class="drawer-info-value">3–5 years</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Preferred Route</div><div class="drawer-info-value">Rio Hondo</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Applied</div><div class="drawer-info-value">Mar 13, 2025</div></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-file-lines"></i> Submitted Documents</div>
+            <div class="doc-row">
+              <div class="doc-box"><i class="fa-solid fa-id-card"></i><span class="doc-label">Driver's License</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-face-smile"></i><span class="doc-label">Selfie w/ ID</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i><span class="doc-label">KYC Status</span><span class="doc-status" style="color:var(--green);">Verified</span></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-clipboard-list"></i> Citizen Report History</div>
+            <table class="mini-table" style="margin-bottom:16px;">
+              <thead><tr><th>ID</th><th>Location</th><th>Type</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>#384</strong></td><td>Pasonanca Rd.</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#379</strong></td><td>Sta. Cruz Wharf</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-comment-dots"></i> Applicant's Notes</div>
+            <div class="notes-box">"I would like to help the barangay with waste collection. I am available on weekdays and Saturday mornings."</div>
+
+            <div class="drawer-actions">
+              <a href="#" class="drawer-close"><i class="fa-solid fa-chevron-up"></i> Close</a>
+              <a href="#" class="btn-do-reject" style="flex:1;justify-content:center;"><i class="fa-solid fa-xmark"></i> Reject</a>
+              <a href="#" class="btn-do-approve" style="flex:2;justify-content:center;"><i class="fa-solid fa-check"></i> Approve Application</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Juan dela Cruz ── -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <div class="app-avatar"><i class="fa-solid fa-circle-user"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="app-name">Juan dela Cruz</div>
+              <div class="app-meta"><i class="fa-solid fa-location-dot"></i> Barangay Rio Hondo &nbsp;·&nbsp; Applied Mar 13, 2025</div>
+            </div>
+            <span class="badge badge-yellow">Pending</span>
+          </div>
+          <div class="app-details-grid">
+            <div><div class="det-label">License Type</div><div class="det-value">Professional</div></div>
+            <div><div class="det-label">Experience</div><div class="det-value">1–3 years</div></div>
+            <div><div class="det-label">Preferred Route</div><div class="det-value">Rio Hondo</div></div>
+            <div><div class="det-label">License No.</div><div class="det-value">N04-24-003311</div></div>
+          </div>
+          <div class="app-actions">
+            <a href="#drawer-juan" class="btn-view-app"><i class="fa-solid fa-eye"></i> View Application</a>
+            <a href="#" class="btn-do-approve"><i class="fa-solid fa-check"></i> Approve</a>
+            <a href="#" class="btn-do-reject"><i class="fa-solid fa-xmark"></i> Reject</a>
+          </div>
+        </div>
+
+        <!-- Juan drawer -->
+        <div class="app-drawer" id="drawer-juan">
+          <div class="drawer-inner">
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Applicant Information</div>
+            <div class="drawer-info-grid">
+              <div class="drawer-info-box"><div class="drawer-info-label">Full Name</div><div class="drawer-info-value">Juan dela Cruz</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Contact</div><div class="drawer-info-value">0917 123 4567</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Type</div><div class="drawer-info-value">Professional</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License No.</div><div class="drawer-info-value">N04-24-003311</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Expiry</div><div class="drawer-info-value">Mar 2028</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Experience</div><div class="drawer-info-value">1–3 years</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Preferred Route</div><div class="drawer-info-value">Rio Hondo</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Applied</div><div class="drawer-info-value">Mar 13, 2025</div></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-file-lines"></i> Submitted Documents</div>
+            <div class="doc-row">
+              <div class="doc-box"><i class="fa-solid fa-id-card"></i><span class="doc-label">Driver's License</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-face-smile"></i><span class="doc-label">Selfie w/ ID</span><span class="doc-status">Submitted</span></div>
+              <div class="doc-box"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i><span class="doc-label">KYC Status</span><span class="doc-status" style="color:var(--green);">Verified</span></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-clipboard-list"></i> Citizen Report History</div>
+            <table class="mini-table" style="margin-bottom:16px;">
+              <thead><tr><th>ID</th><th>Location</th><th>Type</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>#384</strong></td><td>Pasonanca Rd.</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#382</strong></td><td>Canelar Market</td><td>Commercial</td><td><span class="urg-medium">Medium</span></td><td><span class="badge badge-blue">Approved</span></td></tr>
+                <tr><td><strong>#381</strong></td><td>Rio Hondo Bridge</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-yellow">Pending</span></td></tr>
+                <tr><td><strong>#378</strong></td><td>Sta. Cruz Wharf</td><td>Hazardous</td><td><span class="urg-critical">Critical</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#370</strong></td><td>Guiwan Blvd.</td><td>Construction</td><td><span class="urg-medium">Medium</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-comment-dots"></i> Applicant's Notes</div>
+            <div class="notes-box">"I want to actively serve my community beyond just reporting. I am a full-time resident of Rio Hondo and can commit to daily routes."</div>
+
+            <div class="drawer-actions">
+              <a href="#" class="drawer-close"><i class="fa-solid fa-chevron-up"></i> Close</a>
+              <a href="#" class="btn-do-reject" style="flex:1;justify-content:center;"><i class="fa-solid fa-xmark"></i> Reject</a>
+              <a href="#" class="btn-do-approve" style="flex:2;justify-content:center;"><i class="fa-solid fa-check"></i> Approve Application</a>
+            </div>
+          </div>
+        </div>
+      </div><!-- /section-pending -->
+
+
+      <!-- ══════════════════════════════════
+           APPROVED
+      ══════════════════════════════════ -->
+      <div class="app-section section-approved">
+        <div class="section-heading">
+          <i class="fa-solid fa-circle-check" style="color:var(--green);"></i> Approved — Active Drivers
+        </div>
+
+        <div class="app-card card-approved">
+          <div class="app-card-header">
+            <div class="app-avatar active-drv"><i class="fa-solid fa-truck"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="app-name">Rodel Macaraeg</div>
+              <div class="app-meta"><i class="fa-solid fa-location-dot"></i> Rio Hondo &nbsp;·&nbsp; Truck #04 &nbsp;·&nbsp; <span style="color:var(--green);font-weight:600;">On Route</span></div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="app-details-grid">
+            <div><div class="det-label">Assigned Truck</div><div class="det-value">Truck #04</div></div>
+            <div><div class="det-label">Today's Route</div><div class="det-value">Route A — 8/12</div></div>
+            <div><div class="det-label">Status</div><div class="det-value" style="color:var(--green);">On Route</div></div>
+            <div><div class="det-label">Approved</div><div class="det-value">Mar 10, 2025</div></div>
+          </div>
+          <div class="app-actions">
+            <a href="#drawer-rodel" class="btn-view-app"><i class="fa-solid fa-eye"></i> View Profile</a>
+          </div>
+        </div>
+
+        <!-- Rodel drawer -->
+        <div class="app-drawer" id="drawer-rodel">
+          <div class="drawer-inner">
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Driver Information</div>
+            <div class="drawer-info-grid">
+              <div class="drawer-info-box"><div class="drawer-info-label">Full Name</div><div class="drawer-info-value">Rodel Macaraeg</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Contact</div><div class="drawer-info-value">0918 222 3333</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Assigned Truck</div><div class="drawer-info-value">Truck #04</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Today's Route</div><div class="drawer-info-value">Route A — 8/12 stops</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Type</div><div class="drawer-info-value">Professional</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Experience</div><div class="drawer-info-value">5+ years</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Status</div><div class="drawer-info-value" style="color:var(--green);">On Route</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Approved On</div><div class="drawer-info-value">Mar 10, 2025</div></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-clipboard-list"></i> Recent Collections</div>
+            <table class="mini-table" style="margin-bottom:16px;">
+              <thead><tr><th>ID</th><th>Location</th><th>Type</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>#390</strong></td><td>Rio Hondo Blvd.</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#383</strong></td><td>Waterfront Area</td><td>Commercial</td><td><span class="urg-medium">Medium</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+                <tr><td><strong>#375</strong></td><td>Market Gate</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="drawer-actions">
+              <a href="#" class="drawer-close"><i class="fa-solid fa-chevron-up"></i> Close</a>
+              <div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);padding:0 10px;">
+                <i class="fa-solid fa-circle-check"></i> Active driver — no action needed
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /section-approved -->
+
+
+      <!-- ══════════════════════════════════
+           REJECTED
+      ══════════════════════════════════ -->
+      <div class="app-section section-rejected">
+        <div class="section-heading">
+          <i class="fa-solid fa-circle-xmark" style="color:var(--red);"></i> Rejected Applications
+        </div>
+
+        <div class="app-card card-rejected">
+          <div class="app-card-header">
+            <div class="app-avatar rejected-drv"><i class="fa-solid fa-circle-user"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="app-name">Armando Reyes</div>
+              <div class="app-meta"><i class="fa-solid fa-location-dot"></i> Barangay Rio Hondo &nbsp;·&nbsp; Applied Mar 10, 2025 &nbsp;·&nbsp; <span style="color:var(--red);font-weight:600;">Rejected — Expired license</span></div>
+            </div>
+            <span class="badge badge-red">Rejected</span>
+          </div>
+          <div class="app-details-grid">
+            <div><div class="det-label">Reason</div><div class="det-value" style="color:var(--red);">Expired license</div></div>
+            <div><div class="det-label">License Expiry</div><div class="det-value">Jan 2023</div></div>
+            <div><div class="det-label">Reviewed</div><div class="det-value">Mar 11, 2025</div></div>
+            <div><div class="det-label">Experience</div><div class="det-value">1–3 years</div></div>
+          </div>
+          <div class="app-actions">
+            <a href="#drawer-armando" class="btn-view-app"><i class="fa-solid fa-eye"></i> View Details</a>
+          </div>
+        </div>
+
+        <!-- Armando drawer -->
+        <div class="app-drawer" id="drawer-armando">
+          <div class="drawer-inner">
+            <div class="drawer-section-title"><i class="fa-solid fa-user"></i> Applicant Information</div>
+            <div class="drawer-info-grid">
+              <div class="drawer-info-box"><div class="drawer-info-label">Full Name</div><div class="drawer-info-value">Armando Reyes</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Contact</div><div class="drawer-info-value">0916 777 8888</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Type</div><div class="drawer-info-value">Non-Professional</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License No.</div><div class="drawer-info-value">C03-18-007654</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">License Expiry</div><div class="drawer-info-value" style="color:var(--red);">Jan 2023 — Expired</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Rejection Reason</div><div class="drawer-info-value" style="color:var(--red);">Expired license</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Applied</div><div class="drawer-info-value">Mar 10, 2025</div></div>
+              <div class="drawer-info-box"><div class="drawer-info-label">Reviewed On</div><div class="drawer-info-value">Mar 11, 2025</div></div>
+            </div>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-clipboard-list"></i> Citizen Report History</div>
+            <table class="mini-table" style="margin-bottom:16px;">
+              <thead><tr><th>ID</th><th>Location</th><th>Type</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>#365</strong></td><td>Canelar St.</td><td>Household</td><td><span class="urg-low">Low</span></td><td><span class="badge badge-green">Collected</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="drawer-section-title"><i class="fa-solid fa-comment-dots"></i> Applicant's Notes</div>
+            <div class="notes-box">"I want to help my community. I plan to renew my license soon."</div>
+
+            <div style="background:#fff0f0;border:1.5px solid #fca5a5;border-radius:9px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Application rejected: driver's license expired Jan 2023. Applicant may reapply with a valid license.
+            </div>
+
+            <div class="drawer-actions">
+              <a href="#" class="drawer-close"><i class="fa-solid fa-chevron-up"></i> Close</a>
+            </div>
+          </div>
+        </div>
+      </div><!-- /section-rejected -->
+
+    </div><!-- /page-wrap -->
+  </main>
+</div><!-- /app-shell -->
+
+</body>
+</html>
