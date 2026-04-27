@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZamboCollect — Sign In</title>
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v5M14 11v5"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <span class="logo-text">ZamboCollect</span>
+    </div>
+
+    <div class="left-body">
+      <h1 class="headline">Welcome back<br/>to a cleaner<br/>Zamboanga City.</h1>
+      <p class="subtext">Select your role to access your portal and stay connected with your barangay's cleanup effort.</p>
+    </div>
+
+    <div class="stats">
+      <div>
+        <div class="stat-value">98</div>
+        <div class="stat-label">Barangays</div>
+      </div>
+      <div>
+        <div class="stat-value">2.4k</div>
+        <div class="stat-label">Reports Today</div>
+      </div>
+      <div>
+        <div class="stat-value">91%</div>
+        <div class="stat-label">Collection Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="form-title">Sign in</div>
+    <div class="form-subtitle">Enter your email to continue</div>
+
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="emailInput">Email Address</label>
+        <input type="email" id="emailInput" placeholder="Enter your email (e.g. citizen@gmail.com)" required />
+        <div id="errorMsg" style="display:none;color:#dc2626;font-size:13px;margin-top:6px;font-weight:500;">
+          <i class="fa-solid fa-circle-exclamation"></i> Email not recognized. Please try again or register.
+        </div>
+      </div>
+      <button type="submit" class="btn-login">Sign In →</button>
+    </form>
+
+    <div class="quick-access">
+      <div class="quick-title">Quick Access (Demo)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--muted);">
+        <div><strong>Citizen:</strong> citizen@gmail.com</div>
+        <div><strong>Officer:</strong> officer@gmail.com</div>
+        <div><strong>Driver:</strong> driver@gmail.com</div>
+        <div><strong>Admin:</strong> admin@gmail.com</div>
+      </div>
+    </div>
+
+    <div class="register-row">Don't have an account? <a href="Register.html">Create one</a></div>
+  </div>
+
+</div>
+
+<!-- External JavaScript files -->
+<script src="js/global.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
