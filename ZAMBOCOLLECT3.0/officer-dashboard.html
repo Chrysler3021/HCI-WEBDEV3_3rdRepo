@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Officer Portal</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ============================
+     CSS-ONLY HAMBURGER TOGGLE
+     ============================ -->
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<!-- ============================
+     APP SHELL
+     ============================ -->
+<div class="app-shell">
+
+  <!-- ========================
+       SIDEBAR
+       ======================== -->
+  <aside class="sidebar" role="navigation" aria-label="Officer navigation">
+
+    <!-- Sidebar overlay (closes nav on mobile tap outside) -->
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+
+    <!-- Logo -->
+    <a class="sidebar-logo" href="index.html" aria-label="ZamboCollect home">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <!-- Role indicator -->
+    <div class="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal — Rio Hondo</div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+
+        <a href="officer-dashboard.html" class="nav-item active" aria-current="page">
+          <span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard
+        </a>
+        <a href="officer-kyc-review.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review
+          <span class="nav-badge badge-yellow">5</span>
+        </a>
+        <a href="officer-pending-reports.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports
+          <span class="nav-badge">8</span>
+        </a>
+        <a href="officer-density-map.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map
+        </a>
+        
+        <a href="officer-manage-drivers.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-truck"></i></span> Driver Applications
+        </a>
+        <a href="officer-analytics.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div>
+          <div class="user-name">Maria Santos</div>
+          <div class="user-role">Officer · Rio Hondo</div>
+        </div>
+      </a>
+      <a class="logout-btn" href="index.html">
+        <span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ========================
+       MAIN CONTENT
+       ======================== -->
+  <main class="main-content" id="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar" role="banner">
+      <div class="topbar-left">
+        <!-- Hamburger label (CSS-only toggle) -->
+        <label class="hamburger" for="nav-toggle" aria-label="Toggle navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </label>
+        <span class="topbar-title">Barangay Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+        <a href="#" class="topbar-btn primary">+ Add Checkpoint</a>
+      </div>
+    </div>
+
+    <!-- ========================
+         PAGE: DASHBOARD
+         ======================== -->
+    <div class="page active" id="page-dashboard" role="main">
+      <div class="page-header">
+        <h1>Barangay Dashboard</h1>
+        <p>Rio Hondo, Zamboanga City — Officer Portal</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-id-card"></i></div>
+          <div class="stat-num" style="color:var(--yellow);">5</div>
+          <div class="stat-label">KYC Pending</div>
+        </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+          <div class="stat-num" style="color:var(--yellow);">12</div>
+          <div class="stat-label">Pending Reports</div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fa-solid fa-truck"></i></div>
+          <div class="stat-num" style="color:var(--blue);">3</div>
+          <div class="stat-label">Active Drivers</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="stat-num" style="color:var(--green);">89%</div>
+          <div class="stat-label">Collection Rate</div>
+        </div>
+      </div>
+
+      <!-- KYC Queue + Recent Reports -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            KYC Queue
+            <a href="officer-kyc-review.html" class="topbar-btn btn-sm">Review All</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);">
+              <div class="kyc-avatar" style="width:36px;height:36px;font-size:14px;"><i class="fa-solid fa-circle-user"></i></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Maria Corazon Santos</div>
+                <div style="font-size:11px;color:var(--muted);">PhilSys · Mar 13</div>
+              </div>
+              <span class="badge badge-yellow">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);">
+              <div class="kyc-avatar" style="width:36px;height:36px;font-size:14px;"><i class="fa-solid fa-circle-user"></i></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Roberto Dela Cruz</div>
+                <div style="font-size:11px;color:var(--muted);">Driver's License · Mar 13</div>
+              </div>
+              <span class="badge badge-yellow">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);">
+              <div class="kyc-avatar" style="width:36px;height:36px;font-size:14px;"><i class="fa-solid fa-circle-user"></i></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ana Luisa Ramos</div>
+                <div style="font-size:11px;color:var(--muted);">Voter's ID · Mar 13</div>
+              </div>
+              <span class="badge badge-yellow">Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recent Reports</div>
+          <div class="table-wrap" style="border:none;box-shadow:none;">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Location</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#390</td>
+                  <td>Rio Hondo Blvd.</td>
+                  <td><span class="badge badge-yellow">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>#388</td>
+                  <td>Waterfront Area</td>
+                  <td><span class="badge badge-blue">Approved</span></td>
+                </tr>
+                <tr>
+                  <td>#385</td>
+                  <td>Market Street</td>
+                  <td><span class="badge badge-green">Collected</span></td>
+                </tr>
+                <tr>
+                  <td>#381</td>
+                  <td>Pasonanca Road</td>
+                  <td><span class="badge badge-green">Collected</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="card mt-24">
+        <div class="card-title">Weekly Collection Activity</div>
+        <div class="bar-chart">
+          <div class="bar-col"><div class="bar-fill" style="height:80%;background:var(--green);opacity:0.7;"></div><div class="bar-label">Mon</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:60%;background:var(--yellow);opacity:0.7;"></div><div class="bar-label">Tue</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:90%;background:var(--red);opacity:0.7;"></div><div class="bar-label">Wed</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:50%;background:var(--green);opacity:0.6;"></div><div class="bar-label">Thu</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:70%;background:var(--green);opacity:0.7;"></div><div class="bar-label">Fri</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:40%;background:var(--yellow);opacity:0.6;"></div><div class="bar-label">Sat</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:30%;background:var(--green);opacity:0.5;"></div><div class="bar-label">Sun</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- /page-dashboard -->
+
+  </main>
+</div><!-- /app-shell -->
+
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/profile-modal.js"></script>
+</body>
+</html>

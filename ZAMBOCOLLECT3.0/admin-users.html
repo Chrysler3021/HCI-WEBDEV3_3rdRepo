@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users &amp; Accounts — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+  /* ── Modal overlay ─────────────────────────────────────── */
+  .um-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.52);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10001; padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .um-overlay.um-open { opacity: 1; pointer-events: all; }
+
+  .um-modal {
+    background: #fff; border-radius: 16px; width: 100%; max-width: 480px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    opacity: 0; transform: translateY(14px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    max-height: 90vh; display: flex; flex-direction: column;
+  }
+  .um-overlay.um-open .um-modal { opacity: 1; transform: translateY(0) scale(1); }
+  .um-hidden { display: none !important; }
+
+  /* ── Modal header ──────────────────────────────────────── */
+  .um-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px 16px;
+    border-bottom: 1.5px solid #f1f5f9; flex-shrink: 0;
+  }
+  .um-header-warn { background: #fffbeb; border-color: #fef3c7; }
+
+  .um-avatar {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; color: #fff;
+    background: linear-gradient(135deg,#64748b,#94a3b8);
+  }
+  .um-avatar.role-officer { background: linear-gradient(135deg,#2563eb,#60a5fa); }
+  .um-avatar.role-driver  { background: linear-gradient(135deg,#588157,#A3B18A); }
+  .um-warn-icon {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; color: #fff;
+    background: linear-gradient(135deg,#f59e0b,#fcd34d);
+  }
+
+  .um-header-info { flex: 1; min-width: 0; }
+  .um-modal-name { font-size: 16px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .um-modal-role-wrap { margin-top: 4px; }
+  .um-suspend-title { font-size: 15px; font-weight: 700; color: #92400e; }
+  .um-suspend-sub   { font-size: 12px; color: #b45309; margin-top: 2px; }
+
+  .um-x {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    border: 1.5px solid #e2e8f0; background: #f8fafc; color: #64748b;
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .um-x:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+
+  /* ── Modal body ────────────────────────────────────────── */
+  .um-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+
+  .um-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #94a3b8; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .um-section-title:first-child { margin-top: 0; }
+
+  .um-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .um-info-box {
+    background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .um-info-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 3px;
+  }
+  .um-info-label i { margin-right: 3px; }
+  .um-info-value { font-size: 13px; font-weight: 600; color: #1e293b; }
+
+  .um-activity-row {
+    display: flex; gap: 8px; margin-top: 2px;
+  }
+  .um-activity-box {
+    flex: 1; background: #f0fdf4; border: 1.5px solid #bbf7d0;
+    border-radius: 10px; padding: 10px 12px; text-align: center;
+  }
+  .um-activity-num { font-size: 20px; font-weight: 800; color: #16a34a; }
+  .um-activity-lbl { font-size: 10px; font-weight: 600; color: #15803d; margin-top: 1px; }
+
+  .um-suspend-banner {
+    background: #fff1f2; border: 1.5px solid #fecdd3;
+    border-radius: 10px; padding: 10px 13px;
+    display: flex; align-items: flex-start; gap: 10px; margin-top: 2px;
+  }
+  .um-suspend-banner i { color: #e11d48; margin-top: 1px; flex-shrink: 0; }
+  .um-suspend-banner-text { font-size: 12px; color: #9f1239; line-height: 1.5; }
+  .um-suspend-banner-label { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* ── Reason select ─────────────────────────────────────── */
+  .um-reason-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+  .um-reason-select {
+    width: 100%; padding: 10px 36px 10px 13px;
+    border-radius: 9px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; font-weight: 500;
+    color: #334155; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    transition: border-color 0.15s;
+  }
+  .um-reason-select:focus { outline: none; border-color: #588157; box-shadow: 0 0 0 3px rgba(88,129,87,0.15); }
+  .um-reason-select.um-select-error { border-color: #dc2626; background-color: #fff5f5; }
+  .um-reason-error {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 7px; font-size: 12px; font-weight: 600; color: #dc2626;
+  }
+  .um-reason-notes {
+    width: 100%; margin-top: 10px; padding: 9px 12px;
+    border-radius: 9px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; font-family: inherit;
+    color: #334155; resize: vertical; min-height: 72px;
+    transition: border-color 0.15s;
+  }
+  .um-reason-notes:focus { outline: none; border-color: #588157; box-shadow: 0 0 0 3px rgba(88,129,87,0.15); }
+
+  @keyframes um-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-7px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .um-shake { animation: um-shake 0.35s ease; }
+
+  /* ── Modal footer ──────────────────────────────────────── */
+  .um-footer {
+    display: flex; gap: 8px; padding: 13px 20px;
+    border-top: 1.5px solid #f1f5f9; background: #fafafa; flex-shrink: 0;
+  }
+  .um-btn-ghost {
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid #e2e8f0; background: #fff;
+    color: #64748b; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .um-btn-ghost:hover { background: #f1f5f9; color: #334155; }
+  .um-btn-danger {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #dc2626; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-danger:hover { opacity: 0.88; }
+  .um-btn-unsuspend {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #16a34a; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-unsuspend:hover { opacity: 0.88; }
+
+  /* ── Sort headers ──────────────────────────────────────── */
+  th[data-sort] { cursor: pointer; user-select: none; white-space: nowrap; }
+  th[data-sort]:hover { color: var(--primary); }
+  th[data-sort].sort-active { color: var(--primary); }
+  .sort-icon { font-size: 10px; color: var(--muted2); margin-left: 3px; }
+  th[data-sort].sort-active .sort-icon { color: var(--primary); }
+
+  /* ── Toast ─────────────────────────────────────────────── */
+  .adm-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1e293b; color: #fff; border-radius: 10px;
+    padding: 11px 20px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 9px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 20000; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0;
+    white-space: nowrap;
+  }
+  .adm-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .adm-toast.toast-green i { color: #4ade80; }
+  .adm-toast.toast-yellow i { color: #fbbf24; }
+
+  @media (max-width: 500px) { .um-info-grid { grid-template-columns: 1fr; } }
+
+  /* ── Pagination ─────────────────────────────────────────── */
+  .page-btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  /* ── Create Officer form ─────────────────────────────────── */
+  .co-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .co-form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .co-label { font-size: 13px; font-weight: 600; color: #475569; }
+  .co-input {
+    padding: 9px 12px; border-radius: 9px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; font-family: inherit; color: #334155;
+    transition: border-color 0.15s;
+  }
+  .co-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+  @media (max-width: 500px) { .co-form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-drivers.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Performance</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar"><i class="fa-solid fa-gear"></i></div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-drivers.html"><i class="fa-solid fa-truck"></i> Driver Performance</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Users &amp; Accounts</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="#" class="topbar-btn primary" onclick="openCreateOfficerModal();return false;">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <h1>Users &amp; Accounts</h1>
+          <p>Manage all system accounts across Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn primary" onclick="openCreateOfficerModal();return false;">+ Create Officer Account</a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-blue"><span class="stat-icon"><i class="fa-solid fa-users"></i></span><div class="stat-num blue" id="stat-total">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon"><i class="fa-solid fa-landmark"></i></span><div class="stat-num yellow" id="stat-officers">—</div><div class="stat-label">Officers</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-truck"></i></span><div class="stat-num green" id="stat-drivers">—</div><div class="stat-label">Drivers</div></div>
+        <div class="stat-card stat-sage"><span class="stat-icon"><i class="fa-solid fa-user"></i></span><div class="stat-num sage" id="stat-citizens">—</div><div class="stat-label">Citizens</div></div>
+      </div>
+
+      <div class="notice red">
+        <span class="notice-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span><strong style="color:var(--red);">Admin access:</strong> You can only create Officer accounts. Driver accounts are created by the assigned Officer per barangay. Citizens self-register.</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row" id="filter-chips">
+          <a href="#" class="filter-chip active" data-filter="all">All</a>
+          <a href="#" class="filter-chip" data-filter="officer"><i class="fa-solid fa-landmark"></i> Officers</a>
+          <a href="#" class="filter-chip" data-filter="driver"><i class="fa-solid fa-truck"></i> Drivers</a>
+          <a href="#" class="filter-chip" data-filter="citizen"><i class="fa-solid fa-user"></i> Citizens</a>
+          <a href="#" class="filter-chip" data-filter="kyc-pending"><i class="fa-solid fa-hourglass-half"></i> KYC Pending</a>
+          <a href="#" class="filter-chip" data-filter="suspended"><i class="fa-solid fa-ban"></i> Suspended</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="user-search" placeholder="Search name, email, barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="name">Name <span class="sort-icon">↕</span></th>
+              <th data-sort="role">Role <span class="sort-icon">↕</span></th>
+              <th data-sort="barangay">Barangay <span class="sort-icon">↕</span></th>
+              <th>Created By</th>
+              <th data-sort="kyc">KYC <span class="sort-icon">↕</span></th>
+              <th data-sort="status">Status <span class="sort-icon">↕</span></th>
+              <th data-sort="joinedTs">Joined <span class="sort-icon">↓</span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info" id="page-info">Showing — users</div>
+          <div id="pagination-wrap" class="page-btns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Officer modal ────────────────────────────────── -->
+<div id="co-overlay" class="um-overlay" role="dialog" aria-modal="true">
+  <div class="um-modal">
+    <div class="um-header">
+      <div class="um-avatar role-officer"><i class="fa-solid fa-landmark"></i></div>
+      <div class="um-header-info">
+        <div class="um-modal-name">Create Officer Account</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">Fill in the new officer's details below.</div>
+      </div>
+      <button class="um-x" id="co-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="um-body">
+      <form id="co-form" onsubmit="return false;">
+        <div class="co-form-row">
+          <div class="co-form-group">
+            <label class="co-label">First Name <span style="color:#dc2626;">*</span></label>
+            <input type="text" id="co-firstname" class="co-input" placeholder="First name" />
+          </div>
+          <div class="co-form-group">
+            <label class="co-label">Last Name <span style="color:#dc2626;">*</span></label>
+            <input type="text" id="co-lastname" class="co-input" placeholder="Last name" />
+          </div>
+        </div>
+        <div class="co-form-group">
+          <label class="co-label">Email <span style="color:#dc2626;">*</span></label>
+          <input type="email" id="co-email" class="co-input" placeholder="officer@example.com" />
+        </div>
+        <div class="co-form-group">
+          <label class="co-label">Phone <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="co-phone" class="co-input" placeholder="09XX XXX XXXX" />
+        </div>
+        <div class="co-form-group">
+          <label class="co-label">Barangay <span style="color:#dc2626;">*</span></label>
+          <select id="co-barangay" class="um-reason-select">
+            <option value="">— Select Barangay —</option>
+            <option>Rio Hondo</option><option>Canelar</option><option>Guiwan</option>
+            <option>Tetuan</option><option>Talon-Talon</option><option>Putik</option>
+            <option>Baliwasan</option><option>Calarian</option><option>Camino Nuevo</option>
+            <option>San Roque</option><option>Sta. Barbara</option><option>Sta. Catalina</option>
+          </select>
+        </div>
+        <div class="co-form-row">
+          <div class="co-form-group">
+            <label class="co-label">Password <span style="color:#dc2626;">*</span></label>
+            <input type="password" id="co-password" class="co-input" placeholder="Min 6 characters" />
+          </div>
+          <div class="co-form-group">
+            <label class="co-label">Confirm Password <span style="color:#dc2626;">*</span></label>
+            <input type="password" id="co-confirm" class="co-input" placeholder="Re-enter password" />
+          </div>
+        </div>
+        <div id="co-error" style="display:none;align-items:center;gap:7px;margin-top:4px;padding:9px 13px;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:9px;font-size:12px;font-weight:600;color:#dc2626;">
+          <i class="fa-solid fa-circle-exclamation"></i><span></span>
+        </div>
+      </form>
+    </div>
+    <div class="um-footer">
+      <button class="um-btn-ghost" id="co-cancel">Cancel</button>
+      <button class="um-btn-unsuspend" id="co-create-btn" style="background:linear-gradient(135deg,#2563eb,#60a5fa);">
+        <i class="fa-solid fa-plus"></i> Create Officer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────── -->
+<div id="adm-toast" class="adm-toast toast-green">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="adm-toast-msg">Done.</span>
+</div>
+
+<!-- ── Profile modal ──────────────────────────────────────── -->
+<div id="um-overlay" class="um-overlay" role="dialog" aria-modal="true">
+  <div class="um-modal">
+
+    <!-- PROFILE VIEW -->
+    <div id="um-profile-view">
+      <div class="um-header">
+        <div class="um-avatar" id="um-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="um-header-info">
+          <div class="um-modal-name" id="um-modal-name">—</div>
+          <div class="um-modal-role-wrap" id="um-modal-role"></div>
+        </div>
+        <button class="um-x" id="um-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="um-body">
+        <!-- Contact -->
+        <div class="um-section-title"><i class="fa-solid fa-address-card"></i> Contact</div>
+        <div class="um-info-grid">
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-envelope"></i> Email</div>
+            <div class="um-info-value" id="um-email" style="font-size:12px;">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-phone"></i> Phone</div>
+            <div class="um-info-value" id="um-phone">—</div>
+          </div>
+        </div>
+
+        <!-- Account details -->
+        <div class="um-section-title"><i class="fa-solid fa-circle-info"></i> Account Details</div>
+        <div class="um-info-grid">
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-location-dot"></i> Barangay</div>
+            <div class="um-info-value" id="um-barangay">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-user-plus"></i> Created By</div>
+            <div class="um-info-value" id="um-created-by">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-id-card"></i> KYC Status</div>
+            <div class="um-info-value" id="um-kyc">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-circle-dot"></i> Account Status</div>
+            <div class="um-info-value" id="um-acc-status">—</div>
+          </div>
+          <div class="um-info-box" style="grid-column:1/-1;">
+            <div class="um-info-label"><i class="fa-solid fa-calendar-days"></i> Joined</div>
+            <div class="um-info-value" id="um-joined">—</div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="um-section-title"><i class="fa-solid fa-chart-simple"></i> Activity</div>
+        <div class="um-activity-row" id="um-activity-row"></div>
+
+        <!-- Suspension banner (shown only if suspended) -->
+        <div id="um-suspend-banner" class="um-suspend-banner um-hidden" style="margin-top:14px;">
+          <i class="fa-solid fa-ban"></i>
+          <div class="um-suspend-banner-text">
+            <div class="um-suspend-banner-label">Account Suspended</div>
+            <div id="um-suspend-reason-text">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-close-btn">Close</button>
+        <button class="um-btn-unsuspend um-hidden" id="um-unsuspend-btn">
+          <i class="fa-solid fa-circle-check"></i> Unsuspend
+        </button>
+        <button class="um-btn-danger" id="um-to-suspend-btn">
+          <i class="fa-solid fa-ban"></i> Suspend Account
+        </button>
+      </div>
+    </div>
+
+    <!-- SUSPEND VIEW -->
+    <div id="um-suspend-view" class="um-hidden">
+      <div class="um-header um-header-warn">
+        <div class="um-warn-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="um-header-info">
+          <div class="um-suspend-title">Suspend Account</div>
+          <div class="um-suspend-sub">Suspending: <strong id="um-suspend-name">—</strong></div>
+        </div>
+        <button class="um-x" id="um-suspend-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="um-body">
+        <label class="um-reason-label" for="um-reason-select">Reason for suspension <span style="color:#dc2626;">*</span></label>
+        <select id="um-reason-select" class="um-reason-select">
+          <option value="">— Choose a reason —</option>
+          <option>Submitting Fake Reports</option>
+          <option>Inappropriate Behavior</option>
+          <option>Multiple Policy Violations</option>
+          <option>Spam or Abuse</option>
+          <option>Identity Fraud</option>
+          <option>Unauthorized Access Attempt</option>
+          <option>Other</option>
+        </select>
+        <div id="um-reason-error" class="um-reason-error um-hidden">
+          <i class="fa-solid fa-circle-exclamation"></i> Please select a reason before continuing.
+        </div>
+        <textarea id="um-reason-notes" class="um-reason-notes" placeholder="Additional notes for this suspension (optional)…"></textarea>
+      </div>
+
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="um-btn-danger" id="um-confirm-btn">
+          <i class="fa-solid fa-ban"></i> Confirm Suspension
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── localStorage helpers ───────────────────────────────────
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('zc_users')) || []; }
+  catch(e) { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem('zc_users', JSON.stringify(users));
+}
+function getUserById(id) {
+  var users = getUsers();
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === id) return users[i];
+  }
+  return null;
+}
+
+// ── Map a localStorage user to a display row ───────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtTs(iso) {
+  if (!iso) return 0;
+  var d = new Date(iso);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
+function userToRow(u) {
+  var status;
+  if (u.suspended) {
+    status = 'suspended';
+  } else if (u.role === 'citizen' && u.kycStatus === 'pending') {
+    status = 'kyc-pending';
+  } else {
+    status = 'active';
+  }
+  var createdBy = u.role === 'officer' ? 'Admin'
+                : u.role === 'driver'  ? 'Officer'
+                : 'Self-registered';
+  var actLabel  = u.role === 'officer' ? 'Reports Reviewed'
+                : u.role === 'driver'  ? 'Routes Completed'
+                : 'Reports Submitted';
+  var kyc = (u.role === 'officer' || u.role === 'driver') ? '—' : (u.kycStatus || '—');
+  return {
+    id:            u.id,
+    name:          (u.firstName || '') + ' ' + (u.lastName || ''),
+    email:         u.email || '—',
+    phone:         u.phone || '—',
+    role:          u.role,
+    barangay:      u.barangay || '—',
+    createdBy:     createdBy,
+    kyc:           kyc,
+    status:        status,
+    joined:        fmtDate(u.createdAt),
+    joinedTs:      fmtTs(u.createdAt),
+    activityNum:   0,
+    activityLabel: actLabel,
+    suspendReason: u.suspendReason || null,
+    suspendNote:   u.suspendNote   || null
+  };
+}
+
+// ── Load non-admin users from localStorage ─────────────────
+function loadUsers() {
+  var raw = getUsers();
+  var rows = [];
+  for (var i = 0; i < raw.length; i++) {
+    var r = raw[i];
+    if (r.role === 'admin' || r.role === 'superadmin') continue;
+    rows.push(userToRow(r));
+  }
+  return rows;
+}
+
+// ── Update stat cards ──────────────────────────────────────
+function updateStats() {
+  var rows = loadUsers();
+  var officers = 0, drivers = 0, citizens = 0;
+  for (var i = 0; i < rows.length; i++) {
+    if      (rows[i].role === 'officer') officers++;
+    else if (rows[i].role === 'driver')  drivers++;
+    else if (rows[i].role === 'citizen') citizens++;
+  }
+  document.getElementById('stat-total').textContent    = rows.length;
+  document.getElementById('stat-officers').textContent = officers;
+  document.getElementById('stat-drivers').textContent  = drivers;
+  document.getElementById('stat-citizens').textContent = citizens;
+}
+
+// ── State ──────────────────────────────────────────────────
+var sortCol       = 'joinedTs';
+var sortDir       = 'desc';
+var filterRole    = 'all';
+var searchQ       = '';
+var currentUserId = null;
+var currentPage   = 1;
+var PAGE_SIZE     = 10;
+
+// ── Helpers ────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function roleBadge(role) {
+  if (role === 'officer') return '<span class="badge badge-officer"><i class="fa-solid fa-landmark"></i> Officer</span>';
+  if (role === 'driver')  return '<span class="badge badge-driver"><i class="fa-solid fa-truck"></i> Driver</span>';
+  return '<span class="badge badge-citizen"><i class="fa-solid fa-user"></i> Citizen</span>';
+}
+function kycBadge(kyc) {
+  if (kyc === 'verified') return '<span class="badge badge-green">Verified</span>';
+  if (kyc === 'pending')  return '<span class="badge badge-yellow">Pending</span>';
+  return '—';
+}
+function statusBadge(status) {
+  if (status === 'active')      return '<span class="badge badge-green">Active</span>';
+  if (status === 'kyc-pending') return '<span class="badge badge-yellow">KYC Pending</span>';
+  if (status === 'suspended')   return '<span class="badge badge-red">Suspended</span>';
+  return '<span class="badge">' + esc(status) + '</span>';
+}
+
+// ── Filtered data ──────────────────────────────────────────
+function getFiltered() {
+  return loadUsers().filter(function(u) {
+    if (filterRole === 'officer'     && u.role   !== 'officer')    return false;
+    if (filterRole === 'driver'      && u.role   !== 'driver')     return false;
+    if (filterRole === 'citizen'     && u.role   !== 'citizen')    return false;
+    if (filterRole === 'kyc-pending' && u.kyc    !== 'pending')    return false;
+    if (filterRole === 'suspended'   && u.status !== 'suspended')  return false;
+    if (searchQ) {
+      var q = searchQ.toLowerCase();
+      return u.name.toLowerCase().indexOf(q)     !== -1 ||
+             u.email.toLowerCase().indexOf(q)    !== -1 ||
+             u.barangay.toLowerCase().indexOf(q) !== -1;
+    }
+    return true;
+  });
+}
+
+// ── Pagination ─────────────────────────────────────────────
+function renderPagination(total, pages) {
+  var wrap = document.getElementById('pagination-wrap');
+  if (!wrap) return;
+  if (pages <= 1) { wrap.innerHTML = ''; return; }
+
+  var btns = '';
+  var prevDisabled = currentPage === 1;
+  btns += '<div class="page-btn' + (prevDisabled ? ' disabled' : '') + '" id="pg-prev">‹</div>';
+
+  var nums = [];
+  if (pages <= 7) {
+    for (var i = 1; i <= pages; i++) nums.push(i);
+  } else {
+    nums.push(1);
+    if (currentPage > 3) nums.push('…');
+    for (var p = Math.max(2, currentPage - 1); p <= Math.min(pages - 1, currentPage + 1); p++) nums.push(p);
+    if (currentPage < pages - 2) nums.push('…');
+    nums.push(pages);
+  }
+  nums.forEach(function(n) {
+    if (n === '…') {
+      btns += '<div class="page-btn" style="width:auto;padding:0 8px;cursor:default;">…</div>';
+    } else {
+      btns += '<div class="page-btn' + (n === currentPage ? ' active' : '') + '" data-page="' + n + '">' + n + '</div>';
+    }
+  });
+
+  var nextDisabled = currentPage === pages;
+  btns += '<div class="page-btn' + (nextDisabled ? ' disabled' : '') + '" id="pg-next">›</div>';
+  wrap.innerHTML = btns;
+
+  if (!prevDisabled) {
+    document.getElementById('pg-prev').addEventListener('click', function() { currentPage--; renderTable(); });
+  }
+  if (!nextDisabled) {
+    document.getElementById('pg-next').addEventListener('click', function() { currentPage++; renderTable(); });
+  }
+  wrap.querySelectorAll('.page-btn[data-page]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentPage = parseInt(this.getAttribute('data-page'));
+      renderTable();
+    });
+  });
+}
+
+// ── Table render ───────────────────────────────────────────
+function renderTable() {
+  var data = getFiltered();
+
+  data.sort(function(a, b) {
+    var av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    var cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  var total = data.length;
+  var pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > pages) currentPage = pages;
+  var start    = (currentPage - 1) * PAGE_SIZE;
+  var pageData = data.slice(start, start + PAGE_SIZE);
+
+  var tbody = document.getElementById('user-tbody');
+  if (pageData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">No users match your search or filter.</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(function(u) {
+      var canSuspend = (u.role === 'officer' || u.role === 'citizen') && u.status !== 'suspended';
+      var actionBtns = '<a href="#" class="action-btn" data-action="view" data-id="' + esc(u.id) + '">View</a>';
+      if (canSuspend) {
+        actionBtns += '<a href="#" class="action-btn danger" data-action="suspend" data-id="' + esc(u.id) + '">Suspend</a>';
+      }
+      return '<tr>' +
+        '<td class="col-strong">' + esc(u.name) + '</td>' +
+        '<td>' + roleBadge(u.role) + '</td>' +
+        '<td>' + esc(u.barangay) + '</td>' +
+        '<td>' + esc(u.createdBy) + '</td>' +
+        '<td>' + kycBadge(u.kyc) + '</td>' +
+        '<td>' + statusBadge(u.status) + '</td>' +
+        '<td>' + esc(u.joined) + '</td>' +
+        '<td style="display:flex;gap:6px;">' + actionBtns + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  var showing = total === 0 ? '0' : (start + 1) + '–' + Math.min(start + PAGE_SIZE, total);
+  document.getElementById('page-info').textContent = 'Showing ' + showing + ' of ' + total + ' users';
+
+  document.querySelectorAll('th[data-sort]').forEach(function(th) {
+    var col  = th.getAttribute('data-sort');
+    var icon = th.querySelector('.sort-icon');
+    if (!icon) return;
+    if (col === sortCol) {
+      icon.textContent = sortDir === 'asc' ? ' ↑' : ' ↓';
+      th.classList.add('sort-active');
+    } else {
+      icon.textContent = ' ↕';
+      th.classList.remove('sort-active');
+    }
+  });
+
+  renderPagination(total, pages);
+  updateStats();
+}
+
+// ── Sort ───────────────────────────────────────────────────
+document.querySelectorAll('th[data-sort]').forEach(function(th) {
+  th.addEventListener('click', function() {
+    var col = this.getAttribute('data-sort');
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'asc'; }
+    currentPage = 1;
+    renderTable();
+  });
+});
+
+// ── Filter chips ───────────────────────────────────────────
+document.getElementById('filter-chips').addEventListener('click', function(e) {
+  var chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  e.preventDefault();
+  filterRole = chip.getAttribute('data-filter');
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  currentPage = 1;
+  renderTable();
+});
+
+// ── Search ─────────────────────────────────────────────────
+document.getElementById('user-search').addEventListener('input', function() {
+  searchQ = this.value.trim();
+  currentPage = 1;
+  renderTable();
+});
+
+// ── Modal elements ─────────────────────────────────────────
+var overlay       = document.getElementById('um-overlay');
+var profileView   = document.getElementById('um-profile-view');
+var suspendView   = document.getElementById('um-suspend-view');
+var btnToSuspend  = document.getElementById('um-to-suspend-btn');
+var btnUnsuspend  = document.getElementById('um-unsuspend-btn');
+var btnBack       = document.getElementById('um-back-btn');
+var btnConfirm    = document.getElementById('um-confirm-btn');
+var reasonSelect  = document.getElementById('um-reason-select');
+var reasonError   = document.getElementById('um-reason-error');
+var reasonNotes   = document.getElementById('um-reason-notes');
+var suspendBanner = document.getElementById('um-suspend-banner');
+
+function openModal() {
+  overlay.classList.add('um-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  overlay.classList.remove('um-open');
+  document.body.style.overflow = '';
+  reasonSelect.value = '';
+  reasonNotes.value  = '';
+  reasonSelect.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+}
+function showProfileView() {
+  profileView.classList.remove('um-hidden');
+  suspendView.classList.add('um-hidden');
+}
+function showSuspendView() {
+  var raw = getUserById(currentUserId);
+  if (raw) document.getElementById('um-suspend-name').textContent = (raw.firstName || '') + ' ' + (raw.lastName || '');
+  profileView.classList.add('um-hidden');
+  suspendView.classList.remove('um-hidden');
+}
+
+// ── Populate profile modal ─────────────────────────────────
+function openProfile(userId) {
+  var raw = getUserById(userId);
+  if (!raw) return;
+  var u = userToRow(raw);
+  currentUserId = userId;
+
+  var avatarEl = document.getElementById('um-avatar');
+  avatarEl.className = 'um-avatar' + (u.role === 'officer' ? ' role-officer' : u.role === 'driver' ? ' role-driver' : '');
+  avatarEl.innerHTML = '<i class="fa-solid ' + (u.role === 'officer' ? 'fa-landmark' : u.role === 'driver' ? 'fa-truck' : 'fa-user') + '"></i>';
+
+  document.getElementById('um-modal-name').textContent  = u.name;
+  document.getElementById('um-modal-role').innerHTML    = roleBadge(u.role);
+  document.getElementById('um-email').textContent       = u.email;
+  document.getElementById('um-phone').textContent       = u.phone;
+  document.getElementById('um-barangay').textContent    = u.barangay;
+  document.getElementById('um-created-by').textContent  = u.createdBy;
+  document.getElementById('um-kyc').innerHTML           = kycBadge(u.kyc);
+  document.getElementById('um-acc-status').innerHTML    = statusBadge(u.status);
+  document.getElementById('um-joined').textContent      = u.joined;
+
+  document.getElementById('um-activity-row').innerHTML =
+    '<div class="um-activity-box">' +
+      '<div class="um-activity-num">' + u.activityNum + '</div>' +
+      '<div class="um-activity-lbl">' + esc(u.activityLabel) + '</div>' +
+    '</div>';
+
+  if (u.status === 'suspended') {
+    suspendBanner.classList.remove('um-hidden');
+    var reasonText = u.suspendReason || 'No reason recorded';
+    if (u.suspendNote) reasonText += ' — ' + u.suspendNote;
+    document.getElementById('um-suspend-reason-text').textContent = reasonText;
+    btnToSuspend.classList.add('um-hidden');
+    btnUnsuspend.classList.remove('um-hidden');
+  } else {
+    suspendBanner.classList.add('um-hidden');
+    btnUnsuspend.classList.add('um-hidden');
+    btnToSuspend.classList.toggle('um-hidden', !(u.role === 'officer' || u.role === 'citizen'));
+  }
+
+  showProfileView();
+  openModal();
+}
+
+// ── Table click delegation ─────────────────────────────────
+document.getElementById('user-tbody').addEventListener('click', function(e) {
+  var btn = e.target.closest('a.action-btn');
+  if (!btn) return;
+  e.preventDefault();
+  var id     = btn.getAttribute('data-id');
+  var action = btn.getAttribute('data-action');
+  if (action === 'suspend') { openProfile(id); showSuspendView(); }
+  else                      { openProfile(id); }
+});
+
+// ── Confirm suspension ─────────────────────────────────────
+btnConfirm.addEventListener('click', function() {
+  if (!reasonSelect.value) {
+    reasonSelect.classList.add('um-select-error');
+    reasonError.classList.remove('um-hidden');
+    reasonSelect.classList.remove('um-shake');
+    void reasonSelect.offsetWidth;
+    reasonSelect.classList.add('um-shake');
+    reasonSelect.addEventListener('animationend', function(){ reasonSelect.classList.remove('um-shake'); }, { once: true });
+    return;
+  }
+  reasonSelect.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+
+  var users = getUsers();
+  var userName = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].suspended     = true;
+      users[i].suspendReason = reasonSelect.value;
+      users[i].suspendNote   = reasonNotes.value.trim() || null;
+      userName = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      break;
+    }
+  }
+  saveUsers(users);
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-ban"></i>', userName + ' has been suspended.', 'toast-yellow');
+});
+
+// ── Unsuspend ──────────────────────────────────────────────
+btnUnsuspend.addEventListener('click', function() {
+  var users = getUsers();
+  var userName = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].suspended     = false;
+      users[i].suspendReason = null;
+      users[i].suspendNote   = null;
+      userName = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      break;
+    }
+  }
+  saveUsers(users);
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-circle-check"></i>', userName + '\'s account has been restored.', 'toast-green');
+});
+
+// ── Modal controls ─────────────────────────────────────────
+document.getElementById('um-x').addEventListener('click', closeModal);
+document.getElementById('um-suspend-x').addEventListener('click', closeModal);
+document.getElementById('um-close-btn').addEventListener('click', closeModal);
+btnToSuspend.addEventListener('click', showSuspendView);
+btnBack.addEventListener('click', showProfileView);
+overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('um-open')) closeModal(); });
+reasonSelect.addEventListener('change', function(){
+  this.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+});
+
+// ── Toast ──────────────────────────────────────────────────
+function showToast(iconHtml, msg, cls) {
+  var t = document.getElementById('adm-toast');
+  t.className = 'adm-toast ' + (cls || 'toast-green');
+  var icon = t.querySelector('i');
+  if (icon) icon.remove();
+  t.insertAdjacentHTML('afterbegin', iconHtml + ' ');
+  document.getElementById('adm-toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+// ── Create Officer ─────────────────────────────────────────
+function openCreateOfficerModal() {
+  document.getElementById('co-overlay').classList.add('um-open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('co-form').reset();
+  document.getElementById('co-error').style.display = 'none';
+}
+function closeCreateOfficerModal() {
+  document.getElementById('co-overlay').classList.remove('um-open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('co-cancel').addEventListener('click', closeCreateOfficerModal);
+document.getElementById('co-x').addEventListener('click', closeCreateOfficerModal);
+document.getElementById('co-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeCreateOfficerModal();
+});
+
+document.getElementById('co-create-btn').addEventListener('click', function() {
+  var firstName = document.getElementById('co-firstname').value.trim();
+  var lastName  = document.getElementById('co-lastname').value.trim();
+  var email     = document.getElementById('co-email').value.trim();
+  var phone     = document.getElementById('co-phone').value.trim();
+  var barangay  = document.getElementById('co-barangay').value;
+  var password  = document.getElementById('co-password').value;
+  var confirm   = document.getElementById('co-confirm').value;
+  var errorEl   = document.getElementById('co-error');
+  var errorSpan = errorEl.querySelector('span');
+
+  function showErr(msg) {
+    errorSpan.textContent = msg;
+    errorEl.style.display = 'flex';
+  }
+
+  if (!firstName || !lastName || !email || !phone || !barangay || !password) {
+    return showErr('Please fill in all required fields.');
+  }
+  if (password.length < 6) {
+    return showErr('Password must be at least 6 characters.');
+  }
+  if (password !== confirm) {
+    return showErr('Passwords do not match.');
+  }
+
+  var users = getUsers();
+  var emailLower = email.toLowerCase();
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].email.toLowerCase() === emailLower) {
+      return showErr('An account with that email already exists.');
+    }
+  }
+
+  users.push({
+    id:          'OFR-' + Date.now(),
+    firstName:   firstName,
+    lastName:    lastName,
+    email:       emailLower,
+    phone:       phone,
+    barangay:    barangay,
+    address:     '',
+    fullAddress: barangay + ', Zamboanga City',
+    password:    password,
+    role:        'officer',
+    kycStatus:   'verified',
+    suspended:   false,
+    createdAt:   new Date().toISOString()
+  });
+  saveUsers(users);
+
+  closeCreateOfficerModal();
+  currentPage = 1;
+  renderTable();
+  showToast('<i class="fa-solid fa-circle-check"></i>', firstName + ' ' + lastName + ' added as Officer.', 'toast-green');
+});
+
+// ── Init ───────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>
