@@ -377,6 +377,20 @@
   var STATUS_COLORS = { critical:'#c0392b', urgent:'#c08a10', normal:'#2563eb', ok:'#588157' };
 
   function initCitywideMap() {
+    // Fallback: Show a message if Google Maps fails to load
+    setTimeout(function() {
+      if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        document.getElementById('citywide-map').innerHTML =
+          '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:14px;">' +
+          '<i class="fa-solid fa-map" style="font-size:3rem;margin-bottom:10px;"></i>' +
+          '<div style="text-align:center;">' +
+          '<strong>Map Unavailable</strong><br>' +
+          'Google Maps API key may be invalid or quota exceeded.<br>' +
+          'Please check your API configuration.' +
+          '</div></div>';
+      }
+    }, 5000);
+
     cityMap = new google.maps.Map(document.getElementById('citywide-map'), {
       center: { lat: 6.9214, lng: 122.0790 },
       zoom: 13,
@@ -477,6 +491,6 @@
     });
   }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=visualization&callback=initCitywideMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU&libraries=visualization&callback=initCitywideMap" async defer></script>
 </body>
 </html>

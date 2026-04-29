@@ -160,6 +160,20 @@
   var STATUS_OVERRIDE = { collected:'#588157', approved:'#2563eb' };
 
   function initDensityMap() {
+    // Fallback: Show a message if Google Maps fails to load
+    setTimeout(function() {
+      if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        document.getElementById('density-map').innerHTML =
+          '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:14px;">' +
+          '<i class="fa-solid fa-map" style="font-size:3rem;margin-bottom:10px;"></i>' +
+          '<div style="text-align:center;">' +
+          '<strong>Map Unavailable</strong><br>' +
+          'Google Maps API key may be invalid or quota exceeded.<br>' +
+          'Please check your API configuration.' +
+          '</div></div>';
+      }
+    }, 5000);
+
     var rioHondo = { lat: 6.9162, lng: 122.0838 };
     dMap = new google.maps.Map(document.getElementById('density-map'), {
       center: rioHondo, zoom: 15,
@@ -211,6 +225,6 @@
     document.getElementById('zoom-out-btn').addEventListener('click', function() { dMap.setZoom(Math.max(dMap.getZoom()-1, 3));  });
   }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=visualization&callback=initDensityMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU&libraries=visualization&callback=initDensityMap" async defer></script>
 </body>
 </html>

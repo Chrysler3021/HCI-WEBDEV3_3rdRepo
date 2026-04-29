@@ -84,7 +84,7 @@
       <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
       <a href="submit-report.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
       <a href="my-reports.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
-      <a href="#" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+      <a href="citizen-density-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
     </div>
 
     <div class="sidebar-section">
@@ -120,7 +120,7 @@
           <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
           <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
           <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
-          <li><a href="#"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="citizen-density-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
           <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
           <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
           <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
@@ -140,35 +140,27 @@
         <p>All waste reports you've submitted across Zamboanga City.</p>
       </div>
 
-      <!-- Summary row -->
-      <div class="summary-row">
-        <div class="summary-chip">
-          <span class="s-icon"><i class="fa-solid fa-clipboard-list"></i></span>
-          <div>
-            <div class="s-num" style="color:var(--text);" id="stat-total">0</div>
-            <div class="s-label">Total</div>
-          </div>
+      <!-- Summary stats -->
+      <div class="stats-grid">
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+          <div class="stat-num" style="color:var(--text);" id="stat-total">0</div>
+          <div class="stat-label">Total Reports</div>
         </div>
-        <div class="summary-chip">
-          <span class="s-icon"><i class="fa-solid fa-hourglass-half"></i></span>
-          <div>
-            <div class="s-num" style="color:var(--yellow);" id="stat-pending">0</div>
-            <div class="s-label">Pending</div>
-          </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+          <div class="stat-num" style="color:var(--yellow);" id="stat-pending">0</div>
+          <div class="stat-label">Pending</div>
         </div>
-        <div class="summary-chip">
-          <span class="s-icon"><i class="fa-solid fa-circle-check"></i></span>
-          <div>
-            <div class="s-num" style="color:var(--blue);" id="stat-approved">0</div>
-            <div class="s-label">Approved</div>
-          </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-num" style="color:var(--blue);" id="stat-approved">0</div>
+          <div class="stat-label">Approved</div>
         </div>
-        <div class="summary-chip">
-          <span class="s-icon"><i class="fa-solid fa-circle-xmark"></i></span>
-          <div>
-            <div class="s-num" style="color:var(--red);" id="stat-rejected">0</div>
-            <div class="s-label">Rejected</div>
-          </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+          <div class="stat-num" style="color:var(--red);" id="stat-rejected">0</div>
+          <div class="stat-label">Rejected</div>
         </div>
       </div>
 
