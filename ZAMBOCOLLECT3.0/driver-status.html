@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Status — ZamboCollect</title>
+    <link rel="stylesheet" href="css/driver.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">
+        <i class="fa-solid fa-truck"></i> Driver Portal
+      </span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard
+      </a>
+      <a href="driver-route.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-map"></i></span> Daily Route
+      </a>
+      <a href="driver-task.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Assigned Tasks
+      </a>
+      <a href="driver-status.html" class="nav-item active">
+        <span class="nav-icon"><i class="fa-solid fa-truck"></i></span> Vehicle Status
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+        Notifications <span class="nav-badge">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-role">Collection Driver</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link">
+        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="dashboard-driver.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="driver-route.html"><i class="fa-solid fa-map"></i> Daily Route</a></li>
+          <li><a href="driver-task.html"><i class="fa-solid fa-clipboard-list"></i> Assigned Tasks</a></li>
+          <li><a href="driver-status.html" class="active"><i class="fa-solid fa-truck"></i> Vehicle Status</a></li>
+          <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Vehicle Status</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span class="notif-badge">2</span>
+        </a>
+      </div>
+    </div>
+
+    <!--======= Vehicle Status ======-->
+    <div class="page active">
+      <div class="page-header">
+        <h1>Vehicle Status</h1>
+        <p>GTC-Truck-04 — Assigned to Barangay Rio Hondo.</p>
+      </div>
+
+      <div class="vehicle-header">
+        <div class="truck-icon-wrap">🚛</div>
+        <div class="vehicle-meta">
+          <h2>GTC-Truck-04</h2>
+          <p>Plate No. ZAM-1042 &nbsp;&middot;&nbsp; 2019 Isuzu NQR Garbage Truck</p>
+          <div class="active-badge"><span class="active-dot"></span> Active — On Route</div>
+        </div>
+        <button class="report-btn">&#9888; Report an Issue</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🛠️</div>
+          <div>
+            <div class="stat-num">Mar 1</div>
+            <div class="stat-label">Last Maintenance</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div>
+            <div class="stat-num">Apr 1</div>
+            <div class="stat-label">Next Maintenance</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-title">Vehicle Details</div>
+          <div class="info-row">
+            <span class="info-label">Vehicle ID</span>
+            <span class="info-value">GTC-Truck-04</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Plate number</span>
+            <span class="info-value">ZAM-1042</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Make &amp; model</span>
+            <span class="info-value">2019 Isuzu NQR</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Capacity</span>
+            <span class="info-value">6,000 kg</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Assigned driver</span>
+            <span class="info-value highlight">Carlos Mendoza</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Assigned barangay</span>
+            <span class="info-value">Rio Hondo</span>
+          </div>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-label-row">
+              <span>Fuel level</span>
+              <span class="fuel-pct">72% — 54 L remaining</span>
+            </div>
+            <div class="fuel-bar-bg">
+              <div class="fuel-bar-fill" style="width:72%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title">Maintenance Info</div>
+          <div class="info-row">
+            <span class="info-label">Current status</span>
+            <span class="info-value highlight">Active</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Last oil change</span>
+            <span class="info-value">Feb 10, 2026</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Last tire check</span>
+            <span class="info-value">Mar 1, 2026</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Next PMS due</span>
+            <span class="info-value warn">Apr 1, 2026</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">LTO registration</span>
+            <span class="info-value">Valid until Dec 2026</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Insurance expiry</span>
+            <span class="info-value">Nov 30, 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="card-title">System Checklist</div>
+
+        <div class="issue-item">
+          <div class="issue-dot dot-ok"></div>
+          <div class="issue-text">
+            <strong>Engine</strong>
+            <span class="issue-sub">No issues detected</span>
+          </div>
+          <span class="issue-badge badge-ok">Good</span>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-dot dot-ok"></div>
+          <div class="issue-text">
+            <strong>Brakes</strong>
+            <span class="issue-sub">Last checked Mar 1, 2026</span>
+          </div>
+          <span class="issue-badge badge-ok">Good</span>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-dot dot-warn"></div>
+          <div class="issue-text">
+            <strong>Tires</strong>
+            <span class="issue-sub">Front-left tire showing early wear</span>
+          </div>
+          <span class="issue-badge badge-warn">Monitor</span>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-dot dot-ok"></div>
+          <div class="issue-text">
+            <strong>Lights &amp; Signals</strong>
+            <span class="issue-sub">All lights functional</span>
+          </div>
+          <span class="issue-badge badge-ok">Good</span>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-dot dot-bad"></div>
+          <div class="issue-text">
+            <strong>Hydraulic Lift</strong>
+            <span class="issue-sub">Reported slow response — needs inspection</span>
+          </div>
+          <span class="issue-badge badge-bad">Needs Repair</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
