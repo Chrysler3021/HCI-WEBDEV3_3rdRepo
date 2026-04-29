@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Driver Applications</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+
+    /* ── Filter tab bar ── */
+    .tab-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .tab-label {
+      padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border2);
+      background: var(--surface); color: var(--text2); transition: all 0.15s;
+      user-select: none; box-shadow: var(--shadow-sm);
+    }
+    .tab-label:hover { border-color: var(--green); color: var(--green); background: var(--surface3); }
+    .tab-label.tab-active { background: var(--green); color: #fff; border-color: var(--green); box-shadow: none; }
+
+    /* ── Search bar ── */
+    .search-bar-wrap {
+      position: relative; display: flex; align-items: center; margin-bottom: 22px;
+    }
+    .search-bar-wrap input {
+      padding: 9px 14px 9px 36px; border-radius: 9px; font-size: 13px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      width: 100%; max-width: 320px; outline: none;
+      transition: border-color 0.15s; color: var(--text);
+    }
+    .search-bar-wrap input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(88,129,87,0.08); }
+    .search-bar-wrap .s-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--muted2); font-size: 13px; pointer-events: none;
+    }
+
+    /* ── Application cards ── */
+    .app-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .app-card-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+    } 
+    .app-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #A3B18A);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; flex-shrink: 0;
+    }
+    .app-avatar.active-drv  { background: linear-gradient(135deg,#2563eb,#60a5fa); }
+    .app-avatar.rejected-drv { background: linear-gradient(135deg,#9ca3af,#d1d5db); }
+    .app-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .app-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .app-details-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 10px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .det-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .det-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .app-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn-view-app {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); text-decoration: none; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-view-app:hover { background: var(--surface3); border-color: var(--primary); color: var(--primary); }
+
+    .btn-do-approve {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: var(--green); color: #fff; border: none;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-do-approve:hover { opacity: 0.88; }
+
+    .btn-do-reject {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #fff0f0; color: var(--red);
+      border: 1.5px solid var(--red); cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-do-reject:hover { opacity: 0.80; }
+
+    /* ── Section dividers ── */
+    .section-heading {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted); margin: 20px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 8px; border-bottom: 1.5px solid var(--border);
+    }
+
+    /* ── Urgency pills ── */
+    .urg-low      { background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-medium   { background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-critical { background:#fee2e2; color:#dc2626; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+
+    /* ── Detail drawer (JS-toggled) ── */
+    .app-drawer {
+      display: none;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-top: none; border-radius: 0 0 14px 14px;
+      margin-top: -14px; margin-bottom: 14px;
+      padding: 0 20px 20px; overflow: hidden;
+    }
+    .app-drawer.drawer-open { display: block; }
+
+    .drawer-inner {
+      padding-top: 16px; border-top: 1.5px dashed var(--border);
+    }
+    .drawer-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .drawer-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 8px; margin-bottom: 16px;
+    }
+    .drawer-info-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 11px;
+    }
+    .drawer-info-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .drawer-info-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .doc-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .doc-box {
+      flex: 1; min-width: 110px; border: 1.5px dashed var(--border);
+      border-radius: 10px; background: var(--surface); padding: 14px 10px;
+      text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .doc-box i { font-size: 1.5rem; color: var(--muted); }
+    .doc-box .doc-label  { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .doc-box .doc-status { font-size: 10px; font-weight: 700; color: var(--primary); }
+
+    .notes-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 14px; font-size: 13px;
+      color: var(--text); font-style: italic; line-height: 1.6; margin-bottom: 14px;
+    }
+
+    .drawer-actions {
+      display: flex; gap: 8px; padding-top: 12px;
+      border-top: 1.5px solid var(--border);
+    }
+    .drawer-close {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--muted); cursor: pointer; transition: all 0.15s;
+    }
+    .drawer-close:hover { border-color: var(--text); color: var(--text); }
+
+    /* card tints */
+    .card-approved { border-color: rgba(88,129,87,0.35); background: linear-gradient(135deg,#f8faf7,var(--surface)); }
+    .card-rejected  { opacity: 0.72; }
+
+    @media (max-width:600px) {
+      .app-details-grid { grid-template-columns: 1fr 1fr; }
+      .drawer-info-grid  { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- hamburger toggle -->
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal — Rio Hondo</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review <span class="nav-badge badge-yellow">5</span></a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-density-map.html"     class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="javascript:void(0)" id="sidebar-tab-applications" class="nav-item active" onclick="setTab('Applications')" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Applications <span class="nav-badge badge-yellow" id="sidebar-count-applications">5</span></a>
+        <a href="javascript:void(0)" id="sidebar-tab-profiles"      class="nav-item"        onclick="setTab('Profiles')"><span class="nav-icon"><i class="fa-solid fa-user-tie"></i></span> Driver Profiles <span class="nav-badge" id="sidebar-count-profiles">3</span></a>
+        <a href="officer-analytics.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile
+        </a>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div><div class="user-name">Maria Santos</div><div class="user-role">Officer · Rio Hondo</div></div>
+      </a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content" id="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Driver Applications</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page active page-wrap" role="main">
+
+      <div class="page-header">
+        <h1>Driver Applications</h1>
+        <p>Promote verified citizens to driver accounts for Barangay Rio Hondo. Only officers can create driver accounts.</p>
+      </div>
+
+      <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <i class="fa-solid fa-arrow-up" style="flex-shrink:0;"></i>
+        <span><strong>Officer privilege:</strong> Verified citizens who apply to become drivers can only be promoted by you. Admins cannot create driver accounts. Approve applications to upgrade the citizen's account to Driver role.</span>
+      </div>
+
+      <!-- JS-rendered filter bar -->
+      <div class="tab-bar" id="filter-bar"></div>
+
+      <!-- Search bar -->
+      <div class="search-bar-wrap">
+        <span class="s-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" id="driver-search" placeholder="Search by name or license number…" oninput="filterDrivers()">
+      </div>
+
+      <!-- JS-rendered application cards -->
+      <div id="apps-container"></div>
+
+    </div><!-- /page-wrap -->
+  </main>
+</div><!-- /app-shell -->
+
+<!-- Promote to Driver Confirmation Modal -->
+<div class="modal-overlay hidden" id="modal-promoteDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-arrow-up" style="color:#16a34a;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Promote to Driver</div>
+    </div>
+    <div class="modal-sub">Are you sure you want to promote <strong id="promote-driver-name">this applicant</strong> to a Driver account? They will be granted access to the Driver Portal and assigned to a collection route.</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin:12px 0;display:flex;align-items:flex-start;gap:8px;">
+      <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;"></i>
+      <span>Once promoted, the applicant's account will be upgraded to <strong>Driver</strong> role and they will be notified to begin onboarding.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-promoteDriver').classList.add('hidden')" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-green btn-sm" id="promote-driver-confirm-btn" style="flex:1;"><i class="fa-solid fa-arrow-up"></i> Yes, Promote →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Driver Application Modal -->
+<div class="modal-overlay hidden" id="modal-rejectDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fff0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-xmark" style="color:var(--red);font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Reject Application</div>
+    </div>
+    <div class="modal-sub">Rejecting <strong id="reject-driver-name">this applicant</strong>'s driver application. Select a reason — they will be notified and may reapply once resolved.</div>
+    <div class="form-group">
+      <label>Rejection Reason <span style="color:var(--red);">*</span></label>
+      <select id="reject-driver-reason">
+        <option value="">— Select reason —</option>
+        <option>Expired or invalid driver's license</option>
+        <option>Insufficient driving experience (minimum 1 year required)</option>
+        <option>Non-professional license — professional license required for this route</option>
+        <option>KYC verification incomplete or still pending</option>
+        <option>Incomplete application documents</option>
+        <option>Does not meet physical or medical requirements</option>
+        <option>Background check concern</option>
+        <option>No available routes in the requested barangay</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Additional Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea id="reject-driver-notes" placeholder="Provide specific guidance so the applicant knows what to fix before reapplying…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeRejectDriverModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-red btn-sm" id="reject-driver-confirm-btn" style="flex:1;">✗ Reject &amp; Notify →</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/global.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/driver-applications.js"></script>
+<script>
+  /* Close modals when clicking outside */
+  document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+  });
+
+  function closeRejectDriverModal() {
+    document.getElementById('modal-rejectDriver').classList.add('hidden');
+    document.getElementById('reject-driver-reason').value = '';
+    document.getElementById('reject-driver-notes').value = '';
+  }
+</script>
+</body>
+</html>
