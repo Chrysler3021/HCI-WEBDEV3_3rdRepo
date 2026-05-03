@@ -6,6 +6,481 @@
     <title>Driver's Profile — ZamboCollect</title>
     <link rel="stylesheet" href="css/driver.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+      
+/* ===================================================
+   EDIT PROFILE OVERLAY
+   =================================================== */
+
+/* Prevent body scroll when overlay is open */
+body.overlay-open { overflow: hidden; }
+
+.edit-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  /* No blur — just a semi-transparent dark scrim */
+  background: rgba(10, 20, 10, 0.45);
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.edit-overlay.active {
+  display: flex;
+}
+
+/* Slide-in panel from the right */
+.edit-panel {
+  background: var(--surface);
+  width: 100%;
+  max-width: 520px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0, 40, 0, 0.14);
+  border-left: 1px solid var(--border);
+  animation: panelSlideIn 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+.edit-panel.closing {
+  animation: panelSlideOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes panelSlideIn {
+  from { transform: translateX(100%); opacity: 0.5; }
+  to   { transform: translateX(0);    opacity: 1;   }
+}
+@keyframes panelSlideOut {
+  from { transform: translateX(0);    opacity: 1;   }
+  to   { transform: translateX(100%); opacity: 0;   }
+}
+
+/* ---- Header ---- */
+.edit-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 18px;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+.edit-panel-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.edit-panel-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.edit-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.edit-close-btn:hover { background: var(--red-bg); color: var(--red); border-color: rgba(192,57,43,0.25); }
+
+/* ---- Body (scrollable) ---- */
+.edit-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Avatar preview row */
+.edit-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--green-glow);
+  border: 1.5px solid rgba(88,129,87,0.18);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+}
+
+.edit-avatar-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(88,129,87,0.30);
+  transition: background 0.2s;
+}
+
+.edit-avatar-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.edit-avatar-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Section labels */
+.edit-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--border);
+  margin-top: 4px;
+}
+
+/* Field rows */
+.edit-field-row {
+  display: grid;
+  gap: 12px;
+}
+.edit-field-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+.edit-field-row.two-col   { grid-template-columns: 1fr 1fr; }
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+.edit-label .req     { color: var(--red); margin-left: 1px; }
+.edit-label .optional{ color: var(--muted2); font-weight: 400; font-size: 11px; }
+
+.edit-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border2);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.edit-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(88,129,87,0.12);
+}
+.edit-input.invalid {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.10);
+}
+.edit-input::placeholder { color: var(--muted2); }
+
+/* Input with icon */
+.edit-input-icon-wrap {
+  position: relative;
+}
+.edit-input-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--green);
+  pointer-events: none;
+}
+.edit-input.with-icon { padding-left: 32px; }
+
+/* Read-only license field */
+.readonly-field .edit-readonly-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface2);
+  position: relative;
+  cursor: not-allowed;
+}
+.edit-readonly-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text2);
+  font-family: 'Outfit', monospace;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+.edit-readonly-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  background: var(--surface3);
+  border: 1.5px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.edit-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+/* Error message */
+.edit-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--red-bg);
+  border: 1.5px solid rgba(192,57,43,0.20);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  animation: shakeX 0.35s ease;
+}
+@keyframes shakeX {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+/* ---- Footer ---- */
+.edit-panel-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1.5px solid var(--border);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+.edit-btn-cancel,
+.edit-btn-save {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Source Sans 3', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+  border: none;
+}
+
+.edit-btn-cancel {
+  background: var(--surface);
+  color: var(--text2);
+  border: 1.5px solid var(--border2);
+}
+.edit-btn-cancel:hover { background: var(--surface3); border-color: var(--border2); }
+
+.edit-btn-save {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(88,129,87,0.28);
+}
+.edit-btn-save:hover:not(:disabled) {
+  background: var(--green-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(88,129,87,0.32);
+}
+.edit-btn-save:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+/* ======== Success Toast ======== */
+.save-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 24px rgba(88,129,87,0.38);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9000;
+  white-space: nowrap;
+}
+.save-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ======== Responsive tweaks ======== */
+@media (max-width: 600px) {
+  .edit-panel { max-width: 100%; border-left: none; }
+  .edit-field-row.three-col { grid-template-columns: 1fr; }
+  .edit-field-row.two-col   { grid-template-columns: 1fr; }
+}
+
+/* ===================================================
+   CONFIRM SAVE DIALOG
+   =================================================== */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(10, 20, 10, 0.50);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.confirm-overlay.active { display: flex; }
+
+.confirm-dialog {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 24px 22px;
+  text-align: center;
+  animation: confirmPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.confirm-dialog.confirm-closing {
+  animation: confirmFade 0.2s ease forwards;
+}
+
+@keyframes confirmPop {
+  from { transform: scale(0.88); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+@keyframes confirmFade {
+  from { transform: scale(1);    opacity: 1; }
+  to   { transform: scale(0.92); opacity: 0; }
+}
+
+.confirm-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--green-glow);
+  border: 2px solid rgba(88,129,87,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--green);
+  margin: 0 auto 16px;
+}
+
+.confirm-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.confirm-desc {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn-cancel,
+.confirm-btn-ok {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: 'Source Sans 3', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+  border: none;
+}
+
+.confirm-btn-cancel {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1.5px solid var(--border2);
+}
+.confirm-btn-cancel:hover { background: var(--surface3); }
+
+.confirm-btn-ok {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(88,129,87,0.28);
+}
+.confirm-btn-ok:hover {
+  background: var(--green-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(88,129,87,0.32);
+}
+    </style>
 </head>
 <body>
 
@@ -32,7 +507,7 @@
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Account</div>
-      <a href="driver-notification.html" class="nav-item">
+       <a href="driver-notification.html" class="nav-item">
         <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
         Notifications <span class="nav-badge">2</span>
       </a>
@@ -52,9 +527,7 @@
           <div class="user-role">Collection Driver</div>
         </div>
       </div>
-      <a href="Login.html" class="logout-link">
-        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
-      </a>
+      <a href="#" class="logout-link" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
     </div>
   </aside>
 
@@ -71,7 +544,7 @@
         
           <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
           <li><a href="driver-profile.html" class="active"><i class="fa-solid fa-user"></i> My Profile</a></li>
-          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+          <li><a href="#" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         </ul>
       </nav>
       <div class="topbar-title">My Profile</div>
@@ -82,14 +555,14 @@
       </div>
     </div>
 
-<!--======== Driver Profile ========-->
-
+ <!--======== Driver Profile ========-->
+ 
     <div class="page active">
       <div class="page-header">
         <h1>My Profile</h1>
         <p>Carlos Mendoza — Collection Driver, Barangay Rio Hondo.</p>
       </div>
-
+ 
       <div class="profile-header-card">
         <div class="big-avatar">CM</div>
         <div class="profile-meta">
@@ -99,23 +572,23 @@
         </div>
         <button class="edit-btn"> ✏️ Edit Profile</button>
       </div>
-
+ 
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card stat-blue">
           <div class="stat-icon">🛣️</div>
           <div>
-            <div class="stat-num" style="color:var(--green);">142</div>
+            <div class="stat-num" style="color:var(--blue);">142</div>
             <div class="stat-label">Routes Completed</div>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-green">
           <div class="stat-icon">✅</div>
           <div>
             <div class="stat-num" style="color:var(--green);">98%</div>
             <div class="stat-label">Task Completion Rate</div>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-blue">
           <div class="stat-icon">📅</div>
           <div>
             <div class="stat-num" style="color:var(--blue);">2 yrs</div>
@@ -123,7 +596,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="cards-grid">
         <div class="info-card">
           <div class="card-title">Personal Information</div>
@@ -152,7 +625,7 @@
             <span class="info-value">+63 917 654 3210</span>
           </div>
         </div>
-
+ 
         <div class="info-card">
           <div class="card-title">Assignment Details</div>
           <div class="info-row">
@@ -178,4 +651,325 @@
           <div class="info-row">
             <span class="info-label">License expiry</span>
             <span class="info-value">Mar 28, 2030</span>
-            <span class
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+ 
+<!-- ======== Edit Profile Overlay ======== -->
+<div class="edit-overlay" id="editOverlay" role="dialog" aria-modal="true" aria-labelledby="editOverlayTitle">
+  <div class="edit-panel" id="editPanel">
+ 
+    <div class="edit-panel-header">
+      <div>
+        <div class="edit-panel-eyebrow"><i class="fa-solid fa-pen-to-square"></i> Edit Profile</div>
+        <h2 class="edit-panel-title" id="editOverlayTitle">Update Your Information</h2>
+      </div>
+      <button class="edit-close-btn" id="editCloseBtn" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+ 
+    <div class="edit-panel-body">
+ 
+      <!-- Avatar row -->
+      <div class="edit-avatar-row">
+        <div class="edit-avatar-circle" id="editAvatarDisplay">CM</div>
+        <div>
+          <div class="edit-avatar-name" id="editAvatarName">Carlos Mendoza</div>
+          <div class="edit-avatar-sub">Employee ID: DRV-2024-011</div>
+        </div>
+      </div>
+ 
+      <!-- Section: Personal -->
+      <div class="edit-section-label">Personal Information</div>
+ 
+      <div class="edit-field-row three-col">
+        <div class="edit-field">
+          <label class="edit-label" for="ef-fname">First Name <span class="req">*</span></label>
+          <input class="edit-input" id="ef-fname" type="text" placeholder="e.g. Carlos" value="Carlos">
+        </div>
+        <div class="edit-field">
+          <label class="edit-label" for="ef-mname">Middle Name <span class="optional">(optional)</span></label>
+          <input class="edit-input" id="ef-mname" type="text" placeholder="e.g. Buenaventura" value="B.">
+        </div>
+        <div class="edit-field">
+          <label class="edit-label" for="ef-lname">Last Name <span class="req">*</span></label>
+          <input class="edit-input" id="ef-lname" type="text" placeholder="e.g. Mendoza" value="Mendoza">
+        </div>
+      </div>
+ 
+      <div class="edit-field-row two-col">
+        <div class="edit-field">
+          <label class="edit-label" for="ef-contact">Contact Number <span class="req">*</span></label>
+          <div class="edit-input-icon-wrap">
+            <i class="fa-solid fa-phone edit-input-icon"></i>
+            <input class="edit-input with-icon" id="ef-contact" type="tel" placeholder="+63 9XX XXX XXXX" value="+63 912 345 6789">
+          </div>
+        </div>
+        <div class="edit-field">
+          <label class="edit-label" for="ef-email">Email Address <span class="req">*</span></label>
+          <div class="edit-input-icon-wrap">
+            <i class="fa-solid fa-envelope edit-input-icon"></i>
+            <input class="edit-input with-icon" id="ef-email" type="email" placeholder="you@example.com" value="juan.delacruz@gmail.com">
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Section: Emergency Contact -->
+      <div class="edit-section-label" style="margin-top:8px;">Emergency Contact</div>
+ 
+      <div class="edit-field-row two-col">
+        <div class="edit-field">
+          <label class="edit-label" for="ef-ec-name">Contact Name <span class="req">*</span></label>
+          <div class="edit-input-icon-wrap">
+            <i class="fa-solid fa-user-shield edit-input-icon"></i>
+            <input class="edit-input with-icon" id="ef-ec-name" type="text" placeholder="Full name" value="Maria Mendoza">
+          </div>
+        </div>
+        <div class="edit-field">
+          <label class="edit-label" for="ef-ec-num">Contact Number <span class="req">*</span></label>
+          <div class="edit-input-icon-wrap">
+            <i class="fa-solid fa-phone edit-input-icon"></i>
+            <input class="edit-input with-icon" id="ef-ec-num" type="tel" placeholder="+63 9XX XXX XXXX" value="+63 917 654 3210">
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Section: License (read-only) -->
+      <div class="edit-section-label" style="margin-top:8px;">Driver License</div>
+ 
+      <div class="edit-field readonly-field">
+        <label class="edit-label">License Number</label>
+        <div class="edit-readonly-wrap">
+          <i class="fa-solid fa-id-card edit-input-icon" style="color:var(--muted2);"></i>
+          <span class="edit-readonly-value">N 01-23-456789</span>
+          <span class="edit-readonly-badge"><i class="fa-solid fa-lock"></i> Non-editable</span>
+        </div>
+        <p class="edit-hint">License numbers are set upon driver registration and cannot be changed. Contact an administrator for corrections.</p>
+      </div>
+ 
+      <!-- Validation message -->
+      <div class="edit-error-msg" id="editErrorMsg" style="display:none;">
+        <i class="fa-solid fa-circle-exclamation"></i> <span id="editErrorText">Please fill in all required fields.</span>
+      </div>
+ 
+    </div>
+ 
+    <div class="edit-panel-footer">
+      <button class="edit-btn-cancel" id="editCancelBtn">Cancel</button>
+      <button class="edit-btn-save" id="editSaveBtn">
+        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      </button>
+    </div>
+ 
+  </div>
+</div>
+ 
+<!-- ======== Confirm Save Dialog ======== -->
+<div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="confirm-dialog" id="confirmDialog">
+    <div class="confirm-icon-wrap">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </div>
+    <h3 class="confirm-title" id="confirmTitle">Save Changes?</h3>
+    <p class="confirm-desc">Are you sure you want to update your profile? This will replace your current information.</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" id="confirmCancelBtn">No, go back</button>
+      <button class="confirm-btn-ok" id="confirmOkBtn">
+        <i class="fa-solid fa-check"></i> Yes, save it
+      </button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ======== Success Toast ======== -->
+<div class="save-toast" id="saveToast">
+  <i class="fa-solid fa-circle-check"></i> Profile updated successfully!
+</div>
+ 
+<script>
+(function () {
+  const overlay    = document.getElementById('editOverlay');
+  const panel      = document.getElementById('editPanel');
+  const openBtn    = document.querySelector('.edit-btn');
+  const closeBtn   = document.getElementById('editCloseBtn');
+  const cancelBtn  = document.getElementById('editCancelBtn');
+  const saveBtn    = document.getElementById('editSaveBtn');
+  const toast      = document.getElementById('saveToast');
+  const errorMsg   = document.getElementById('editErrorMsg');
+  const errorText  = document.getElementById('editErrorText');
+ 
+  // Fields
+  const fFname   = document.getElementById('ef-fname');
+  const fMname   = document.getElementById('ef-mname');
+  const fLname   = document.getElementById('ef-lname');
+  const fContact = document.getElementById('ef-contact');
+  const fEmail   = document.getElementById('ef-email');
+  const fEcName  = document.getElementById('ef-ec-name');
+  const fEcNum   = document.getElementById('ef-ec-num');
+ 
+  // Live avatar preview
+  function updateAvatarPreview() {
+    const first = fFname.value.trim();
+    const last  = fLname.value.trim();
+    const initials = (first[0] || '') + (last[0] || '');
+    document.getElementById('editAvatarDisplay').textContent = initials.toUpperCase() || '?';
+    document.getElementById('editAvatarName').textContent =
+      [first, fMname.value.trim(), last].filter(Boolean).join(' ') || 'Your Name';
+  }
+ 
+  [fFname, fMname, fLname].forEach(el => el.addEventListener('input', updateAvatarPreview));
+ 
+  function openOverlay() {
+    overlay.classList.add('active');
+    document.body.classList.add('overlay-open');
+    fFname.focus();
+    errorMsg.style.display = 'none';
+  }
+ 
+  function closeOverlay() {
+    panel.classList.add('closing');
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      panel.classList.remove('closing');
+      document.body.classList.remove('overlay-open');
+    }, 240);
+  }
+ 
+  openBtn.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  cancelBtn.addEventListener('click', closeOverlay);
+ 
+  // Close on backdrop click
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeOverlay();
+  });
+ 
+  // Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) closeOverlay();
+  });
+ 
+  // Validation
+  function validate() {
+    const required = [
+      { el: fFname,   label: 'First Name' },
+      { el: fLname,   label: 'Last Name' },
+      { el: fContact, label: 'Contact Number' },
+      { el: fEmail,   label: 'Email Address' },
+      { el: fEcName,  label: 'Emergency Contact Name' },
+      { el: fEcNum,   label: 'Emergency Contact Number' },
+    ];
+ 
+    for (const { el, label } of required) {
+      el.classList.remove('invalid');
+      if (!el.value.trim()) {
+        el.classList.add('invalid');
+        errorText.textContent = `${label} is required.`;
+        errorMsg.style.display = 'flex';
+        el.focus();
+        return false;
+      }
+    }
+ 
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(fEmail.value.trim())) {
+      fEmail.classList.add('invalid');
+      errorText.textContent = 'Please enter a valid email address.';
+      errorMsg.style.display = 'flex';
+      fEmail.focus();
+      return false;
+    }
+ 
+    errorMsg.style.display = 'none';
+    return true;
+  }
+ 
+  // Clear invalid state on input
+  [fFname, fLname, fContact, fEmail, fEcName, fEcNum].forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('invalid');
+      errorMsg.style.display = 'none';
+    });
+  });
+ 
+  // Confirmation dialog
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmDialog  = document.getElementById('confirmDialog');
+  const confirmOkBtn   = document.getElementById('confirmOkBtn');
+  const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+ 
+  function openConfirm() {
+    confirmOverlay.classList.add('active');
+    confirmOkBtn.focus();
+  }
+ 
+  function closeConfirm() {
+    confirmDialog.classList.add('confirm-closing');
+    setTimeout(() => {
+      confirmOverlay.classList.remove('active');
+      confirmDialog.classList.remove('confirm-closing');
+    }, 200);
+  }
+ 
+  confirmCancelBtn.addEventListener('click', closeConfirm);
+  confirmOverlay.addEventListener('click', function (e) {
+    if (e.target === confirmOverlay) closeConfirm();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && confirmOverlay.classList.contains('active')) closeConfirm();
+  });
+ 
+  function commitSave() {
+    closeConfirm();
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+ 
+    setTimeout(() => {
+      const fullName = [fFname.value.trim(), fMname.value.trim(), fLname.value.trim()]
+                         .filter(Boolean).join(' ');
+ 
+      const avatarEl = document.querySelector('.big-avatar');
+      if (avatarEl) {
+        avatarEl.textContent = (fFname.value.trim()[0] || '') + (fLname.value.trim()[0] || '');
+      }
+      document.querySelectorAll('.profile-meta h2').forEach(el => el.textContent = fullName);
+ 
+      const infoRows = document.querySelectorAll('.info-row');
+      infoRows.forEach(row => {
+        const label = row.querySelector('.info-label')?.textContent?.toLowerCase();
+        const val   = row.querySelector('.info-value');
+        if (!val) return;
+        if (label?.includes('full name'))          val.textContent = fullName;
+        if (label?.includes('contact number'))     val.textContent = fContact.value.trim();
+        if (label?.includes('email'))              val.textContent = fEmail.value.trim();
+        if (label?.includes('emergency contact') && !label.includes('number')) val.textContent = fEcName.value.trim();
+        if (label?.includes('emergency number'))   val.textContent = fEcNum.value.trim();
+      });
+ 
+      document.querySelector('.user-name').textContent = fFname.value.trim() + ' ' + fLname.value.trim();
+ 
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+      closeOverlay();
+ 
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3200);
+    }, 800);
+  }
+ 
+  confirmOkBtn.addEventListener('click', commitSave);
+ 
+  // Save button → validate first, then show confirm dialog
+  saveBtn.addEventListener('click', function () {
+    if (!validate()) return;
+    openConfirm();
+  });
+})();
+</script>
+ 
+</body>
+</html>
