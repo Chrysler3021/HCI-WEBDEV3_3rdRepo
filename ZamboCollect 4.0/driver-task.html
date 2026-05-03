@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assigned Tasks — ZamboCollect</title>
+    <link rel="stylesheet" href="css/driver.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+      .view-task-btn {
+        padding: 4px 11px; border-radius: 6px;
+        background: var(--surface2); border: 1.5px solid var(--border);
+        font-size: 11px; font-weight: 600; color: var(--text2);
+        cursor: pointer; font-family: inherit; appearance: none;
+        transition: all 0.15s; white-space: nowrap;
+      }
+      .view-task-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+
+      /* ── Task View Modal ── */
+      .modal-backdrop {
+        position: fixed; inset: 0; z-index: 9000;
+        background: rgba(0,0,0,0.52); backdrop-filter: blur(3px);
+        display: none; align-items: flex-start; justify-content: center;
+        padding: 20px 16px; overflow-y: auto;
+      }
+      .modal-backdrop.open { display: flex; }
+      .modal-card {
+        background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px;
+        box-shadow: var(--shadow-lg); flex-shrink: 0; margin: auto;
+        animation: modal-in 0.18s ease;
+      }
+      @keyframes modal-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+      .modal-header {
+        padding: 18px 20px 14px; border-bottom: 1.5px solid var(--border);
+        display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      }
+      .modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+      .modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+      .modal-close {
+        width: 32px; height: 32px; min-width: 32px; border-radius: 8px;
+        border: 1.5px solid var(--border); background: var(--surface2);
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: var(--muted); font-size: 14px; transition: all 0.15s;
+        appearance: none; font-family: inherit;
+      }
+      .modal-close:hover { border-color: var(--text); color: var(--text); }
+      .modal-body { padding: 18px 20px 20px; }
+      .modal-photo {
+        width: 100%; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+        background: var(--surface3); margin-bottom: 16px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .modal-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .modal-photo-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); }
+      .modal-photo-ph i { font-size: 2rem; }
+      .modal-photo-ph span { font-size: 12px; }
+      .modal-section-lbl {
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+        display: flex; align-items: center; gap: 5px;
+      }
+      .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+      .modal-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+      .modal-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+      .modal-box-val { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+      .modal-desc {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 10px 14px; font-size: 13px;
+        color: var(--text); line-height: 1.6; margin-bottom: 14px;
+      }
+      .btn-collect-modal {
+        width: 100%; padding: 11px 0; border-radius: 9px; font-size: 13px;
+        font-weight: 600; cursor: pointer; border: none;
+        background: var(--green); color: #fff;
+        font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+      }
+      .btn-collect-modal:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+      /* ── Empty state ── */
+      .empty-state {
+        text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px;
+      }
+      .empty-state i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: var(--muted2); }
+
+      @media (max-width: 480px) { .modal-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">
+        <i class="fa-solid fa-truck"></i> Driver Portal
+      </span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> Dashboard
+      </a>
+      <a href="driver-task.html" class="nav-item active">
+        <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Assigned Tasks
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+        Notifications <span class="nav-badge">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile
+      </a>
+      <a href="citizen-dashboard.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarDriverName">Driver</div>
+          <div class="user-role" id="sidebarDriverRole">Collection Driver</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link">
+        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="dashboard-driver.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="dashboard-driver.html"><i class="fa-solid fa-map"></i> Daily Route</a></li>
+          <li><a href="driver-task.html" class="active"><i class="fa-solid fa-clipboard-list"></i> Assigned Tasks</a></li>
+          <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Assigned Tasks</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span class="notif-badge">2</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ========== Assigned Tasks ========== -->
+    <div class="page active">
+      <div class="page-header">
+        <h1>Today's Tasks</h1>
+        <p id="page-subheader">Loading your assigned collection stops…</p>
+      </div>
+
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1d4ed8;display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <i class="fa-solid fa-rotate" style="flex-shrink:0;"></i>
+        <span>Tasks are <strong>automatically assigned</strong> by the system from citizen reports approved by your officer. Open a stop and tap <strong>Mark as Collected</strong> to complete it.</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <div class="stat-num" id="stat-total">—</div>
+            <div class="stat-label">Total Stops</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div>
+            <div class="stat-num" style="color:var(--green);" id="stat-done">—</div>
+            <div class="stat-label">Collected</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+          <div>
+            <div class="stat-num" style="color:var(--yellow);" id="stat-pending">—</div>
+            <div class="stat-label">Pending</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-radiation" style="color:var(--red);"></i></div>
+          <div>
+            <div class="stat-num" style="color:var(--red);" id="stat-critical">—</div>
+            <div class="stat-label">High Priority</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="progress-bar-wrap" style="border:none; box-shadow:none; padding:0; margin-bottom:16px;">
+          <span class="prog-label">Today's progress</span>
+          <div class="prog-bg"><div class="prog-fill" id="prog-fill-bar" style="width:0%"></div></div>
+          <span class="prog-label" style="color:var(--green); font-weight:600;" id="prog-text">— / — stops</span>
+        </div>
+
+        <div class="filter-row" style="margin-bottom:16px;">
+          <span class="filter-label">Show:</span>
+          <button class="filter-btn active-filter" onclick="filterTasks('all', this)">All</button>
+          <button class="filter-btn" onclick="filterTasks('pending', this)">Pending</button>
+          <button class="filter-btn" onclick="filterTasks('done', this)">Collected</button>
+          <span class="date-label"><i class="fa-solid fa-calendar-days"></i> <span id="today-date"></span></span>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-header">
+            <div>#</div>
+            <div>Address</div>
+            <div>Waste Type</div>
+            <div>Submitted</div>
+            <div>Status</div>
+            <div style="text-align:center;">Details</div>
+          </div>
+          <div id="task-rows"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ── Task View Modal ── -->
+<div class="modal-backdrop" id="taskModal" onclick="handleBackdropClick(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="tModalTitle">Stop Details</div>
+        <div class="modal-subtitle" id="tModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeTaskModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>
+      <div class="modal-photo" id="tPhotoWrap">
+        <div class="modal-photo-ph" id="tPhotoPh">
+          <i class="fa-solid fa-image"></i>
+          <span>Loading photo…</span>
+        </div>
+        <img id="tModalImg" src="" alt="Task photo" style="display:none;">
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-circle-info"></i> Task Details</div>
+      <div class="modal-grid">
+        <div class="modal-box"><div class="modal-box-label">Report ID</div><div class="modal-box-val" id="tStop">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Status</div><div class="modal-box-val" id="tStatus">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Address</div><div class="modal-box-val" id="tAddr">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Waste Type</div><div class="modal-box-val" id="tType">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Submitted By</div><div class="modal-box-val" id="tCitizen">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Assigned Driver</div><div class="modal-box-val" id="tDriver">—</div></div>
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Report</div>
+      <div class="modal-desc" id="tDesc">—</div>
+      <!-- Mark as Collected button — hidden for already-collected stops -->
+      <div id="tMarkCollectedWrap" style="margin-top:14px; display:none;">
+        <button class="btn-collect-modal" onclick="confirmCollect()">
+          <i class="fa-solid fa-truck"></i> Mark as Collected
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/reports.js"></script>
+<script>
+  var _currentFilter = 'all';
+  var _openReportId  = null;
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : '—'; }
+
+  // Reports assigned to this driver = approved (pending collection) + collected
+  function getTaskReports() {
+    return REPORTS_DB.getAll().filter(function(r) {
+      return r.status === 'approved' || r.status === 'collected';
+    });
+  }
+
+  function updateStats() {
+    var all      = getTaskReports();
+    var done     = all.filter(function(r){ return r.status === 'collected'; }).length;
+    var pending  = all.filter(function(r){ return r.status === 'approved';  }).length;
+    var critical = all.filter(function(r){ return r.status === 'approved' && (r.urgency === 'critical' || r.urgency === 'high'); }).length;
+    var total    = all.length;
+    var pct      = total > 0 ? Math.round(done / total * 100) : 0;
+
+    var el;
+    el = document.getElementById('stat-total');    if (el) el.textContent = total;
+    el = document.getElementById('stat-done');     if (el) el.textContent = done;
+    el = document.getElementById('stat-pending');  if (el) el.textContent = pending;
+    el = document.getElementById('stat-critical'); if (el) el.textContent = critical;
+    el = document.getElementById('prog-fill-bar'); if (el) el.style.width = pct + '%';
+    el = document.getElementById('prog-text');     if (el) el.textContent = done + ' / ' + total + ' stop' + (total !== 1 ? 's' : '');
+
+    var sub = document.getElementById('page-subheader');
+    if (sub) {
+      var session = ZC_DB.getSession();
+      var barangay = (session && session.barangay) ? session.barangay : 'your barangay';
+      sub.textContent = barangay + ' collection schedule — ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+  }
+
+  function renderTasks(filter) {
+    _currentFilter = filter || 'all';
+    var all = getTaskReports();
+    var filtered = all.filter(function(r) {
+      if (_currentFilter === 'pending') return r.status === 'approved';
+      if (_currentFilter === 'done')    return r.status === 'collected';
+      return true;
+    });
+
+    var container = document.getElementById('task-rows');
+    if (!container) return;
+
+    if (filtered.length === 0) {
+      var msg = _currentFilter === 'pending'
+        ? 'All stops have been collected — great work!'
+        : _currentFilter === 'done'
+          ? 'No stops collected yet.'
+          : 'No tasks assigned to you yet. Check back after reports are approved.';
+      container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i>' + msg + '</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(function(r, i) {
+      var isDone   = r.status === 'collected';
+      var rowCls   = isDone ? 'task-row done' : 'task-row';
+      var numCls   = isDone ? '' : 'pending';
+      var badge    = isDone
+        ? '<span class="badge badge-done">Collected</span>'
+        : '<span class="badge badge-pending">Pending</span>';
+
+      // Highlight in-progress look for the first pending stop
+      var firstPending = !isDone && all.filter(function(x){ return x.status === 'approved'; })[0] === r;
+      var rowStyle = firstPending ? ' style="background:var(--green-glow);"' : '';
+
+      return '<div class="' + rowCls + '"' + rowStyle + '>' +
+        '<div class="stop-num ' + numCls + '">' + (i + 1) + '</div>' +
+        '<div>' +
+          '<div class="stop-address">' + esc(r.location) + '</div>' +
+          '<div class="stop-sub">' + esc(r.barangay) + '</div>' +
+        '</div>' +
+        '<div class="waste-type">' + cap(r.wasteType) + '</div>' +
+        '<div class="time-val" style="font-size:11px;">' + esc(r.dateStr) + '</div>' +
+        '<div>' + badge + '</div>' +
+        '<div class="notes-icon">' +
+          '<button class="view-task-btn" onclick="openTaskModal(\'' + esc(r.id) + '\')">View</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function filterTasks(filter, btn) {
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active-filter'); });
+    btn.classList.add('active-filter');
+    renderTasks(filter);
+  }
+
+  function openTaskModal(id) {
+    var r = REPORTS_DB.getById(id);
+    if (!r) return;
+    _openReportId = id;
+
+    var isDone = r.status === 'collected';
+    var badge  = isDone
+      ? '<span class="badge badge-done">Collected</span>'
+      : '<span class="badge badge-pending">Pending</span>';
+
+    document.getElementById('tModalTitle').textContent   = r.location;
+    document.getElementById('tModalSubtitle').textContent = r.barangay + ' · ' + r.dateStr;
+    document.getElementById('tStop').textContent          = '#' + r.id;
+    document.getElementById('tAddr').textContent          = r.location;
+    document.getElementById('tType').textContent          = cap(r.wasteType);
+    document.getElementById('tCitizen').textContent       = r.citizen || '—';
+    document.getElementById('tStatus').innerHTML          = badge;
+    document.getElementById('tDesc').textContent          = r.description || 'No description provided.';
+
+    var session    = ZC_DB.getSession();
+    var driverName = session
+      ? [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ')
+      : 'Driver';
+    document.getElementById('tDriver').textContent = r.assignedDriver || driverName;
+
+    // Photo
+    var img = document.getElementById('tModalImg');
+    var ph  = document.getElementById('tPhotoPh');
+    img.style.display = 'none';
+    ph.style.display  = 'flex';
+    if (r.photo && (r.photo.startsWith('data:') || r.photo.startsWith('http') || r.photo.startsWith('/'))) {
+      ph.querySelector('span').textContent = 'Loading photo…';
+      img.onload  = function() { img.style.display = 'block'; ph.style.display = 'none'; };
+      img.onerror = function() { ph.querySelector('span').textContent = 'Photo not available'; };
+      img.src = r.photo;
+    } else {
+      ph.querySelector('i').className = 'fa-solid fa-camera';
+      ph.querySelector('span').textContent = 'No photo submitted';
+    }
+
+    // Show / hide Mark as Collected button
+    document.getElementById('tMarkCollectedWrap').style.display = isDone ? 'none' : 'block';
+
+    document.getElementById('taskModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTaskModal() {
+    document.getElementById('taskModal').classList.remove('open');
+    document.body.style.overflow = '';
+    _openReportId = null;
+  }
+
+  function confirmCollect() {
+    if (!_openReportId) return;
+    var session    = ZC_DB.getSession();
+    var driverName = session
+      ? [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ')
+      : 'Driver';
+    REPORTS_DB.collect(_openReportId, driverName);
+    closeTaskModal();
+    renderTasks(_currentFilter);
+    updateStats();
+  }
+
+  function handleBackdropClick(e) {
+    if (e.target === document.getElementById('taskModal')) closeTaskModal();
+  }
+
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeTaskModal(); });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Today's date label
+    var todayEl = document.getElementById('today-date');
+    if (todayEl) {
+      todayEl.textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    // Sidebar driver name from session
+    var session = ZC_DB.getSession();
+    if (session) {
+      var fullName = [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ');
+      var nameEl = document.getElementById('sidebarDriverName');
+      var roleEl = document.getElementById('sidebarDriverRole');
+      if (nameEl) nameEl.textContent = fullName || 'Driver';
+      if (roleEl) roleEl.textContent = 'Collection Driver' + (session.barangay ? ' · ' + session.barangay : '');
+    }
+
+    renderTasks('all');
+    updateStats();
+  });
+</script>
+
+</body>
+</html>

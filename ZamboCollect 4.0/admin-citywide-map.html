@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City-Wide Map — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <style>
+    .map-container {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+    .map-filter-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .map-filter-btn.active, .map-filter-btn:hover {
+      background: var(--primary-glow);
+      border-color: var(--primary-tint);
+      color: var(--primary);
+    }
+    .map-body {
+      position: relative;
+      height: 460px;
+      overflow: hidden;
+    }
+    #citywide-map { width: 100%; height: 100%; }
+
+    
+    .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .map-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .hotspot-table .table-wrap {
+      margin-bottom: 0;
+    }
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .barangay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .bgy-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .bgy-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .bgy-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .bgy-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .bgy-rate { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 22px; }
+    .bgy-bar-bg { height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; margin-top: 8px; }
+    .bgy-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; }
+    .col-rate { font-family: 'Outfit', sans-serif; font-weight: 700; }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"   class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-gear"></i></div>
+        <div>
+          <div class="user-name">Admin User</div>
+          <div class="user-role">City Administrator — Zamboanga City</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">City-Wide Map</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>City-Wide Map</h1>
+        <p>Real-time hotspot and collection status view — Zamboanga City.</p>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="map-stats-row">
+        <div class="stat-card stat-red">
+          <span class="stat-icon"><i class="fa-solid fa-fire"></i></span>
+          <div class="stat-num red">17</div>
+          <div class="stat-label">Active Hotspots</div>
+          <span class="stat-trend trend-down">↑ 4 new today</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
+          <div class="stat-num blue">34</div>
+          <div class="stat-label">Trucks On Route</div>
+          <span class="stat-trend trend-up">All operational</span>
+        </div>
+        <div class="stat-card stat-yellow">
+          <span class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+          <div class="stat-num yellow">487</div>
+          <div class="stat-label">Pending Reports</div>
+          <span class="stat-trend">Across 98 barangays</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <div class="stat-num green">91%</div>
+          <div class="stat-label">City Collection Rate</div>
+          <span class="stat-trend trend-up">↑ 1.8% vs last week</span>
+        </div>
+      </div>
+
+      <!-- Map viewer -->
+      <div class="map-container">
+        <div class="map-toolbar">
+          <span style="font-size:12px;font-weight:700;color:var(--text2);margin-right:4px;">Show:</span>
+          <button class="map-filter-btn active" data-layer="hotspot"><i class="fa-solid fa-fire"></i> Hotspots</button>
+          <button class="map-filter-btn" data-layer="truck"><i class="fa-solid fa-truck"></i> Trucks</button>
+          <button class="map-filter-btn" data-layer="report"><i class="fa-solid fa-clipboard-list"></i> Reports</button>
+          <button class="map-filter-btn" data-layer="collected"><i class="fa-solid fa-circle-check"></i> Collected</button>
+          <button class="map-filter-btn" data-layer="barangay"><i class="fa-solid fa-house"></i> Barangays</button>
+          <div style="margin-left:auto;display:flex;gap:8px;">
+            <button class="map-filter-btn">⊕ Zoom In</button>
+            <button class="map-filter-btn">⊖ Zoom Out</button>
+          </div>
+        </div>
+
+        <div class="map-body">
+          <div id="citywide-map"></div>
+        </div>
+      </div>
+
+      <!-- Hotspot table + barangay rates side by side -->
+      <div class="grid-2">
+        <!-- Hotspot table -->
+        <div class="card">
+          <div class="card-title">Active Hotspots</div>
+          <div class="table-wrap" style="margin-bottom:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Location</th>
+                  <th>Barangay</th>
+                  <th>Reports</th>
+                  <th>Priority</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Waterfront Market</td>
+                  <td>Rio Hondo</td>
+                  <td><strong style="color:var(--red);">47</strong></td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Canelar Market</td>
+                  <td>Canelar</td>
+                  <td><strong style="color:var(--red);">38</strong></td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Pasonanca Road</td>
+                  <td>Guiwan</td>
+                  <td><strong style="color:var(--yellow);">22</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Tetuan Public Market</td>
+                  <td>Tetuan</td>
+                  <td><strong style="color:var(--yellow);">19</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Tumaga River Bank</td>
+                  <td>Tumaga</td>
+                  <td><strong style="color:var(--yellow);">14</strong></td>
+                  <td><span class="badge badge-yellow">Urgent</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+                <tr>
+                  <td>Talon-talon Bridge</td>
+                  <td>Talon-talon</td>
+                  <td><strong style="color:var(--muted);">9</strong></td>
+                  <td><span class="badge badge-sage">Normal</span></td>
+                  <td><a href="admin-all-reports.html" class="action-btn">View</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top barangay collection rates -->
+        <div class="card">
+          <div class="card-title">Barangay Collection Rates
+            <a href="admin-barangays.html" style="font-size:12px;font-weight:500;color:var(--primary);background:var(--primary-glow);padding:4px 10px;border-radius:6px;border:1px solid var(--primary-tint);">View All</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Guiwan</span>
+                <span style="font-size:13px;font-weight:700;color:var(--primary);">95%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:95%;background:var(--primary);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Sta. Cruz</span>
+                <span style="font-size:13px;font-weight:700;color:var(--primary);">92%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:92%;background:var(--primary);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Pasonanca</span>
+                <span style="font-size:13px;font-weight:700;color:var(--blue);">88%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:88%;background:var(--blue);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Tetuan</span>
+                <span style="font-size:13px;font-weight:700;color:var(--yellow);">74%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:74%;background:var(--yellow);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Canelar</span>
+                <span style="font-size:13px;font-weight:700;color:var(--yellow);">68%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:68%;background:var(--yellow);"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:var(--text);">Rio Hondo</span>
+                <span style="font-size:13px;font-weight:700;color:var(--red);">54%</span>
+              </div>
+              <div class="bgy-bar-bg"><div class="bgy-bar-fill" style="width:54%;background:var(--red);"></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  var cityMap, heatmapLayer, markersLayer = [];
+
+  var BARANGAYS = [
+    { name: 'Rio Hondo',   lat: 6.9167, lng: 122.0833, reports: 47, status: 'critical', truck: null },
+    { name: 'Canelar',     lat: 6.9100, lng: 122.0750, reports: 38, status: 'critical', truck: null },
+    { name: 'Guiwan',      lat: 6.9300, lng: 122.0667, reports: 22, status: 'urgent',   truck: 'Truck #03' },
+    { name: 'Tetuan',      lat: 6.9400, lng: 122.0933, reports: 19, status: 'urgent',   truck: null },
+    { name: 'Sta. Cruz',   lat: 6.8880, lng: 122.0760, reports:  6, status: 'ok',       truck: 'Truck #07' },
+    { name: 'Pasonanca',   lat: 6.9850, lng: 122.0400, reports:  4, status: 'ok',       truck: 'Truck #02' },
+    { name: 'Talon-talon', lat: 6.8650, lng: 122.0750, reports:  9, status: 'normal',   truck: 'Truck #05' },
+    { name: 'Tumaga',      lat: 6.9650, lng: 122.1100, reports:  5, status: 'ok',       truck: 'Truck #09' },
+  ];
+
+  var HOTSPOT_HEAT = [
+    // Rio Hondo cluster
+    {lat:6.9167,lng:122.0833,w:60},{lat:6.9175,lng:122.0841,w:45},{lat:6.9155,lng:122.0825,w:38},{lat:6.9180,lng:122.0820,w:30},
+    // Canelar cluster
+    {lat:6.9100,lng:122.0750,w:50},{lat:6.9108,lng:122.0758,w:35},{lat:6.9092,lng:122.0742,w:28},
+    // Guiwan cluster
+    {lat:6.9300,lng:122.0667,w:28},{lat:6.9308,lng:122.0675,w:18},
+    // Tetuan cluster
+    {lat:6.9400,lng:122.0933,w:24},{lat:6.9390,lng:122.0920,w:15},
+    // Talon-talon
+    {lat:6.8650,lng:122.0750,w:12},{lat:6.8660,lng:122.0760,w:8},
+    // Tumaga
+    {lat:6.9650,lng:122.1100,w:8},{lat:6.9640,lng:122.1090,w:5},
+    // Sta. Cruz
+    {lat:6.8880,lng:122.0760,w:7},
+    // Pasonanca
+    {lat:6.9850,lng:122.0400,w:5},
+  ];
+
+  var STATUS_COLORS = { critical:'#c0392b', urgent:'#c08a10', normal:'#2563eb', ok:'#588157' };
+
+  function initCitywideMap() {
+    cityMap = new google.maps.Map(document.getElementById('citywide-map'), {
+      center: { lat: 6.9214, lng: 122.0790 },
+      zoom: 13,
+      mapTypeControl: true,
+      mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+      streetViewControl: false,
+      fullscreenControl: true,
+    });
+
+    // Heatmap layer
+    var heatData = HOTSPOT_HEAT.map(function(p) {
+      return { location: new google.maps.LatLng(p.lat, p.lng), weight: p.w };
+    });
+    heatmapLayer = new google.maps.visualization.HeatmapLayer({
+      data: heatData,
+      map: cityMap,
+      radius: 40,
+      opacity: 0.7,
+      gradient: ['rgba(0,0,0,0)','rgba(255,255,0,0.6)','rgba(255,140,0,0.8)','rgba(192,57,43,1)']
+    });
+
+    // Barangay markers
+    BARANGAYS.forEach(function(b) {
+      var marker = new google.maps.Marker({
+        position: { lat: b.lat, lng: b.lng },
+        map: cityMap,
+        title: b.name,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: STATUS_COLORS[b.status] || '#588157',
+          fillOpacity: 0.95,
+          strokeColor: '#fff',
+          strokeWeight: 2
+        },
+        label: { text: String(b.reports), color: '#fff', fontSize: '9px', fontWeight: '700' }
+      });
+
+      var infoContent = '<div style="font-family:sans-serif;padding:4px 2px;min-width:160px;">'
+        + '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">' + b.name + '</div>'
+        + '<div style="font-size:12px;color:#555;margin-bottom:2px;"><strong>' + b.reports + '</strong> active reports</div>'
+        + (b.truck ? '<div style="font-size:12px;color:#2563eb;">🚛 ' + b.truck + ' on route</div>' : '<div style="font-size:12px;color:#888;">No truck assigned</div>')
+        + '</div>';
+
+      var infoWindow = new google.maps.InfoWindow({ content: infoContent });
+      marker.addListener('click', function() { infoWindow.open(cityMap, marker); });
+      markersLayer.push(marker);
+    });
+
+    // Truck markers
+    var TRUCKS = [
+      { lat: 6.9220, lng: 122.0870, label: 'T4',  name: 'Truck #04 — Rio Hondo' },
+      { lat: 6.8930, lng: 122.0768, label: 'T7',  name: 'Truck #07 — Sta. Cruz' },
+      { lat: 6.9338, lng: 122.0532, label: 'T2',  name: 'Truck #02 — Pasonanca' },
+      { lat: 6.8670, lng: 122.0760, label: 'T5',  name: 'Truck #05 — Talon-talon' },
+    ];
+    TRUCKS.forEach(function(t) {
+      var tm = new google.maps.Marker({
+        position: { lat: t.lat, lng: t.lng },
+        map: null,
+        title: t.name,
+        icon: { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="6" fill="#2563eb"/><text x="14" y="19" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">' + t.label + '</text></svg>'), scaledSize: new google.maps.Size(28,28) },
+      });
+      tm.set('layerType','truck');
+      markersLayer.push(tm);
+    });
+
+    wireFilterButtons();
+  }
+
+  function wireFilterButtons() {
+    document.querySelectorAll('.map-filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var txt = this.textContent.trim();
+        var layer = this.dataset.layer;
+        if (txt.includes('Zoom In'))  { cityMap.setZoom(Math.min(cityMap.getZoom()+1, 20)); return; }
+        if (txt.includes('Zoom Out')) { cityMap.setZoom(Math.max(cityMap.getZoom()-1, 3));  return; }
+        document.querySelectorAll('.map-filter-btn').forEach(function(b) {
+          if (!b.textContent.includes('Zoom')) b.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        // Reset all layers first
+        heatmapLayer.setMap(null);
+        markersLayer.forEach(function(m) { m.setMap(null); });
+
+        if (layer === 'hotspot') {
+          heatmapLayer.setMap(cityMap);
+          markersLayer.forEach(function(m) { if (!m.get('layerType')) m.setMap(cityMap); });
+        } else if (layer === 'truck') {
+          markersLayer.forEach(function(m) { if (m.get('layerType') === 'truck') m.setMap(cityMap); });
+        } else if (layer === 'report' || layer === 'collected') {
+          markersLayer.forEach(function(m) { if (!m.get('layerType')) m.setMap(cityMap); });
+        } else if (layer === 'barangay') {
+          heatmapLayer.setMap(cityMap);
+          markersLayer.forEach(function(m) { if (!m.get('layerType')) m.setMap(cityMap); });
+        }
+      });
+    });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU&libraries=visualization&callback=initCitywideMap" async defer></script>
+</body>
+</html>
