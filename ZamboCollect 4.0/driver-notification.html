@@ -9,6 +9,7 @@
 </head>
 <body>
 
+
 <div class="app-shell">
 
   <!-- SIDEBAR -->
@@ -27,15 +28,12 @@
     <div class="sidebar-section">
       <div class="sidebar-label">Operations</div>
       <a href="dashboard-driver.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
-    
-      
     </div>
-
-    <div class="sidebar-section">
+   <div class="sidebar-section">
       <div class="sidebar-label">Account</div>
       <a href="driver-notification.html" class="nav-item active">
         <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
-        Notifications <span class="nav-badge">2</span>
+        Notifications
       </a>
       <a href="driver-profile.html" class="nav-item">
         <span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile
@@ -53,9 +51,7 @@
           <div class="user-role">Collection Driver</div>
         </div>
       </div>
-      <a href="Login.html" class="logout-link">
-        <span><i class="fa-solid fa-right-from-bracket"></i></span> Logout
-      </a>
+      <a href="#" class="logout-link" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
     </div>
   </aside>
 
@@ -74,7 +70,7 @@
         
           <li><a href="driver-notification.html" class="active"><i class="fa-solid fa-bell"></i> Notifications</a></li>
           <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
-          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+          <li><a href="#" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         </ul>
       </nav>
       <div class="topbar-title">Notifications</div>
@@ -100,18 +96,25 @@
 
       <!-- Filter chips -->
       <div class="filter-chips">
-        <a href="#" class="filter-chip active">All (5)</a>
-        <a href="#" class="filter-chip">New Route</a>
-        <a href="#" class="filter-chip">Route Updated</a>
-        <a href="#" class="filter-chip">Cancelled</a>
+        <button class="filter-chip active" data-filter="all">All (5)</button>
+        <button class="filter-chip" data-filter="new-route">New Route</button>
+        <button class="filter-chip" data-filter="updated">Route Updated</button>
+        <button class="filter-chip" data-filter="cancelled">Cancelled</button>
+        <button class="filter-chip" data-filter="completed">Completed</button>
+      </div>
+
+      <!-- Empty state (hidden by default) -->
+      <div class="notif-empty" id="notifEmpty" style="display:none;">
+        <div class="notif-empty-icon"><i class="fa-solid fa-bell-slash"></i></div>
+        <div class="notif-empty-text">No notifications in this category.</div>
       </div>
 
       <!-- TODAY -->
-      <div class="notif-group">
+      <div class="notif-group" data-group>
         <div class="notif-group-label">Today — Mar 14, 2026</div>
         <div class="notif-list">
 
-          <a href="dashboard-driver.html" class="notif-item unread">
+          <a href="driver-route.html" class="notif-item unread" data-category="new-route">
             <div class="notif-icon-wrap blue">🗺</div>
             <div class="notif-body">
               <div class="notif-title">New route assigned — Rio Hondo Zone A</div>
@@ -123,7 +126,7 @@
             </div>
           </a>
 
-          <a href="dashboard-driver.html" class="notif-item unread">
+          <a href="driver-route.html" class="notif-item unread" data-category="updated">
             <div class="notif-icon-wrap yellow">⚠️</div>
             <div class="notif-body">
               <div class="notif-title">Route #R-042 updated — Stop order changed</div>
@@ -139,11 +142,11 @@
       </div>
 
       <!-- YESTERDAY -->
-      <div class="notif-group">
+      <div class="notif-group" data-group>
         <div class="notif-group-label">Yesterday — Mar 13, 2026</div>
         <div class="notif-list">
 
-          <a href="#" class="notif-item">
+          <a href="#" class="notif-item" data-category="cancelled">
             <div class="notif-icon-wrap red">🚫</div>
             <div class="notif-body">
               <div class="notif-title">Stop cancelled — Sta. Cruz Wharf</div>
@@ -155,7 +158,7 @@
             </div>
           </a>
 
-          <a href="#" class="notif-item">
+          <a href="#" class="notif-item" data-category="completed">
             <div class="notif-icon-wrap green">✅</div>
             <div class="notif-body">
               <div class="notif-title">Route #R-041 completed</div>
@@ -171,11 +174,11 @@
       </div>
 
       <!-- EARLIER -->
-      <div class="notif-group">
+      <div class="notif-group" data-group>
         <div class="notif-group-label">Earlier this week</div>
         <div class="notif-list">
 
-          <a href="#" class="notif-item">
+          <a href="#" class="notif-item" data-category="new-route">
             <div class="notif-icon-wrap blue">🗺</div>
             <div class="notif-body">
               <div class="notif-title">New route assigned — Talisay–Mabini Zone</div>
@@ -194,5 +197,42 @@
   </div>
 
 </div>
+<script>
+(function () {
+  const chips  = document.querySelectorAll('.filter-chip');
+  const items  = document.querySelectorAll('.notif-item');
+  const groups = document.querySelectorAll('[data-group]');
+  const empty  = document.getElementById('notifEmpty');
+
+  function applyFilter(filter) {
+    let anyVisible = false;
+
+    items.forEach(item => {
+      const cat  = item.getAttribute('data-category');
+      const show = filter === 'all' || cat === filter;
+      item.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+
+    // Hide date-group headers when all their items are hidden
+    groups.forEach(group => {
+      const hasVisible = Array.from(group.querySelectorAll('.notif-item'))
+                              .some(i => i.style.display !== 'none');
+      group.style.display = hasVisible ? '' : 'none';
+    });
+
+    empty.style.display = anyVisible ? 'none' : 'flex';
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', function () {
+      chips.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      applyFilter(this.getAttribute('data-filter'));
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
