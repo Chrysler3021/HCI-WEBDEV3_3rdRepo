@@ -183,6 +183,10 @@ body::after {
   text-align: center;
   flex-shrink: 0;
 }
+.nav-badge {
+  margin-left: auto; background: var(--red); color: #fff;
+  border-radius: 100px; padding: 1px 7px; font-size: 10px; font-weight: 700;
+}
 
 /* ===================================================
    SIDEBAR FOOTER
