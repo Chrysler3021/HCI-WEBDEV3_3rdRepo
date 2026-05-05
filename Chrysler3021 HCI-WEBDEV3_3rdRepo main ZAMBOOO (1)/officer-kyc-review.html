@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — KYC Review</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .kyc-doc-viewer {
+      display: flex; align-items: center; gap: 14px; justify-content: space-between;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .kyc-doc-pagination {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+    }
+  </style>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <aside class="sidebar" role="navigation" aria-label="Officer navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal — Rio Hondo</div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html" class="nav-item active" aria-current="page">
+          <span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review
+          <span class="nav-badge badge-yellow">5</span>
+        </a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-density-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="officer-manage-drivers.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span> Driver Applications <span class="nav-badge badge-yellow">3</span></a>
+        <a href="officer-manage-users.html"   class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Users &amp; Accounts</a>
+        <a href="officer-analytics.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile
+        </a>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div>
+          <div class="user-name" id="sidebar-user-name">Maria Santos</div>
+          <div class="user-role" id="sidebar-user-role">Officer · Rio Hondo</div>
+        </div>
+      </a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </label>
+        <span class="topbar-title">KYC Review</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+        <a href="#" class="topbar-btn primary">+ Add Checkpoint</a>
+      </div>
+    </div>
+
+    <div class="page active" role="main">
+      <div class="page-header">
+        <h1 id="kyc-page-heading">KYC Review</h1>
+        <p>Review and approve or reject citizen verification applications for your assigned barangay.</p>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-row" id="kyc-filter-chips">
+        <button class="filter-chip active" data-filter="pending">Pending (<span id="count-pending">—</span>)</button>
+        <button class="filter-chip" data-filter="verified">Approved (<span id="count-verified">—</span>)</button>
+        <button class="filter-chip" data-filter="rejected">Rejected (<span id="count-rejected">—</span>)</button>
+      </div>
+
+      <!-- KYC Cards Container -->
+      <div id="kyc-cards-container"></div>
+
+      <!-- Pagination -->
+      <div id="kyc-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:28px;padding:20px;border-top:1.5px solid var(--border);"></div>
+
+    </div><!-- /page -->
+  </main>
+</div><!-- /app-shell -->
+
+<!-- Approve KYC Confirmation Modal -->
+<div class="modal-overlay hidden" id="modal-approveKYC">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-shield-check" style="color:#16a34a;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Verify KYC Application</div>
+    </div>
+    <div class="modal-sub">Are you sure you want to verify <strong id="approve-kyc-name">this applicant</strong>? This will grant them full verified citizen access on ZamboCollect.</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin:12px 0;display:flex;align-items:flex-start;gap:8px;">
+      <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;"></i>
+      <span>Once approved, the citizen's account will be marked as <strong>Verified</strong> and they will be notified via the app.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-approveKYC').classList.add('hidden')" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-green btn-sm" id="approve-kyc-confirm-btn" style="flex:1;">✓ Yes, Verify →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject KYC Modal -->
+<div class="modal-overlay hidden" id="modal-rejectKYC">
+  <div class="modal">
+    <div class="modal-title">Reject KYC Application</div>
+    <div class="modal-sub">Provide a reason for rejection. <strong id="reject-kyc-name"></strong> will be notified and can resubmit with corrections.</div>
+    <div class="form-group">
+      <label>Rejection Reason (required)</label>
+      <select id="reject-reason-select">
+        <option value="">— Select reason —</option>
+        <option>ID image is blurry or unclear</option>
+        <option>Selfie does not clearly show ID</option>
+        <option>ID appears expired</option>
+        <option>Name on ID does not match registration</option>
+        <option>ID is not a valid government-issued document</option>
+        <option>Suspected fraudulent document</option>
+        <option>Incomplete information provided</option>
+        <option>Other</option>
+      </select>
+      <div id="reject-reason-error" style="display:none;font-size:12px;color:#dc2626;margin-top:5px;font-weight:600;"><i class="fa-solid fa-circle-exclamation"></i> Please select a reason.</div>
+    </div>
+    <div class="form-group">
+      <label>Additional Notes</label>
+      <textarea id="reject-notes" placeholder="Provide specific instructions for resubmission…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-rejectKYC').classList.add('hidden')" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-red btn-sm" id="reject-confirm-btn" style="flex:1;">Reject &amp; Notify →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ── localStorage helpers ────────────────────────────────────
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('zc_users')) || []; }
+  catch(e) { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem('zc_users', JSON.stringify(users));
+}
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('zc_session')); }
+  catch(e) { return null; }
+}
+
+// ── Officer context ─────────────────────────────────────────
+var session = getSession();
+var officerBarangay = (session && session.barangay) ? session.barangay : '';
+var officerName = session ? ((session.firstName || '') + ' ' + (session.lastName || '')).trim() : 'Officer';
+
+if (officerName) {
+  var sn = document.getElementById('sidebar-user-name');
+  if (sn) sn.textContent = officerName;
+}
+if (officerBarangay) {
+  var sr = document.getElementById('sidebar-user-role');
+  if (sr) sr.textContent = 'Officer · ' + officerBarangay;
+  var ri = document.querySelector('.role-indicator');
+  if (ri) ri.innerHTML = '<i class="fa-solid fa-landmark"></i> Officer Portal — ' + officerBarangay;
+  var ph = document.getElementById('kyc-page-heading');
+  if (ph) ph.textContent = 'KYC Review — Barangay ' + officerBarangay;
+}
+
+// ── State ───────────────────────────────────────────────────
+var kycFilter     = 'pending';
+var currentPage   = 1;
+var PAGE_SIZE     = 5;
+var pendingUserId = null;
+
+// ── Helpers ─────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+// ── Load citizens by kycStatus ──────────────────────────────
+function loadCitizens(status) {
+  var users = getUsers();
+  var result = [];
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i];
+    if (u.role !== 'citizen') continue;
+    if (u.kycStatus !== status) continue;
+    result.push(u);
+  }
+  result.sort(function(a, b) {
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+  return result;
+}
+
+// ── Update filter chip counts ───────────────────────────────
+function updateCounts() {
+  var pending  = loadCitizens('pending').length;
+  var verified = loadCitizens('verified').length;
+  var rejected = loadCitizens('rejected').length;
+  document.getElementById('count-pending').textContent  = pending;
+  document.getElementById('count-verified').textContent = verified;
+  document.getElementById('count-rejected').textContent = rejected;
+  var navBadge = document.querySelector('a[href="officer-kyc-review.html"] .nav-badge');
+  if (navBadge) navBadge.textContent = pending;
+}
+
+// ── Build one KYC card ──────────────────────────────────────
+function buildCard(u) {
+  var name    = (u.firstName || '') + ' ' + (u.lastName || '');
+  var address = u.fullAddress || u.address || (u.barangay ? u.barangay + ', Zamboanga City' : '—');
+  var phone   = u.phone || '—';
+  var joined  = fmtDate(u.createdAt);
+  var brgy    = u.barangay || '—';
+
+  var badge = u.kycStatus === 'pending'
+    ? '<span class="badge badge-yellow">Pending</span>'
+    : u.kycStatus === 'verified'
+    ? '<span class="badge badge-green">Approved</span>'
+    : '<span class="badge badge-red">Rejected</span>';
+
+  var extra = '';
+  if (u.kycStatus === 'pending') {
+    extra = '<div class="kyc-actions">' +
+      '<button class="btn btn-green btn-sm" onclick="showApproveConfirm(\'' + esc(u.id) + '\',\'' + esc(name) + '\')">✓ Approve KYC</button>' +
+      '<button class="btn btn-red btn-sm" onclick="showRejectModal(\'' + esc(u.id) + '\',\'' + esc(name) + '\')">✗ Reject</button>' +
+    '</div>';
+  } else if (u.kycStatus === 'rejected' && u.kycRejectReason) {
+    extra = '<div style="background:#fff1f2;border:1.5px solid #fecdd3;border-radius:8px;padding:9px 13px;font-size:12px;color:#9f1239;margin-top:4px;">' +
+      '<i class="fa-solid fa-ban" style="margin-right:5px;"></i><strong>Rejected:</strong> ' + esc(u.kycRejectReason) +
+      (u.kycRejectNote ? ' — ' + esc(u.kycRejectNote) : '') +
+    '</div>';
+  }
+
+  return '<div class="kyc-review-card">' +
+    '<div class="kyc-user">' +
+      '<div class="kyc-avatar"><i class="fa-solid fa-circle-user"></i></div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div class="kyc-user-name">' + esc(name) + '</div>' +
+        '<div class="kyc-user-info">📍 ' + esc(brgy) + ' · Submitted ' + joined + '</div>' +
+      '</div>' +
+      badge +
+    '</div>' +
+    '<p class="kyc-meta"><strong>Address:</strong> ' + esc(address) + ' &nbsp;|&nbsp; <strong>Contact:</strong> ' + esc(phone) + '</p>' +
+    '<div class="kyc-doc-viewer" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;">' +
+      '<i class="fa-solid fa-circle-info" style="color:var(--muted);flex-shrink:0;"></i>' +
+      '<span style="font-size:12px;color:var(--muted);font-style:italic;">No documents attached — citizens do not upload files in this version.</span>' +
+    '</div>' +
+    extra +
+  '</div>';
+}
+
+// ── Render cards for current filter + page ──────────────────
+function renderCards() {
+  var users = loadCitizens(kycFilter);
+  var total = users.length;
+  var pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > pages) currentPage = pages;
+
+  var start     = (currentPage - 1) * PAGE_SIZE;
+  var pageUsers = users.slice(start, start + PAGE_SIZE);
+
+  var container = document.getElementById('kyc-cards-container');
+  if (pageUsers.length === 0) {
+    var msgs = {
+      pending:  'No pending KYC applications.',
+      verified: 'No approved KYC applications yet.',
+      rejected: 'No rejected KYC applications.'
+    };
+    container.innerHTML =
+      '<div style="text-align:center;padding:48px 20px;color:var(--muted);">' +
+        '<i class="fa-solid fa-id-card" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3;"></i>' +
+        '<div style="font-size:14px;font-weight:600;">' + (msgs[kycFilter] || 'Nothing here.') + '</div>' +
+        '<div style="font-size:12px;margin-top:6px;">Citizens appear here automatically when they register with a pending KYC status.</div>' +
+      '</div>';
+  } else {
+    container.innerHTML = pageUsers.map(buildCard).join('');
+  }
+
+  renderPagination(total, pages);
+  updateCounts();
+}
+
+// ── Pagination ──────────────────────────────────────────────
+function renderPagination(total, pages) {
+  var wrap = document.getElementById('kyc-pagination');
+  if (!wrap) return;
+  if (total === 0) { wrap.innerHTML = ''; return; }
+
+  var prevDis = currentPage === 1;
+  var nextDis  = currentPage === pages;
+  wrap.innerHTML =
+    '<button class="btn btn-outline btn-sm" id="kyc-prev" ' + (prevDis ? 'disabled' : '') + ' style="min-width:100px;opacity:' + (prevDis ? '0.45' : '1') + '"><i class="fa-solid fa-chevron-left"></i> Previous</button>' +
+    '<div style="font-size:13px;color:var(--muted);font-weight:600;min-width:120px;text-align:center;">Page ' + currentPage + ' of ' + pages + '</div>' +
+    '<button class="btn btn-outline btn-sm" id="kyc-next" ' + (nextDis ? 'disabled' : '') + ' style="min-width:100px;opacity:' + (nextDis ? '0.45' : '1') + '">Next <i class="fa-solid fa-chevron-right"></i></button>';
+
+  if (!prevDis) {
+    document.getElementById('kyc-prev').addEventListener('click', function() {
+      currentPage--;
+      renderCards();
+      document.getElementById('kyc-cards-container').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+  if (!nextDis) {
+    document.getElementById('kyc-next').addEventListener('click', function() {
+      currentPage++;
+      renderCards();
+      document.getElementById('kyc-cards-container').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+}
+
+// ── Filter chip click ───────────────────────────────────────
+document.getElementById('kyc-filter-chips').addEventListener('click', function(e) {
+  var chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  kycFilter = chip.getAttribute('data-filter');
+  document.querySelectorAll('#kyc-filter-chips .filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  currentPage = 1;
+  renderCards();
+});
+
+// ── Approve KYC ─────────────────────────────────────────────
+function showApproveConfirm(userId, name) {
+  pendingUserId = userId;
+  document.getElementById('approve-kyc-name').textContent = name;
+  document.getElementById('modal-approveKYC').classList.remove('hidden');
+}
+
+document.getElementById('approve-kyc-confirm-btn').addEventListener('click', function() {
+  if (!pendingUserId) return;
+  var users = getUsers();
+  var name = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === pendingUserId) {
+      users[i].kycStatus = 'verified';
+      name = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      break;
+    }
+  }
+  saveUsers(users);
+  document.getElementById('modal-approveKYC').classList.add('hidden');
+  pendingUserId = null;
+  renderCards();
+  showToast(name + '\'s KYC approved. ✅');
+});
+
+// ── Reject KYC ──────────────────────────────────────────────
+function showRejectModal(userId, name) {
+  pendingUserId = userId;
+  document.getElementById('reject-kyc-name').textContent = name;
+  document.getElementById('reject-reason-select').value = '';
+  document.getElementById('reject-notes').value = '';
+  document.getElementById('reject-reason-error').style.display = 'none';
+  document.getElementById('modal-rejectKYC').classList.remove('hidden');
+}
+
+document.getElementById('reject-confirm-btn').addEventListener('click', function() {
+  var reason = document.getElementById('reject-reason-select').value;
+  if (!reason) {
+    document.getElementById('reject-reason-error').style.display = 'block';
+    return;
+  }
+  if (!pendingUserId) return;
+  var users = getUsers();
+  var name = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === pendingUserId) {
+      users[i].kycStatus       = 'rejected';
+      users[i].kycRejectReason = reason;
+      users[i].kycRejectNote   = document.getElementById('reject-notes').value.trim() || null;
+      name = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      break;
+    }
+  }
+  saveUsers(users);
+  document.getElementById('modal-rejectKYC').classList.add('hidden');
+  pendingUserId = null;
+  renderCards();
+  showToast('KYC rejected. ' + name + ' has been notified. ✗');
+});
+
+document.getElementById('reject-reason-select').addEventListener('change', function() {
+  document.getElementById('reject-reason-error').style.display = 'none';
+});
+
+// ── Modal overlay close ─────────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e){ if (e.target === this) this.classList.add('hidden'); });
+});
+
+// ── Toast ───────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+// ── Init ────────────────────────────────────────────────────
+renderCards();
+</script>
+</body>
+</html>
