@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Driver Dashboard — ZamboCollect</title>
+<link rel="stylesheet" href="css/driver.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ── Tabs ── */
+.page-tabs {
+  display: flex; gap: 4px; margin-bottom: 28px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 5px;
+}
+.tab-btn {
+  flex: 1; padding: 9px 16px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; border: none; background: transparent; color: var(--muted);
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tab-btn:hover { color: var(--text); background: var(--surface2); }
+.tab-btn.active { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(88,129,87,0.3); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: pageIn 0.2s ease; }
+
+/* ── Nav badge ── */
+.nav-badge {
+  margin-left: auto; background: var(--red); color: #fff;
+  border-radius: 100px; padding: 1px 7px; font-size: 10px; font-weight: 700;
+}
+
+/* ── Report cards ── */
+.report-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; margin-bottom: 12px;
+  box-shadow: var(--shadow-sm); overflow: visible;
+}
+.report-card-body { padding: 16px 20px; }
+.report-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+.report-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.report-icon.household    { background: #dcfce7; color: #16a34a; }
+.report-icon.commercial   { background: #fef3c7; color: #d97706; }
+.report-icon.illegal      { background: #fee2e2; color: var(--red); }
+.report-icon.construction { background: #dbeafe; color: #2563eb; }
+.report-icon.hazardous    { background: #fce7f3; color: #be185d; }
+.report-icon.other        { background: #f3f4f6; color: #6b7280; }
+.report-id  { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.report-loc { font-size: 14px; font-weight: 700; color: var(--text); margin: 1px 0; }
+.report-meta { font-size: 12px; color: var(--muted); }
+.report-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.btn-view-rpt {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  color: var(--text); cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-view-rpt:hover { border-color: var(--green); color: var(--green); }
+
+.btn-collect-rpt {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: var(--green); color: #fff; border: none;
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-collect-rpt:hover { background: var(--green-dim); transform: translateY(-1px); }
+
+/* ── Report drawer ── */
+.report-drawer {
+  display: none; border-top: 1.5px dashed var(--border);
+  background: var(--surface2); border-radius: 0 0 12px 12px; padding: 18px 20px 20px;
+}
+.report-drawer.open { display: block; }
+
+.drawer-photo {
+  width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
+  background: var(--surface3); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border);
+}
+.drawer-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.drawer-photo-ph {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; color: var(--muted); font-size: 13px;
+}
+.drawer-photo-ph i { font-size: 2rem; }
+
+.drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.drawer-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+.drawer-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.drawer-box-val   { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.drawer-desc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px;
+  color: var(--text); line-height: 1.6; margin-bottom: 14px;
+}
+.drawer-section-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.drawer-footer {
+  display: flex; gap: 8px; padding-top: 14px; border-top: 1.5px solid var(--border);
+}
+.drawer-close-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--muted); cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+}
+.drawer-close-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── Card states ── */
+.card-approved  { border-color: rgba(88,129,87,0.35); background: linear-gradient(135deg,#f8faf7,var(--surface)); }
+.card-collected { border-color: rgba(88,129,87,0.2); opacity: 0.8; }
+
+/* ── Urgency chips ── */
+.urg-low      { background:#dcfce7; color:#16a34a; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-medium   { background:#fef3c7; color:#d97706; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-high     { background:#ffedd5; color:#ea580c; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-critical { background:#fee2e2; color:#dc2626; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+
+/* ── Section divider ── */
+.section-divider {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; border-bottom: 1.5px solid var(--border); margin-bottom: 12px;
+}
+
+/* ── Collect modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--surface); border-radius: 16px; padding: 24px;
+  max-width: 460px; width: 100%; box-shadow: var(--shadow-lg);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+.modal-sub   { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 14px; }
+.modal-info  {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px;
+  font-weight: 600; color: var(--text); margin-bottom: 16px;
+}
+.modal-actions { display: flex; gap: 10px; }
+.btn-modal-cancel {
+  flex: 0 0 42%; padding: 9px 0; border-radius: 9px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-modal-cancel:hover { border-color: var(--border2); }
+.btn-modal-confirm {
+  flex: 1; padding: 9px 0; border-radius: 9px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: none; background: var(--green); color: #fff;
+  font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-modal-confirm:hover:not(:disabled) { background: var(--green-dim); }
+.btn-modal-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Collect photo upload ── */
+.collect-photo-label {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 18px 16px; border: 2px dashed var(--border); border-radius: 10px;
+  cursor: pointer; background: var(--surface2); transition: all 0.15s;
+  margin-bottom: 0;
+}
+.collect-photo-label:hover { border-color: var(--green); background: var(--green-glow); }
+.collect-photo-label:hover .cpl-icon { color: var(--green); }
+.cpl-icon { font-size: 1.5rem; color: var(--muted); transition: color 0.15s; }
+.collect-photo-preview {
+  display: none; width: 100%; aspect-ratio: 16/9; border-radius: 10px;
+  overflow: hidden; border: 1.5px solid var(--border); position: relative;
+  margin-bottom: 8px;
+}
+.collect-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.collect-photo-clear {
+  position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+  border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: background 0.15s;
+}
+.collect-photo-clear:hover { background: rgba(0,0,0,0.8); }
+.collect-field-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--muted); margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+}
+.collect-note-ta {
+  width: 100%; min-height: 68px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--text); font-family: 'Source Sans 3', sans-serif;
+  font-size: 13px; padding: 9px 12px; resize: vertical; box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.collect-note-ta:focus { outline: none; border-color: var(--green); }
+
+/* ── Task detail modal ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.52); backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 20px 16px; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal-card {
+  background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px;
+  box-shadow: var(--shadow-lg); flex-shrink: 0; margin: auto; animation: modal-in 0.18s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.modal-header {
+  padding: 18px 20px 14px; border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.t-modal-title    { font-size: 15px; font-weight: 700; color: var(--text); }
+.t-modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.modal-close {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 14px; transition: all 0.15s; appearance: none; font-family: inherit;
+}
+.modal-close:hover { border-color: var(--text); color: var(--text); }
+.modal-body { padding: 18px 20px 20px; }
+.modal-photo {
+  width: 100%; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+  background: var(--surface3); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-photo-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); }
+.modal-photo-ph i { font-size: 2rem; }
+.modal-photo-ph span { font-size: 12px; }
+.modal-section-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.modal-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+.modal-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.modal-box-val   { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.modal-desc {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text); line-height: 1.6;
+}
+
+/* ── View task btn ── */
+.view-task-btn {
+  padding: 4px 11px; border-radius: 6px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  cursor: pointer; font-family: inherit; appearance: none;
+  transition: all 0.15s; white-space: nowrap;
+}
+.view-task-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+
+/* ── Route map ── */
+#route-map { width: 100%; height: 380px; border-radius: 10px; border: 1.5px solid var(--border); }
+
+/* ── Route Simulation ── */
+.sim-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px 20px; margin-top: 14px;
+  border-radius: 10px; font-size: 13px; font-weight: 700;
+  background: var(--green); color: #fff; border: none;
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.sim-btn:hover:not(:disabled) { background: var(--green-dim); transform: translateY(-1px); }
+.sim-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.route-complete-banner {
+  display: flex; align-items: center; gap: 14px; margin-top: 14px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border-radius: 12px; padding: 16px 20px; color: #fff;
+}
+.route-complete-banner i { font-size: 2rem; flex-shrink: 0; }
+.rbc-title { font-size: 15px; font-weight: 700; }
+.rbc-sub   { font-size: 12px; opacity: 0.85; margin-top: 3px; }
+
+/* ── Arrival Modal ── */
+.arrival-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.52);
+  z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.arrival-overlay.hidden { display: none; }
+.arrival-card {
+  background: var(--surface); border-radius: 18px; width: 100%; max-width: 430px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35); overflow: hidden; animation: modal-in 0.22s ease;
+}
+.arrival-header {
+  background: linear-gradient(135deg, #588157, #2d6a2d);
+  padding: 22px 24px; text-align: center;
+}
+.arrival-icon {
+  width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2);
+  margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #fff;
+}
+.arrival-headline { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.arrival-sub      { font-size: 12px; color: rgba(255,255,255,0.8); }
+.arrival-body     { padding: 20px 22px 22px; }
+.arrival-report-id {
+  font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.arrival-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.arrival-box   { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+.arrival-box-lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.arrival-box-val { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.arrival-desc {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text);
+  line-height: 1.6; margin-bottom: 14px;
+}
+.btn-arrival-mark {
+  width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700;
+  background: var(--green); color: #fff; border: none;
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.btn-arrival-mark:hover { background: var(--green-dim); }
+
+/* ── Confirm Collection Dialog ── */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.62);
+  z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.confirm-overlay.hidden { display: none; }
+.confirm-card {
+  background: var(--surface); border-radius: 14px; padding: 24px;
+  max-width: 360px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  animation: modal-in 0.18s ease;
+}
+.confirm-title   { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.confirm-msg     { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+.confirm-spot    {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600;
+  color: var(--text); margin-bottom: 18px;
+}
+.confirm-actions { display: flex; gap: 10px; }
+.btn-confirm-no  {
+  flex: 0 0 38%; padding: 10px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; border: 1.5px solid var(--border); background: var(--surface2);
+  color: var(--text); cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-confirm-no:hover { border-color: var(--text); }
+.btn-confirm-yes {
+  flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  background: var(--green); color: #fff; border: none;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s;
+}
+.btn-confirm-yes:hover { background: var(--green-dim); }
+
+@media (max-width: 600px) {
+  .drawer-grid { grid-template-columns: 1fr; }
+  .modal-grid  { grid-template-columns: 1fr; }
+  .tab-btn .tab-lbl { display: none; }
+  .arrival-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">
+        <i class="fa-solid fa-truck"></i> Driver Portal
+      </span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+        Notifications <span class="nav-badge">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile
+      </a>
+      
+      <a href="citizen-dashboard.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarDriverName">Driver</div>
+          <div class="user-role" id="sidebarDriverRole">Collection Driver</div>
+        </div>
+      </div>
+      <a href="#" class="logout-link" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="dashboard-driver.html" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+          <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house-user"></i> Citizen View</a></li>
+          <li><a href="#" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Driver Dashboard</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span class="notif-badge">2</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page active">
+      <div class="page-header">
+        <h1 id="driver-greeting">Good morning, Driver</h1>
+        <p>Your complete operations hub — reports, route, and tasks all in one place.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="page-tabs">
+        <button class="tab-btn active" onclick="switchTab('overview',this)">
+          <i class="fa-solid fa-house"></i><span class="tab-lbl"> Overview</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('route',this)">
+          <i class="fa-solid fa-map"></i><span class="tab-lbl"> Daily Route</span>
+        </button>
+      </div>
+
+      <!-- ════════ TAB: OVERVIEW ════════ -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fa-solid fa-clipboard-check" style="color:var(--blue);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--blue);" id="stat-to-collect">—</div>
+              <div class="stat-label">Pending Collection</div>
+            </div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--green);" id="stat-collected">—</div>
+              <div class="stat-label">Collected</div>
+            </div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fa-solid fa-clipboard-list" style="color:var(--yellow);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--yellow);" id="stat-total-assigned">—</div>
+              <div class="stat-label">Total Assigned</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <i class="fa-solid fa-clipboard-check" style="color:var(--blue);"></i> Pending Collection
+        </div>
+        <div id="approved-container"></div>
+
+        <div class="section-divider" style="margin-top:28px;">
+          <i class="fa-solid fa-circle-check" style="color:var(--green);"></i> Already Collected
+        </div>
+        <div id="collected-container"></div>
+      </div>
+
+      <!-- ════════ TAB: DAILY ROUTE ════════ -->
+      <div class="tab-panel" id="tab-route">
+        <div class="stats-grid">
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fa-solid fa-map-pin" style="color:var(--green);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--green);" id="route-completed">2</div>
+              <div class="stat-label">Stops Completed</div>
+            </div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fa-solid fa-hourglass-half" style="color:var(--yellow);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--yellow);" id="route-remaining">8</div>
+              <div class="stat-label">Remaining Stops</div>
+            </div>
+          </div>
+          <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fa-solid fa-clock" style="color:var(--orange);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--orange);" id="route-eta">2.5h</div>
+              <div class="stat-label">Estimated Time Left</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-route"></i> Route Map</div>
+          <div id="route-map"></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;font-weight:600;">
+            <span style="display:flex;align-items:center;gap:5px;color:#2563eb;"><span style="width:10px;height:10px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Starting Depot (A)</span>
+            <span style="display:flex;align-items:center;gap:5px;color:#16a34a;"><span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block;"></span>Collected</span>
+            <span style="display:flex;align-items:center;gap:5px;color:#9ca3af;"><span style="width:10px;height:10px;border-radius:50%;background:#9ca3af;display:inline-block;"></span>Pending Stop</span>
+            <span style="display:flex;align-items:center;gap:5px;color:#6b7280;">🚛 Truck</span>
+          </div>
+          <div class="route-complete-banner" id="route-complete-msg" style="display:none;">
+            <i class="fa-solid fa-flag-checkered"></i>
+            <div>
+              <div class="rbc-title">Route Complete!</div>
+              <div class="rbc-sub">All 3 collection stops visited and marked as collected.</div>
+            </div>
+          </div>
+          <button class="sim-btn" id="sim-start-btn" onclick="startSimulation()" disabled>
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading Route…
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Route Sequence</div>
+          <div class="route-sequence" id="route-sequence"></div>
+        </div>
+      </div>
+
+    </div><!-- .page -->
+  </main>
+</div>
+
+<!-- ── Arrival Popup Modal ── -->
+<div class="arrival-overlay hidden" id="arrival-modal">
+  <div class="arrival-card">
+    <div class="arrival-header">
+      <div class="arrival-icon"><i class="fa-solid fa-location-dot"></i></div>
+      <div class="arrival-headline" id="arrival-headline">You have reached Stop B!</div>
+      <div class="arrival-sub" id="arrival-sub">Waste collection point</div>
+    </div>
+    <div class="arrival-body">
+      <div class="arrival-report-id" id="arrival-report-id">Report #ZC-2024-0312</div>
+      <div class="arrival-grid">
+        <div class="arrival-box"><div class="arrival-box-lbl">Reported By</div><div class="arrival-box-val" id="arrival-citizen">—</div></div>
+        <div class="arrival-box"><div class="arrival-box-lbl">Contact</div><div class="arrival-box-val" id="arrival-contact">—</div></div>
+        <div class="arrival-box"><div class="arrival-box-lbl">Waste Type</div><div class="arrival-box-val" id="arrival-waste">—</div></div>
+        <div class="arrival-box"><div class="arrival-box-lbl">Urgency</div><div class="arrival-box-val" id="arrival-urgency">—</div></div>
+        <div class="arrival-box"><div class="arrival-box-lbl">Date Reported</div><div class="arrival-box-val" id="arrival-date">—</div></div>
+      </div>
+      <div class="arrival-desc" id="arrival-desc">—</div>
+      <button class="btn-arrival-mark" onclick="openCollectConfirm()">
+        <i class="fa-solid fa-circle-check"></i> Mark this Spot as Collected
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Collect Confirmation Dialog ── -->
+<div class="confirm-overlay hidden" id="collect-confirm">
+  <div class="confirm-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--green-glow);border:1.5px solid rgba(88,129,87,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:16px;"></i>
+      </div>
+      <div class="confirm-title">Confirm Collection</div>
+    </div>
+    <div class="confirm-msg">Are you sure you want to mark this stop as collected? This action cannot be undone.</div>
+    <div class="confirm-spot" id="confirm-spot-label">—</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-no" onclick="closeCollectConfirm()">Cancel</button>
+      <button class="btn-confirm-yes" onclick="confirmStopCollected()">
+        <i class="fa-solid fa-check"></i> Yes, Mark Collected
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Collect Confirmation Modal ── -->
+<div class="modal-overlay hidden" id="modal-collect">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--green-glow);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid rgba(88,129,87,0.2);">
+        <i class="fa-solid fa-truck" style="color:var(--green);font-size:16px;"></i>
+      </div>
+      <div class="modal-title">Mark as Collected</div>
+    </div>
+    <div class="modal-sub">Take a photo of the collected waste as proof of pickup. An optional note can also be added.</div>
+    <div class="modal-info" id="modal-collect-info">—</div>
+
+    <!-- Photo (required) -->
+    <div style="margin-bottom:16px;">
+      <div class="collect-field-lbl">
+        <i class="fa-solid fa-camera"></i> Proof Photo
+        <span style="color:var(--red);font-size:11px;">* required</span>
+      </div>
+      <div class="collect-photo-preview" id="collect-photo-preview">
+        <img id="collect-photo-img" src="" alt="Collection photo">
+        <button class="collect-photo-clear" onclick="clearCollectPhoto()" title="Remove photo">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <label class="collect-photo-label" for="collect-photo-input" id="collect-photo-label">
+        <i class="fa-solid fa-camera cpl-icon"></i>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Take or upload a photo</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Required before confirming collection</div>
+        </div>
+      </label>
+      <input type="file" id="collect-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleCollectPhoto(this)">
+    </div>
+
+    <!-- Optional note -->
+    <div style="margin-bottom:20px;">
+      <div class="collect-field-lbl">
+        <i class="fa-solid fa-comment-dots"></i> Driver Note
+        <span style="font-weight:400;text-transform:none;font-size:10px;">(optional)</span>
+      </div>
+      <textarea class="collect-note-ta" id="collect-message" placeholder="Add any notes about this collection (e.g. extra bags, access issues, weight estimate)…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeCollectModal()">Cancel</button>
+      <button class="btn-modal-confirm" id="btn-confirm-collect" onclick="confirmCollect()" disabled>
+        <i class="fa-solid fa-circle-check"></i> Confirm Collection
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/profile-modal.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+// USER / GREETING
+// ═══════════════════════════════════════════════
+(function () {
+  var user = ZC_DB.getSession();
+  if (!user) return;
+  var fullName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
+  var nameEl = document.getElementById('sidebarDriverName');
+  var roleEl = document.getElementById('sidebarDriverRole');
+  if (nameEl) nameEl.textContent = fullName;
+  if (roleEl) roleEl.textContent = 'Collection Driver' + (user.barangay ? ' · ' + user.barangay : '');
+  var hour = new Date().getHours();
+  var g = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  var greetEl = document.getElementById('driver-greeting');
+  if (greetEl) greetEl.textContent = g + ', ' + (user.firstName || 'Driver') + ' 👋';
+})();
+
+// ═══════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'route' && !window._mapInit) initRouteMap();
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+var WASTE_ICONS = {
+  household:    '<i class="fa-solid fa-house"></i>',
+  commercial:   '<i class="fa-solid fa-store"></i>',
+  construction: '<i class="fa-solid fa-helmet-safety"></i>',
+  hazardous:    '<i class="fa-solid fa-radiation"></i>',
+  other:        '<i class="fa-solid fa-box"></i>'
+};
+var WASTE_CHIPS = {
+  household:    '<span style="background:#dcfce7;color:#16a34a;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-house" style="font-size:9px;"></i> Household</span>',
+  commercial:   '<span style="background:#fef3c7;color:#d97706;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-store" style="font-size:9px;"></i> Commercial</span>',
+  construction: '<span style="background:#dbeafe;color:#2563eb;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-helmet-safety" style="font-size:9px;"></i> Construction</span>',
+  hazardous:    '<span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-radiation" style="font-size:9px;"></i> Hazardous</span>',
+  other:        '<span style="background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-box" style="font-size:9px;"></i> Other</span>'
+};
+var URG_CLASS = { low:'urg-low', medium:'urg-medium', high:'urg-high', critical:'urg-critical' };
+var URG_ICON  = {
+  low:      '<i class="fa-solid fa-circle-check" style="font-size:9px;"></i>',
+  medium:   '<i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i>',
+  high:     '<i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i>',
+  critical: '<i class="fa-solid fa-skull-crossbones" style="font-size:9px;"></i>'
+};
+
+// ═══════════════════════════════════════════════
+// REPORT DRAWER
+// ═══════════════════════════════════════════════
+var _openDrawerId   = null;
+var _collectContext = null; // {type:'report',id} | {type:'task',idx} | {type:'stop',idx}
+
+function openDrawer(id) {
+  closeDrawer();
+  _openDrawerId = id;
+  var el = document.getElementById('drawer-' + id);
+  if (el) el.classList.add('open');
+}
+function closeDrawer() {
+  if (_openDrawerId) {
+    var el = document.getElementById('drawer-' + _openDrawerId);
+    if (el) el.classList.remove('open');
+  }
+  _openDrawerId = null;
+}
+
+function buildPhotoHtml(photo) {
+  if (photo && (photo.startsWith('data:') || photo.startsWith('http') || photo.startsWith('/'))) {
+    return '<div class="drawer-photo"><img src="' + esc(photo) + '" alt="Report photo" onerror="this.parentNode.innerHTML=\'<div class=drawer-photo-ph><i class=fa-solid fa-image></i><span>Photo not available</span></div>\'"></div>';
+  }
+  return '<div class="drawer-photo"><div class="drawer-photo-ph"><i class="fa-solid fa-camera"></i><span>No photo submitted</span></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+// CARD BUILDERS (Overview tab)
+// ═══════════════════════════════════════════════
+function buildApprovedCard(r) {
+  var wt  = r.wasteType || 'other';
+  var urg = r.urgency   || 'low';
+  var iconCls = (wt === 'hazardous') ? 'illegal' : (WASTE_ICONS[wt] ? wt : 'other');
+
+  return '<div class="report-card card-approved">' +
+    '<div class="report-card-body">' +
+      '<div class="report-top">' +
+        '<div class="report-icon ' + iconCls + '">' + (WASTE_ICONS[wt] || WASTE_ICONS.other) + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="report-id">#' + esc(r.id) + ' &nbsp;&middot;&nbsp; ' + esc(r.dateStr) + '</div>' +
+          '<div class="report-loc">' + esc(r.location) + '</div>' +
+          '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;&middot;&nbsp; ' + esc(r.barangay) + '</div>' +
+        '</div>' +
+        '<span class="badge badge-blue">Approved</span>' +
+      '</div>' +
+      '<div class="report-chips">' +
+        (WASTE_CHIPS[wt] || WASTE_CHIPS.other) +
+        '<span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + (URG_ICON[urg] || '') + ' ' + cap(urg) + ' Urgency</span>' +
+      '</div>' +
+      '<div class="report-actions">' +
+        '<button class="btn-view-rpt" onclick="openDrawer(\'' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Details</button>' +
+        '<button class="btn-collect-rpt" onclick="openCollectModal(\'' + esc(r.id) + '\')"><i class="fa-solid fa-truck"></i> Mark as Collected</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="report-drawer" id="drawer-' + esc(r.id) + '">' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>' +
+      buildPhotoHtml(r.photo) +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+      '<div class="drawer-grid">' +
+        '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Contact</div><div class="drawer-box-val">' + esc(r.contact || '—') + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Barangay</div><div class="drawer-box-val">' + esc(r.barangay) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Approved By</div><div class="drawer-box-val">' + esc(r.approvedBy || '—') + '</div></div>' +
+      '</div>' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+      '<div class="drawer-desc">“' + esc(r.description || 'No description provided.') + '”</div>' +
+      '<div class="drawer-footer">' +
+        '<button class="drawer-close-btn" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+        '<button class="btn-collect-rpt" onclick="openCollectModal(\'' + esc(r.id) + '\')" style="flex:1;justify-content:center;"><i class="fa-solid fa-truck"></i> Mark as Collected</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildCollectedCard(r) {
+  var wt  = r.wasteType || 'other';
+  var urg = r.urgency   || 'low';
+  var iconCls = (wt === 'hazardous') ? 'illegal' : (WASTE_ICONS[wt] ? wt : 'other');
+
+  return '<div class="report-card card-collected">' +
+    '<div class="report-card-body">' +
+      '<div class="report-top">' +
+        '<div class="report-icon ' + iconCls + '">' + (WASTE_ICONS[wt] || WASTE_ICONS.other) + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="report-id">#' + esc(r.id) + ' &nbsp;&middot;&nbsp; ' + esc(r.dateStr) + '</div>' +
+          '<div class="report-loc">' + esc(r.location) + '</div>' +
+          '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;&middot;&nbsp; ' + esc(r.barangay) + '</div>' +
+        '</div>' +
+        '<span class="badge badge-green">Collected</span>' +
+      '</div>' +
+      '<div class="report-chips">' +
+        (WASTE_CHIPS[wt] || WASTE_CHIPS.other) +
+        '<span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + (URG_ICON[urg] || '') + ' ' + cap(urg) + ' Urgency</span>' +
+        '<span style="background:#dcfce7;color:#166534;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Collected' + (r.collectedDate ? ' ' + esc(r.collectedDate) : '') + '</span>' +
+      '</div>' +
+      '<div class="report-actions">' +
+        '<button class="btn-view-rpt" onclick="openDrawer(\'c' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Details</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="report-drawer" id="drawer-c' + esc(r.id) + '">' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>' +
+      buildPhotoHtml(r.photo) +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+      '<div class="drawer-grid">' +
+        '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Contact</div><div class="drawer-box-val">' + esc(r.contact || '—') + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Barangay</div><div class="drawer-box-val">' + esc(r.barangay) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Collected By</div><div class="drawer-box-val">' + esc(r.collectedBy || '—') + '</div></div>' +
+      '</div>' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+      '<div class="drawer-desc">“' + esc(r.description || 'No description provided.') + '”</div>' +
+      '<div class="drawer-footer">' +
+        '<button class="drawer-close-btn" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+        '<div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);padding:0 10px;"><i class="fa-solid fa-circle-check"></i> Collected on ' + esc(r.collectedDate || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER OVERVIEW
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  var reports   = REPORTS_DB.getAll();
+  var approved  = reports.filter(function(r){ return r.status === 'approved'; });
+  var collected = reports.filter(function(r){ return r.status === 'collected'; });
+
+  var sta = document.getElementById('stat-to-collect');
+  var stc = document.getElementById('stat-collected');
+  var stt = document.getElementById('stat-total-assigned');
+  if (sta) sta.textContent = approved.length;
+  if (stc) stc.textContent = collected.length;
+  if (stt) stt.textContent = approved.length + collected.length;
+
+  var ac = document.getElementById('approved-container');
+  if (ac) {
+    ac.innerHTML = approved.length === 0
+      ? '<div style="text-align:center;padding:32px;color:var(--muted);font-size:14px;"><i class="fa-solid fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>No approved reports pending collection.</div>'
+      : approved.map(buildApprovedCard).join('');
+  }
+
+  var cc = document.getElementById('collected-container');
+  if (cc) {
+    cc.innerHTML = collected.length === 0
+      ? '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No reports collected yet.</div>'
+      : collected.map(buildCollectedCard).join('');
+  }
+
+  if (_openDrawerId) {
+    var el = document.getElementById('drawer-' + _openDrawerId);
+    if (el) el.classList.add('open');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// COLLECT MODAL
+// ═══════════════════════════════════════════════
+function _openCollectModal(infoText, context) {
+  var infoEl = document.getElementById('modal-collect-info');
+  if (infoEl) infoEl.textContent = infoText;
+  _collectContext = context;
+  _resetCollectModal();
+  document.getElementById('modal-collect').classList.remove('hidden');
+}
+
+function openCollectModal(id) {
+  var reports = REPORTS_DB.getAll();
+  var r = null;
+  for (var i = 0; i < reports.length; i++) {
+    if (reports[i].id === id) { r = reports[i]; break; }
+  }
+  _openCollectModal(
+    r ? '#' + r.id + ' — ' + r.location + ' (' + r.barangay + ')' : id,
+    { type: 'report', id: id }
+  );
+}
+
+function openTaskCollectModal(idx) {
+  var t = TASK_DATA[idx];
+  _openCollectModal('Stop #' + t.stop + ' — ' + t.addr, { type: 'task', idx: idx });
+}
+
+function openStopCollectModal(idx) {
+  var s = STOPS[idx];
+  _openCollectModal('Stop #' + s.label + ' — ' + s.addr, { type: 'stop', idx: idx });
+}
+
+function closeCollectModal() {
+  _collectContext = null;
+  _resetCollectModal();
+  document.getElementById('modal-collect').classList.add('hidden');
+}
+
+function _resetCollectModal() {
+  clearCollectPhoto();
+  var msg = document.getElementById('collect-message');
+  if (msg) msg.value = '';
+}
+
+function handleCollectPhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('collect-photo-img').src = e.target.result;
+    document.getElementById('collect-photo-preview').style.display = 'block';
+    document.getElementById('collect-photo-label').style.display   = 'none';
+    document.getElementById('btn-confirm-collect').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearCollectPhoto() {
+  var input = document.getElementById('collect-photo-input');
+  if (input) input.value = '';
+  var img = document.getElementById('collect-photo-img');
+  if (img) img.src = '';
+  var preview = document.getElementById('collect-photo-preview');
+  if (preview) preview.style.display = 'none';
+  var label = document.getElementById('collect-photo-label');
+  if (label) label.style.display = 'flex';
+  var btn = document.getElementById('btn-confirm-collect');
+  if (btn) btn.disabled = true;
+}
+
+function confirmCollect() {
+  if (!_collectContext) return;
+  var preview = document.getElementById('collect-photo-preview');
+  if (!preview || preview.style.display === 'none') return;
+
+  var photo   = document.getElementById('collect-photo-img').src;
+  var message = (document.getElementById('collect-message').value || '').trim();
+
+  if (_collectContext.type === 'report') {
+    var session = ZC_DB.getSession();
+    var driverName = session
+      ? [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ')
+      : 'Driver';
+    REPORTS_DB.collect(_collectContext.id, driverName);
+    closeCollectModal();
+    closeDrawer();
+    renderDashboard();
+  } else if (_collectContext.type === 'task') {
+    var idx = _collectContext.idx;
+    TASK_DATA[idx].collectionPhoto = photo;
+    TASK_DATA[idx].collectionNote  = message;
+    TASK_DATA[idx].status = 'done';
+    closeCollectModal();
+    closeTaskModal();
+    renderTasks(_currentFilter);
+    updateTaskStats();
+  } else if (_collectContext.type === 'stop') {
+    _applyMarkRouteStop(_collectContext.idx);
+    closeCollectModal();
+  }
+}
+
+document.getElementById('modal-collect').addEventListener('click', function(e) {
+  if (e.target === this) closeCollectModal();
+});
+
+// ═══════════════════════════════════════════════
+// ROUTE MAP — Street-following simulation
+// Coordinates: A→B→C→D
+// ═══════════════════════════════════════════════
+var STOPS = [
+  {
+    lat: 6.9180, lng: 122.0901, label: 'A',
+    addr: 'Barangay Rio Hondo — Collection Depot',
+    type: 'Starting Point', time: '7:00 AM', status: 'active', isDepot: true
+  },
+  {
+    lat: 6.9180, lng: 122.0901, label: 'B',
+    addr: 'Purok 5, Barangay Rio Hondo, Zamboanga',
+    type: 'Household Waste', time: '7:15 AM', status: 'pending',
+    report: {
+      id: 'ZC-2024-0312', citizen: 'Maria Santos', contact: '0912-345-6789',
+      wasteType: 'Household', weight: '15 kg', urgency: 'Medium',
+      submittedDate: 'May 3, 2026',
+      desc: 'Large accumulation of household garbage bags piled in front of the property near the road. Resident reports the waste has been there for 3 days and is attracting pests and causing foul odor throughout the neighborhood.'
+    }
+  },
+  {
+    lat: 6.9195, lng: 122.0855, label: 'C',
+    addr: 'Near Rio Hondo Bridge, Zamboanga City',
+    type: 'Commercial Waste', time: '7:45 AM', status: 'pending',
+    report: {
+      id: 'ZC-2024-0417', citizen: 'Jose dela Cruz', contact: '0921-678-9012',
+      wasteType: 'Commercial', weight: '30 kg', urgency: 'High',
+      submittedDate: 'May 4, 2026',
+      desc: 'Overflowing commercial waste bins near the market area along the bridge. Multiple bags of mixed waste spilling onto the sidewalk, causing pedestrian obstruction and a potential traffic hazard.'
+    }
+  },
+  {
+    lat: 6.9145, lng: 122.0945, label: 'D',
+    addr: 'Talisay Road, Zamboanga City',
+    type: 'Hazardous Waste', time: '8:30 AM', status: 'pending',
+    report: {
+      id: 'ZC-2024-0529', citizen: 'Ana Reyes', contact: '0935-012-3456',
+      wasteType: 'Hazardous', weight: '8 kg', urgency: 'Critical',
+      submittedDate: 'May 5, 2026',
+      desc: 'Suspected hazardous materials including old batteries, chemical containers, and motor oil cans illegally disposed near the roadside. Immediate collection required to prevent soil and water contamination in the area.'
+    }
+  }
+];
+
+// Simulation state
+var SIM = {
+  running: false,
+  currentStop: 0,
+  truckMarker: null,
+  stopMarkers: [],
+  routeLines: [],
+  segments: [],
+  animTimer: null
+};
+
+function _makeStopIcon(label, color) {
+  return L.divIcon({
+    html: '<div style="width:32px;height:32px;border-radius:50%;background:' + color + ';border:3px solid #fff;' +
+          'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;' +
+          'box-shadow:0 2px 8px rgba(0,0,0,0.35);">' + label + '</div>',
+    className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+  });
+}
+
+function fetchOSRMSegment(from, to) {
+  // Same or nearly identical coordinates — skip fetch
+  if (Math.abs(from.lat - to.lat) < 0.0001 && Math.abs(from.lng - to.lng) < 0.0001) {
+    return Promise.resolve([]);
+  }
+  var url = 'https://router.project-osrm.org/route/v1/driving/' +
+    from.lng + ',' + from.lat + ';' + to.lng + ',' + to.lat +
+    '?overview=full&geometries=geojson';
+  return fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.code === 'Ok' && data.routes && data.routes[0]) {
+        return data.routes[0].geometry.coordinates.map(function(c) {
+          return [c[1], c[0]]; // GeoJSON [lng,lat] → Leaflet [lat,lng]
+        });
+      }
+      return [[from.lat, from.lng], [to.lat, to.lng]];
+    })
+    .catch(function() {
+      return [[from.lat, from.lng], [to.lat, to.lng]];
+    });
+}
+
+// Build STOPS from approved reports that have pinned coordinates.
+// Falls back to the hardcoded demo stops when none exist.
+function buildDynamicStops() {
+  if (typeof REPORTS_DB === 'undefined') return null;
+  var approved = REPORTS_DB.getAll().filter(function(r) {
+    return r.status === 'approved' && r.lat != null && r.lng != null;
+  });
+  if (approved.length === 0) return null;
+
+  var labels = ['B','C','D','E','F','G','H','I','J'];
+  var stops = [{
+    lat: 6.9180, lng: 122.0901, label: 'A',
+    addr: 'Collection Depot — Barangay Rio Hondo',
+    type: 'Starting Point', time: '--', status: 'active', isDepot: true
+  }];
+
+  approved.slice(0, labels.length).forEach(function(r, i) {
+    var wt = r.wasteType
+      ? (r.wasteType.charAt(0).toUpperCase() + r.wasteType.slice(1) + ' Waste')
+      : 'General Waste';
+    stops.push({
+      lat: parseFloat(r.lat), lng: parseFloat(r.lng),
+      label: labels[i],
+      addr: r.location || (parseFloat(r.lat).toFixed(5) + ', ' + parseFloat(r.lng).toFixed(5)),
+      type: wt, time: '--', status: 'pending',
+      report: {
+        id: r.id,
+        citizen: r.citizen || '—',
+        contact: r.contact || '—',
+        wasteType: r.wasteType ? (r.wasteType.charAt(0).toUpperCase() + r.wasteType.slice(1)) : 'General',
+        urgency: r.urgency ? (r.urgency.charAt(0).toUpperCase() + r.urgency.slice(1)) : 'Low',
+        submittedDate: r.dateStr || '—',
+        desc: r.description || 'No description provided.'
+      }
+    });
+  });
+
+  return stops.length > 1 ? stops : null;
+}
+
+// Resolve real street/barangay names from coordinates via Nominatim.
+// Delays requests by 1.2 s each to respect the rate limit.
+function resolveStopAddresses() {
+  STOPS.forEach(function(stop, idx) {
+    if (stop.isDepot) return;
+    setTimeout(function() {
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
+            stop.lat + '&lon=' + stop.lng + '&addressdetails=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var a = data.address || {};
+          var road   = a.road || a.pedestrian || a.footway || a.path || '';
+          var suburb = a.suburb || a.neighbourhood || a.village || a.hamlet || a.quarter || '';
+          var city   = a.city || a.town || a.county || 'Zamboanga City';
+          var parts  = [road, suburb, city].filter(Boolean);
+          if (parts.length) {
+            STOPS[idx].addr = parts.join(', ');
+            renderRouteSequence();
+            if (SIM.stopMarkers[idx]) {
+              var pop = SIM.stopMarkers[idx].getPopup();
+              if (pop) {
+                pop.setContent('<strong>Stop ' + stop.label + '</strong><br>' + STOPS[idx].addr +
+                  (stop.report ? '<br><small style="color:#6b7280;">Report #' + stop.report.id + '</small>' : ''));
+              }
+            }
+          }
+        })
+        .catch(function() {});
+    }, idx * 1200);
+  });
+}
+
+function initRouteMap() {
+  window._mapInit = true;
+
+  // Use approved-report stops when available; otherwise use demo stops
+  var dynamic = buildDynamicStops();
+  if (dynamic) STOPS = dynamic;
+
+  var map = L.map('route-map').setView([STOPS[0].lat, STOPS[0].lng], 15);
+  window._routeMap = map;
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 19
+  }).addTo(map);
+
+  // Place stop markers (A=blue depot, rest=gray pending)
+  SIM.stopMarkers = [];
+  STOPS.forEach(function(s, i) {
+    var col = s.isDepot ? '#2563eb' : '#9ca3af';
+    var marker = L.marker([s.lat, s.lng], { icon: _makeStopIcon(s.label, col) }).addTo(map);
+    var popupHtml = '<strong>Stop ' + s.label + '</strong><br>' + s.addr;
+    if (s.report) popupHtml += '<br><small style="color:#6b7280;">Report #' + s.report.id + '</small>';
+    marker.bindPopup(popupHtml);
+    SIM.stopMarkers.push(marker);
+  });
+
+  // Fetch street-following route segments and draw as dashed planned route
+  var promises = [];
+  for (var i = 0; i < STOPS.length - 1; i++) {
+    promises.push(fetchOSRMSegment(STOPS[i], STOPS[i + 1]));
+  }
+
+  function _enableBtn() {
+    var btn = document.getElementById('sim-start-btn');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-play"></i> Begin Collection Route'; }
+    updateRouteStats();
+    renderRouteSequence();
+  }
+
+  Promise.all(promises)
+    .then(function(segments) {
+      SIM.segments = segments;
+      SIM.routeLines = [];
+      segments.forEach(function(coords, i) {
+        var lineCoords = coords.length > 1
+          ? coords
+          : [[STOPS[i].lat, STOPS[i].lng], [STOPS[i + 1].lat, STOPS[i + 1].lng]];
+        var line = L.polyline(lineCoords, {
+          color: '#588157', weight: 4, opacity: 0.45, dashArray: '10, 6'
+        }).addTo(map);
+        SIM.routeLines.push(line);
+      });
+      map.fitBounds(STOPS.map(function(s) { return [s.lat, s.lng]; }), { padding: [40, 40] });
+      _enableBtn();
+      // Resolve real addresses from coordinates (async, non-blocking)
+      resolveStopAddresses();
+    })
+    .catch(function() {
+      SIM.routeLines = [];
+      for (var j = 0; j < STOPS.length - 1; j++) {
+        var line = L.polyline(
+          [[STOPS[j].lat, STOPS[j].lng], [STOPS[j + 1].lat, STOPS[j + 1].lng]],
+          { color: '#588157', weight: 4, opacity: 0.45, dashArray: '10, 6' }
+        ).addTo(map);
+        SIM.routeLines.push(line);
+        SIM.segments.push([[STOPS[j].lat, STOPS[j].lng], [STOPS[j + 1].lat, STOPS[j + 1].lng]]);
+      }
+      map.fitBounds(STOPS.map(function(s) { return [s.lat, s.lng]; }), { padding: [40, 40] });
+      _enableBtn();
+      resolveStopAddresses();
+    });
+}
+
+// ── Simulation Engine ────────────────────────────
+function startSimulation() {
+  if (SIM.running) return;
+  SIM.running = true;
+  SIM.currentStop = 0;
+
+  // Reset all collection stops back to pending
+  STOPS.forEach(function(s, i) {
+    if (i > 0) {
+      s.status = 'pending';
+      SIM.stopMarkers[i].setIcon(_makeStopIcon(s.label, '#9ca3af'));
+    }
+  });
+  // Reset route lines to dashed gray-green
+  SIM.routeLines.forEach(function(line) {
+    line.setStyle({ color: '#588157', opacity: 0.45, dashArray: '10, 6', weight: 4 });
+  });
+  // Hide route-complete banner
+  var completeMsg = document.getElementById('route-complete-msg');
+  if (completeMsg) completeMsg.style.display = 'none';
+
+  // Update button
+  var btn = document.getElementById('sim-start-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Route Running…'; }
+
+  // Place truck at A
+  if (SIM.truckMarker) { SIM.truckMarker.remove(); }
+  SIM.truckMarker = L.marker([STOPS[0].lat, STOPS[0].lng], {
+    icon: L.divIcon({
+      html: '<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45));">🚛</div>',
+      className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+    }),
+    zIndexOffset: 1000
+  }).addTo(window._routeMap);
+
+  // Zoom into starting depot
+  window._routeMap.flyTo([STOPS[0].lat, STOPS[0].lng], 16, { duration: 1.5 });
+
+  renderRouteSequence();
+  updateRouteStats();
+
+  // Begin animating toward first collection stop (B)
+  setTimeout(function() { animateSegment(0); }, 1800);
+}
+
+function animateSegment(segIdx) {
+  if (!SIM.running) return;
+  var coords = SIM.segments[segIdx] || [];
+  var toStop = STOPS[segIdx + 1];
+
+  // Highlight this segment (solid blue line)
+  if (SIM.routeLines[segIdx]) {
+    SIM.routeLines[segIdx].setStyle({ color: '#1d4ed8', opacity: 0.9, dashArray: null, weight: 5 });
+  }
+
+  if (coords.length <= 1) {
+    // Same location or degenerate segment — arrive immediately
+    if (SIM.truckMarker) SIM.truckMarker.setLatLng([toStop.lat, toStop.lng]);
+    setTimeout(function() { arriveAtStop(segIdx + 1); }, 300);
+    return;
+  }
+
+  var stepIdx = 0;
+  // Target ~7 seconds of animation per segment regardless of point count
+  var stepMs = Math.max(30, Math.round(7000 / coords.length));
+
+  function step() {
+    if (!SIM.running) return;
+    if (stepIdx >= coords.length) {
+      arriveAtStop(segIdx + 1);
+      return;
+    }
+    if (SIM.truckMarker) SIM.truckMarker.setLatLng(coords[stepIdx]);
+    // Pan map every 4 steps to follow truck smoothly
+    if (stepIdx % 4 === 0) {
+      window._routeMap.panTo(coords[stepIdx], { animate: true, duration: 0.4 });
+    }
+    stepIdx++;
+    SIM.animTimer = setTimeout(step, stepMs);
+  }
+  step();
+}
+
+function arriveAtStop(stopIdx) {
+  SIM.currentStop = stopIdx;
+  var stop = STOPS[stopIdx];
+  if (SIM.truckMarker) SIM.truckMarker.setLatLng([stop.lat, stop.lng]);
+
+  // Zoom into arrived stop
+  window._routeMap.flyTo([stop.lat, stop.lng], 17, { duration: 1.2 });
+
+  // Show arrival popup after zoom settles
+  setTimeout(function() { showArrivalModal(stopIdx); }, 1400);
+}
+
+function showArrivalModal(stopIdx) {
+  var stop = STOPS[stopIdx];
+  var r = stop.report;
+  document.getElementById('arrival-headline').textContent = 'You have reached Stop ' + stop.label + '!';
+  document.getElementById('arrival-sub').textContent = stop.addr;
+  document.getElementById('arrival-report-id').textContent = 'Report #' + r.id + '  ·  ' + r.submittedDate;
+  document.getElementById('arrival-citizen').textContent = r.citizen;
+  document.getElementById('arrival-contact').textContent = r.contact;
+  document.getElementById('arrival-waste').textContent = r.wasteType;
+  document.getElementById('arrival-urgency').textContent = r.urgency;
+  document.getElementById('arrival-date').textContent = r.submittedDate;
+  document.getElementById('arrival-desc').textContent = r.desc;
+  document.getElementById('arrival-modal').classList.remove('hidden');
+}
+
+function openCollectConfirm() {
+  var stop = STOPS[SIM.currentStop];
+  document.getElementById('confirm-spot-label').textContent =
+    'Stop ' + stop.label + '  —  ' + stop.addr;
+  document.getElementById('collect-confirm').classList.remove('hidden');
+}
+
+function closeCollectConfirm() {
+  document.getElementById('collect-confirm').classList.add('hidden');
+}
+
+function confirmStopCollected() {
+  closeCollectConfirm();
+  document.getElementById('arrival-modal').classList.add('hidden');
+
+  var stopIdx = SIM.currentStop;
+  var stop = STOPS[stopIdx];
+
+  // Mark stop as collected and update its map marker to green
+  STOPS[stopIdx].status = 'completed';
+  SIM.stopMarkers[stopIdx].setIcon(_makeStopIcon(stop.label, '#16a34a'));
+
+  renderRouteSequence();
+  updateRouteStats();
+
+  var nextIdx = stopIdx + 1;
+  if (nextIdx < STOPS.length) {
+    var btn = document.getElementById('sim-start-btn');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> En route to Stop ' + STOPS[nextIdx].label + '…';
+    // Short pause then animate to next stop
+    setTimeout(function() { animateSegment(stopIdx); }, 700);
+  } else {
+    showRouteComplete();
+  }
+}
+
+function showRouteComplete() {
+  SIM.running = false;
+  if (SIM.truckMarker) { SIM.truckMarker.remove(); SIM.truckMarker = null; }
+
+  var completeMsg = document.getElementById('route-complete-msg');
+  if (completeMsg) completeMsg.style.display = 'flex';
+
+  var btn = document.getElementById('sim-start-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Restart Route';
+    btn.onclick = function() {
+      btn.onclick = null;
+      btn.onclick = startSimulation;
+      startSimulation();
+    };
+  }
+
+  // Zoom out to show full route
+  window._routeMap.fitBounds(
+    STOPS.map(function(s) { return [s.lat, s.lng]; }),
+    { padding: [40, 40] }
+  );
+}
+
+// ── Route stats & sequence (used by simulation + init) ──
+function updateRouteStats() {
+  var collectionStops = STOPS.slice(1); // B, C, D
+  var completed = collectionStops.filter(function(s) { return s.status === 'completed'; }).length;
+  var remaining  = collectionStops.length - completed;
+  var el;
+  el = document.getElementById('route-completed'); if (el) el.textContent = completed;
+  el = document.getElementById('route-remaining'); if (el) el.textContent = remaining;
+  el = document.getElementById('route-eta');
+  if (el) {
+    el.textContent = remaining === 0 ? 'Done' : (remaining * 30) + 'm';
+  }
+}
+
+function renderRouteSequence() {
+  var html = STOPS.map(function(s, i) {
+    var cls = s.status === 'completed' ? 'completed' : (i === 0 ? 'active' : '');
+    var right = '';
+    if (s.isDepot) {
+      right = '<span class="badge badge-blue">Depot / Start</span>';
+    } else if (s.status === 'completed') {
+      right = '<span class="badge badge-green">Collected</span>';
+    } else {
+      right = '<span style="font-size:11px;color:var(--muted);font-style:italic;">Awaiting simulation</span>';
+    }
+    return '<div class="route-stop ' + cls + '" id="rs-' + i + '">' +
+      '<div class="stop-number">' + s.label + '</div>' +
+      '<div class="stop-content">' +
+        '<div class="stop-address">' + s.addr + '</div>' +
+        '<div class="stop-details">' + s.type + ' &middot; Scheduled ' + s.time + '</div>' +
+      '</div>' +
+      '<div class="stop-status">' + right + '</div>' +
+    '</div>';
+  }).join('');
+  var el = document.getElementById('route-sequence');
+  if (el) el.innerHTML = html;
+}
+
+function openStopCollectModal(idx) { /* kept for compatibility */ }
+function _applyMarkRouteStop(idx) {
+  STOPS[idx].status = 'completed';
+  renderRouteSequence();
+  updateRouteStats();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeCollectModal(); closeCollectConfirm(); }
+});
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  renderDashboard();
+  renderRouteSequence();
+  updateRouteStats();
+});
+
+setInterval(renderDashboard, 3000);
+</script>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
