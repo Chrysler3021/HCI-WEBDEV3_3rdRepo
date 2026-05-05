@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Barangays — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    th.sortable { cursor:pointer; user-select:none; }
+    th.sortable:hover { color:var(--primary); }
+    .sort-ic { margin-left:4px; font-size:10px; opacity:0.3; transition:opacity 0.15s; }
+    th.sort-asc .sort-ic, th.sort-desc .sort-ic { opacity:1; color:var(--primary); }
+
+    .page-btn.disabled { opacity:0.35; cursor:not-allowed; pointer-events:none; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:var(--surface); border-radius:16px; box-shadow:var(--shadow-lg); width:100%; max-width:480px; overflow:hidden; animation:mIn 0.22s ease; }
+    @keyframes mIn { from{opacity:0;transform:translateY(12px) scale(0.98);} to{opacity:1;transform:none;} }
+    .mhead { padding:20px 24px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .mtitle { font-family:'Outfit',sans-serif; font-size:17px; font-weight:800; color:var(--text); }
+    .msub { font-size:12px; color:var(--muted); margin-top:3px; }
+    .mclose { width:28px; height:28px; border-radius:7px; border:1.5px solid var(--border); background:var(--surface2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--muted); flex-shrink:0; transition:all 0.15s; }
+    .mclose:hover { border-color:var(--red); color:var(--red); background:var(--red-bg); }
+    .mbody { padding:20px 24px; max-height:65vh; overflow-y:auto; }
+    .mfoot { padding:14px 24px; border-top:1.5px solid var(--border); display:flex; gap:8px; justify-content:flex-end; background:var(--surface2); }
+    .mbtn { padding:8px 18px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid; transition:all 0.15s; font-family:'Source Sans 3',sans-serif; }
+    .mbtn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .mbtn-primary:hover { background:var(--primary-dim); }
+    .mbtn-sec { background:var(--surface); color:var(--text2); border-color:var(--border); }
+    .mbtn-sec:hover { border-color:var(--primary); color:var(--primary); }
+
+    .dg { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+    .di { background:var(--surface2); border:1.5px solid var(--border); border-radius:10px; padding:12px; }
+    .dl { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:4px; }
+    .dv { font-size:15px; font-weight:800; color:var(--text); font-family:'Outfit',sans-serif; }
+
+    .osl { font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .osw { position:relative; }
+    .osw select { width:100%; padding:10px 36px 10px 14px; border-radius:9px; border:1.5px solid var(--border); background:var(--surface); font-family:'Source Sans 3',sans-serif; font-size:13px; color:var(--text); outline:none; transition:border-color 0.15s; appearance:none; cursor:pointer; }
+    .osw select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(88,129,87,0.10); }
+    .osw::after { content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--muted); pointer-events:none; }
+
+    .search-input { width:100%; padding:10px 14px; border-radius:9px; border:1.5px solid var(--border); background:var(--surface); font-family:'Source Sans 3',sans-serif; font-size:13px; color:var(--text); outline:none; transition:border-color 0.15s; }
+    .search-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(88,129,87,0.10); }
+    .search-results { position:absolute; top:100%; left:0; right:0; background:var(--surface); border:1.5px solid var(--border); border-top:none; border-radius:0 0 9px 9px; max-height:200px; overflow-y:auto; z-index:10; display:none; }
+    .search-results.active { display:block; }
+    .search-result-item { padding:10px 14px; cursor:pointer; transition:background 0.15s; border-bottom:1px solid var(--border); font-size:13px; }
+    .search-result-item:hover { background:var(--surface2); }
+    .search-result-item:last-child { border-bottom:none; }
+    .search-result-empty { padding:10px 14px; color:var(--muted); font-size:13px; text-align:center; }
+
+    .toast { position:fixed; bottom:24px; right:24px; z-index:2000; background:#1a2e1a; color:#fff; padding:11px 18px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:var(--shadow-lg); transform:translateY(10px); opacity:0; pointer-events:none; transition:all 0.3s ease; }
+    .toast.show { transform:translateY(0); opacity:1; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar"><i class="fa-solid fa-gear"></i></div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Manage Barangays</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <nav class="breadcrumb" aria-label="breadcrumb">
+            <li class="breadcrumb-item"><a href="admin-dashboard.html">City Dashboard</a></li>
+            <li class="breadcrumb-sep">›</li>
+            <li class="breadcrumb-item active">Manage Barangays</li>
+          </nav>
+          <h1>Manage Barangays</h1>
+          <p>Assign officers and monitor all 98 barangays across Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-file"></i> Export PDF</a>
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-chart-bar"></i> Export CSV</a>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-house"></i></span><div class="stat-num green">98</div><div class="stat-label">Total Barangays</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-landmark"></i></span><div class="stat-num green" id="statAssigned">94</div><div class="stat-label">With Officer</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></span><div class="stat-num yellow" id="statUnassigned">4</div><div class="stat-label">Unassigned</div></div>
+        <div class="stat-card stat-blue"><span class="stat-icon"><i class="fa-solid fa-truck"></i></span><div class="stat-num blue" id="statDrivers">—</div><div class="stat-label">Total Drivers</div></div>
+      </div>
+
+      <div class="notice yellow" id="unassignedNotice">
+        <span class="notice-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span id="noticeText"></span>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active" data-filter="all">All (98)</a>
+          <a href="#" class="filter-chip" data-filter="assigned"><i class="fa-solid fa-circle-check"></i> Assigned</a>
+          <a href="#" class="filter-chip" data-filter="unassigned"><i class="fa-solid fa-triangle-exclamation"></i> Unassigned</a>
+          <a href="#" class="filter-chip" data-filter="high-volume"><i class="fa-solid fa-fire"></i> High Volume</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="searchInput" placeholder="Search barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-col="name">Barangay <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="officer">Assigned Officer <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="drivers">Drivers <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="kycPending">KYC Pending <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="activeReports">Active Reports <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="collectionRate">Collection Rate <span class="sort-ic">⇅</span></th>
+              <th class="sortable" data-col="status">Status <span class="sort-ic">⇅</span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="brgyTbody"></tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info" id="pageInfo">Loading…</div>
+          <div class="page-btns" id="pageBtns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manage / Assign Officer Modal -->
+<div class="modal-overlay" id="manageModal">
+  <div class="modal-box">
+    <div class="mhead">
+      <div>
+        <div class="mtitle" id="mTitle">Manage Barangay Officers</div>
+        <div class="msub" id="mSub"></div>
+      </div>
+      <button class="mclose" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mbody">
+      <div class="dg">
+        <div class="di"><div class="dl">Drivers</div><div class="dv" id="mDrivers">—</div></div>
+        <div class="di"><div class="dl">Active Reports</div><div class="dv" id="mReports">—</div></div>
+        <div class="di"><div class="dl">KYC Pending</div><div class="dv" id="mKyc">—</div></div>
+        <div class="di"><div class="dl">Collection Rate</div><div class="dv" id="mRate">—</div></div>
+      </div>
+      <div class="osl"><i class="fa-solid fa-user-tie" style="color:var(--primary);"></i> Assigned Officers</div>
+      <div id="officerList" style="margin-bottom:18px; min-height:50px; background:var(--surface2); border-radius:10px; padding:12px; border:1.5px solid var(--border);">
+        <div style="color:var(--muted); font-size:13px; text-align:center; padding:12px;">No officers assigned yet</div>
+      </div>
+      <div class="osl" style="margin-top:18px;"><i class="fa-solid fa-plus" style="color:var(--primary);"></i> Add Officer</div>
+      <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-start; position:relative;">
+        <div style="position:relative; width:100%;">
+          <input type="text" id="officerSearch" class="search-input" placeholder="Search officer by name…" autocomplete="off">
+          <div id="searchResults" class="search-results">
+            <div class="search-result-empty">No officers available</div>
+          </div>
+        </div>
+        <button id="addOfficerBtn" style="padding:10px 16px; border-radius:9px; border:1.5px solid var(--primary); background:var(--primary); color:#fff; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap;">
+          <i class="fa-solid fa-plus" style="margin-right:5px;"></i>Add
+        </button>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="mbtn mbtn-sec" id="modalCancelBtn">Cancel</button>
+      <button class="mbtn mbtn-primary" id="modalSaveBtn"><i class="fa-solid fa-check" style="margin-right:5px;"></i>Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/db.js"></script>
+<script>
+// ── Data ────────────────────────────────────────────────────
+var BRGY_NAMES = [
+  'Arena Blanco','Ayala','Baliwasan','Baluno','Boalan','Bolong',
+  'Buenavista','Bunguiao','Busay (Punta)','Cabaluay','Cabatangan',
+  'Cacao','Calabasa','Calarian','Camino Nuevo','Campo Islam',
+  'Canelar','Capisan','Cawit','Curuan','Dita','Divisoria',
+  'Dulian (Lower)','Dulian (Upper)','Guiwan','Ilang','Kasanyangan',
+  'La Paz','Labuan','Lal-lo','Lamisahan','Landang Gua',
+  'Landang Laum','Lapakan','Latuan','Limaong','Limpapa',
+  'Lubigan','Lumayang','Lumbangan','Lunzuran','Maasin',
+  'Malagutay','Mampang','Manalipa','Mangusu','Manicahan',
+  'Mariki','Mercedes','Muti','Pamucutan','Pangapuyan',
+  'Panubigan','Pasilmanta','Pasonanca','Putik','Quiniput',
+  'Recodo','Rio Hondo','Saad','Sagunto','San Jose Cawa-Cawa',
+  'San Jose Gusu','San Roque','Sangali','Santa Barbara',
+  'Santa Catalina','Santa Maria','Sibulao','Sinubung','Sinunoc',
+  'Sta. Cruz','Talisayan','Talon-Talon','Taluksangay','Tetuan',
+  'Tictapul','Tigbalabag','Tigtabon','Tolosa','Tugbungan',
+  'Tulungatung','Tumaga','Tumulak','Tungawan','Una','Vitali',
+  'Zone I (Camino Nuevo)','Zone II (Camino Nuevo)','Zone III (Camino Nuevo)',
+  'Zone IV (Camino Nuevo)','Zone I Poblacion','Zone II Poblacion',
+  'Zone III Poblacion','Zone IV Poblacion','Zone V Poblacion',
+  'Zone VI Poblacion','Zone VII Poblacion'
+];
+
+var DEMO_OFFICERS = [
+  'Maria Santos','Pedro Cruz','Ana Ramos','Carlos Delos Reyes',
+  'Rosa Magno','Jimmy Palacio','Fatima Alvarez','Roberto Hernandez',
+  'Liza Mendoza','Manuel Torres','Cynthia Reyes','Benjamin Aquino',
+  'Gloria Bautista','Antonio Villanueva','Maricel Domingo'
+];
+
+var DEFAULT_UNASSIGNED = { 'Pasonanca':true, 'Putik':true, 'Tumaga':true, 'Sibulao':true };
+var ASSIGN_KEY = 'zc_brgy_assignments';
+
+function hashN(str) {
+  var h = 5381;
+  for (var i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
+  return Math.abs(h >>> 0);
+}
+
+function buildData() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(ASSIGN_KEY)) || {}; } catch(e) {}
+
+  return BRGY_NAMES.map(function(name, i) {
+    var h  = hashN(name);
+    var hd = hashN(name + 'drv');
+    var hr = hashN(name + 'rep');
+    var hk = hashN(name + 'kyc');
+
+    var officers;
+    if (name in saved) {
+      officers = Array.isArray(saved[name]) ? saved[name] : (saved[name] ? [saved[name]] : []);
+    } else {
+      officers = DEFAULT_UNASSIGNED[name] ? [] : [DEMO_OFFICERS[h % DEMO_OFFICERS.length]];
+    }
+
+    var assigned = officers.length > 0;
+    var d = hd % 10;
+    var drivers = d < 2 ? 0 : d < 6 ? 1 : d < 9 ? 2 : 3;
+
+    return {
+      _idx: i,
+      name: name,
+      officers: officers,
+      drivers: drivers,
+      kycPending: assigned ? (hk % 16) : -1,
+      activeReports: assigned ? (8 + hr % 33) : (3 + hr % 10),
+      collectionRate: assigned ? (75 + h % 24) : (52 + h % 22),
+      status: assigned ? 'active' : 'no-officer'
+    };
+  });
+}
+
+// ── State ────────────────────────────────────────────────────
+var BARANGAYS   = [];
+var currentPage = 1;
+var ROWS_PER    = 8;
+var sortCol     = 'name';
+var sortDir     = 'asc';
+var activeFilter = 'all';
+var searchQuery  = '';
+var editingIdx   = -1;
+var editingOfficers = [];
+
+// ── Filter + Sort ────────────────────────────────────────────
+function getFiltered() {
+  var data = BARANGAYS.slice();
+
+  if (searchQuery) {
+    var q = searchQuery.toLowerCase();
+    data = data.filter(function(b) { return b.name.toLowerCase().indexOf(q) !== -1; });
+  }
+
+  if (activeFilter === 'assigned')    data = data.filter(function(b) { return b.status === 'active'; });
+  else if (activeFilter === 'unassigned') data = data.filter(function(b) { return b.status === 'no-officer'; });
+  else if (activeFilter === 'high-volume') data = data.filter(function(b) { return b.activeReports >= 25; });
+
+  data.sort(function(a, b) {
+    var av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'kycPending') { av = av < 0 ? 9999 : av; bv = bv < 0 ? 9999 : bv; }
+    if (sortCol === 'officer')    { av = av || '￿'; bv = bv || '￿'; }
+    if (sortCol === 'status')     { av = av || ''; bv = bv || ''; }
+    var cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  return data;
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render() {
+  var filtered   = getFiltered();
+  var total      = filtered.length;
+  var totalPages = Math.max(1, Math.ceil(total / ROWS_PER));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  var start = (currentPage - 1) * ROWS_PER;
+  renderRows(filtered.slice(start, start + ROWS_PER));
+  renderPagination(total, totalPages);
+  renderStats();
+  updateFilterChips();
+}
+
+function renderRows(rows) {
+  var tb = document.getElementById('brgyTbody');
+  if (!rows.length) {
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px 16px;"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;"></i>No barangays found</td></tr>';
+    return;
+  }
+
+  var html = '';
+  rows.forEach(function(b) {
+    var assigned = b.status === 'active';
+
+    var officerCell;
+    if (assigned && b.officers.length > 0) {
+      officerCell = '<span style="font-weight:500;">' + b.officers.join(', ') + '</span>';
+      if (b.officers.length > 1) {
+        officerCell += ' <span style="color:var(--muted); font-size:11px;">(' + b.officers.length + ')</span>';
+      }
+    } else {
+      officerCell = '<span style="color:var(--muted);font-style:italic;">Unassigned</span>';
+    }
+
+    var kyc = b.kycPending;
+    var kycCell = kyc < 0 ? '—'
+      : kyc === 0 ? '<span class="badge badge-green">0</span>'
+      : kyc >= 10  ? '<span class="badge badge-yellow">' + kyc + '</span>'
+      : '<span class="badge badge-muted">' + kyc + '</span>';
+
+    var rate = b.collectionRate;
+    var rateColor  = rate >= 85 ? 'var(--primary)' : rate >= 70 ? 'var(--yellow)' : 'var(--red)';
+    var fillClass  = rate >= 85 ? '' : rate >= 70 ? ' yellow' : ' red';
+
+    var statusBadge = assigned
+      ? '<span class="badge badge-green">Active</span>'
+      : '<span class="badge badge-' + (rate < 65 ? 'red' : 'yellow') + '">No Officer</span>';
+
+    var btnClass = assigned ? 'action-btn' : 'action-btn warn';
+    var btnText  = assigned ? 'Manage' : 'Assign Officer';
+
+    html += '<tr>'
+      + '<td class="col-strong">' + b.name + '</td>'
+      + '<td>' + officerCell + '</td>'
+      + '<td>' + b.drivers + '</td>'
+      + '<td>' + kycCell + '</td>'
+      + '<td>' + b.activeReports + '</td>'
+      + '<td><div style="display:flex;align-items:center;gap:8px;">'
+        + '<div class="progress-track"><div class="progress-fill' + fillClass + '" style="width:' + rate + '%;"></div></div>'
+        + '<span style="font-size:12px;font-weight:700;color:' + rateColor + ';">' + rate + '%</span>'
+      + '</div></td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td><a href="#" class="' + btnClass + '" data-idx="' + b._idx + '">' + btnText + '</a></td>'
+    + '</tr>';
+  });
+
+  tb.innerHTML = html;
+
+  // Attach action button listeners
+  tb.querySelectorAll('a[data-idx]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      openManage(parseInt(this.dataset.idx, 10));
+    });
+  });
+}
+
+function renderPagination(total, totalPages) {
+  var start = (currentPage - 1) * ROWS_PER + 1;
+  var end   = Math.min(currentPage * ROWS_PER, total);
+  document.getElementById('pageInfo').textContent =
+    total === 0 ? 'No results found'
+    : 'Showing ' + start + '–' + end + ' of ' + total + ' barangay' + (total !== 1 ? 's' : '');
+
+  var nums = buildPageNums(currentPage, totalPages);
+  var html = '';
+
+  html += '<div class="page-btn' + (currentPage <= 1 ? ' disabled' : '') + '" id="pgPrev">&#8249;</div>';
+  nums.forEach(function(p) {
+    if (p === '…') {
+      html += '<div class="page-btn" style="width:auto;padding:0 6px;border:none;background:transparent;cursor:default;">…</div>';
+    } else {
+      html += '<div class="page-btn' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</div>';
+    }
+  });
+  html += '<div class="page-btn' + (currentPage >= totalPages ? ' disabled' : '') + '" id="pgNext">&#8250;</div>';
+
+  var container = document.getElementById('pageBtns');
+  container.innerHTML = html;
+
+  container.querySelectorAll('[data-page]').forEach(function(el) {
+    el.addEventListener('click', function() { goPage(parseInt(this.dataset.page, 10)); });
+  });
+  var prev = container.querySelector('#pgPrev');
+  var next = container.querySelector('#pgNext');
+  if (prev) prev.addEventListener('click', function() { goPage(currentPage - 1); });
+  if (next) next.addEventListener('click', function() { goPage(currentPage + 1); });
+}
+
+function buildPageNums(cur, total) {
+  if (total <= 7) {
+    var arr = [];
+    for (var i = 1; i <= total; i++) arr.push(i);
+    return arr;
+  }
+  var left  = Math.max(2, cur - 1);
+  var right = Math.min(total - 1, cur + 1);
+  var pages = [1];
+  if (left > 2)  pages.push('…');
+  for (var i = left; i <= right; i++) pages.push(i);
+  if (right < total - 1) pages.push('…');
+  pages.push(total);
+  return pages;
+}
+
+function renderStats() {
+  var assigned   = BARANGAYS.filter(function(b) { return b.status === 'active'; }).length;
+  var unassigned = BARANGAYS.length - assigned;
+  var drivers    = BARANGAYS.reduce(function(s, b) { return s + b.drivers; }, 0);
+
+  document.getElementById('statAssigned').textContent  = assigned;
+  document.getElementById('statUnassigned').textContent = unassigned;
+  document.getElementById('statDrivers').textContent    = drivers;
+
+  var notice = document.getElementById('unassignedNotice');
+  if (unassigned === 0) {
+    notice.style.display = 'none';
+  } else {
+    notice.style.display = '';
+    document.getElementById('noticeText').innerHTML =
+      '<strong style="color:var(--yellow);">' + unassigned + ' barangay' + (unassigned !== 1 ? 's' : '') +
+      '</strong> currently have no assigned officer. Reports from these barangays cannot be reviewed. Assign officers immediately.';
+  }
+}
+
+function updateFilterChips() {
+  var assigned   = BARANGAYS.filter(function(b) { return b.status === 'active'; }).length;
+  var unassigned = BARANGAYS.length - assigned;
+  var highVol    = BARANGAYS.filter(function(b) { return b.activeReports >= 25; }).length;
+
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    var f = chip.dataset.filter;
+    chip.classList.toggle('active', f === activeFilter);
+    if (f === 'all')         chip.innerHTML = 'All (' + BARANGAYS.length + ')';
+    if (f === 'assigned')    chip.innerHTML = '<i class="fa-solid fa-circle-check"></i> Assigned (' + assigned + ')';
+    if (f === 'unassigned')  chip.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Unassigned (' + unassigned + ')';
+    if (f === 'high-volume') chip.innerHTML = '<i class="fa-solid fa-fire"></i> High Volume (' + highVol + ')';
+  });
+}
+
+// ── Sort ─────────────────────────────────────────────────────
+function setSort(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortCol = col;
+    sortDir = 'asc';
+  }
+  currentPage = 1;
+  updateSortHeaders();
+  render();
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('th.sortable').forEach(function(th) {
+    th.classList.remove('sort-asc', 'sort-desc');
+    var ic = th.querySelector('.sort-ic');
+    if (th.dataset.col === sortCol) {
+      th.classList.add('sort-' + sortDir);
+      if (ic) ic.textContent = sortDir === 'asc' ? '↑' : '↓';
+    } else {
+      if (ic) ic.textContent = '⇅';
+    }
+  });
+}
+
+// ── Pagination ───────────────────────────────────────────────
+function goPage(p) {
+  var filtered   = getFiltered();
+  var totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER));
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Modal ────────────────────────────────────────────────────
+function getOfficerList() {
+  var list = DEMO_OFFICERS.slice();
+  try {
+    var users = JSON.parse(localStorage.getItem('zc_users')) || [];
+    users.forEach(function(u) {
+      if (u.role === 'officer') {
+        var name = (u.firstName + ' ' + u.lastName).trim();
+        if (list.indexOf(name) === -1) list.push(name);
+      }
+    });
+  } catch(e) {}
+  list.sort();
+  return list;
+}
+
+function renderOfficerList() {
+  var container = document.getElementById('officerList');
+  
+  if (editingOfficers.length === 0) {
+    container.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:12px;">No officers assigned yet</div>';
+    return;
+  }
+
+  var html = '';
+  editingOfficers.forEach(function(officer, idx) {
+    html += '<div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--surface); border-radius:8px; margin-bottom:8px; border:1px solid var(--border);">'
+      + '<span style="font-weight:500; font-size:14px;">' + officer + '</span>'
+      + '<button class="remove-officer-btn" data-idx="' + idx + '" style="padding:4px 8px; border-radius:6px; border:1px solid var(--red-dim); background:var(--red-bg); color:var(--red); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s;">'
+        + '<i class="fa-solid fa-trash-can" style="margin-right:4px;"></i>Remove'
+      + '</button>'
+    + '</div>';
+  });
+  
+  container.innerHTML = html;
+  
+  // Attach remove button listeners
+  container.querySelectorAll('.remove-officer-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var idx = parseInt(this.dataset.idx, 10);
+      editingOfficers.splice(idx, 1);
+      renderOfficerList();
+      updateSearchResults('');
+    });
+  });
+}
+
+function updateSearchResults(query) {
+  var container = document.getElementById('searchResults');
+  query = query.toLowerCase().trim();
+  
+  var officers = getOfficerList();
+  var available = officers.filter(function(o) {
+    return editingOfficers.indexOf(o) === -1;
+  });
+  
+  if (!query) {
+    container.classList.remove('active');
+    container.innerHTML = '<div class="search-result-empty">No officers available</div>';
+    return;
+  }
+  
+  var filtered = available.filter(function(o) {
+    return o.toLowerCase().indexOf(query) !== -1;
+  });
+  
+  if (filtered.length === 0) {
+    container.classList.add('active');
+    container.innerHTML = '<div class="search-result-empty">No officers match your search</div>';
+    return;
+  }
+  
+  var html = '';
+  filtered.forEach(function(officer) {
+    html += '<div class="search-result-item" data-officer="' + officer + '">'
+      + '<i class="fa-solid fa-user" style="margin-right:8px; color:var(--primary);"></i>' + officer
+    + '</div>';
+  });
+  
+  container.innerHTML = html;
+  container.classList.add('active');
+  
+  // Attach click listeners
+  container.querySelectorAll('.search-result-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var officer = this.dataset.officer;
+      editingOfficers.push(officer);
+      document.getElementById('officerSearch').value = '';
+      container.classList.remove('active');
+      renderOfficerList();
+      updateSearchResults('');
+    });
+  });
+}
+
+function openManage(idx) {
+  var b = BARANGAYS[idx];
+  if (!b) return;
+  editingIdx = idx;
+  editingOfficers = b.officers.slice();
+
+  document.getElementById('mTitle').textContent = 'Manage Barangay Officers';
+  document.getElementById('mSub').textContent   = b.name;
+  document.getElementById('mDrivers').textContent = b.drivers;
+  document.getElementById('mReports').textContent = b.activeReports;
+  document.getElementById('mKyc').textContent     = b.kycPending < 0 ? '—' : b.kycPending;
+  document.getElementById('mRate').textContent    = b.collectionRate + '%';
+
+  var searchInput = document.getElementById('officerSearch');
+  searchInput.value = '';
+  
+  renderOfficerList();
+  updateSearchResults('');
+  document.getElementById('manageModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('manageModal').classList.remove('active');
+  document.getElementById('searchResults').classList.remove('active');
+  editingIdx = -1;
+  editingOfficers = [];
+}
+
+function saveAssignment() {
+  if (editingIdx < 0) return;
+  var b = BARANGAYS[editingIdx];
+
+  b.officers = editingOfficers.slice();
+  b.status  = b.officers.length > 0 ? 'active' : 'no-officer';
+  if (b.officers.length === 0) b.kycPending = -1;
+  else if (b.kycPending < 0) b.kycPending = 0;
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(ASSIGN_KEY)) || {};
+    saved[b.name] = b.officers;
+    localStorage.setItem(ASSIGN_KEY, JSON.stringify(saved));
+  } catch(e) {}
+
+  closeModal();
+  render();
+
+  var msg = b.officers.length > 0
+    ? (b.officers.length + ' officer' + (b.officers.length !== 1 ? 's' : '') + ' assigned to ' + b.name)
+    : (b.name + ' is now unassigned');
+  showToast('✓ ' + msg);
+}
+
+// ── Toast ────────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  BARANGAYS = buildData();
+
+  // Sort headers
+  document.querySelectorAll('th.sortable').forEach(function(th) {
+    th.addEventListener('click', function() { setSort(th.dataset.col); });
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
+      activeFilter = chip.dataset.filter;
+      currentPage  = 1;
+      render();
+    });
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', function() {
+    searchQuery = this.value.trim();
+    currentPage = 1;
+    render();
+  });
+
+  // Modal close
+  document.getElementById('modalCloseBtn').addEventListener('click',  closeModal);
+  document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+  document.getElementById('modalSaveBtn').addEventListener('click',   saveAssignment);
+  document.getElementById('officerSearch').addEventListener('input', function() {
+    updateSearchResults(this.value);
+  });
+  document.getElementById('officerSearch').addEventListener('blur', function() {
+    setTimeout(function() {
+      document.getElementById('searchResults').classList.remove('active');
+    }, 200);
+  });
+  document.getElementById('officerSearch').addEventListener('focus', function() {
+    var query = this.value.trim();
+    if (query) {
+      updateSearchResults(query);
+    }
+  });
+  document.getElementById('manageModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  updateSortHeaders();
+  render();
+});
+</script>
+
+<button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+<script src="js/shared.js"></script>
+</body>
+</html>

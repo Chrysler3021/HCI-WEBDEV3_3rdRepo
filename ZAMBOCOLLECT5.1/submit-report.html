@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Report — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ── Wizard wrapper ── */
+    .wizard-wrap { max-width: 540px; margin: 0 auto; }
+
+    /* ── Progress indicator ── */
+    .wizard-progress {
+      display: flex; align-items: center;
+      margin-bottom: 24px; padding: 0 4px;
+    }
+    .wp-step {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px; flex-shrink: 0;
+    }
+    .wp-dot {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      transition: all 0.25s;
+    }
+    .wp-step.active .wp-dot  { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .wp-step.done   .wp-dot  { background: #dcfce7; border-color: #4ade80; color: #16a34a; }
+    .wp-label {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .wp-step.active .wp-label { color: var(--primary); }
+    .wp-step.done   .wp-label { color: #16a34a; }
+    .wp-line {
+      flex: 1; height: 2px; background: var(--border);
+      margin: 0 4px 22px; transition: background 0.3s;
+    }
+    .wp-line.done { background: #4ade80; }
+
+    /* ── Step card shell ── */
+    .step-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    }
+    .step-head {
+      padding: 20px 22px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .step-head-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .step-head-title { font-size: 16px; font-weight: 700; color: var(--text); margin: 0 0 2px; }
+    .step-head-sub   { font-size: 12px; color: var(--muted); margin: 0; }
+    .step-body   { padding: 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+    .step-footer { padding: 0 22px 20px; display: flex; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .btn-back:hover { border-color: var(--text); color: var(--text); }
+    .btn-next {
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      background: var(--primary); color: #fff; border: none;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .btn-next:hover { opacity: 0.9; }
+    .btn-submit-wizard {
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      background: var(--primary); color: #fff; border: none;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .btn-submit-wizard:hover { opacity: 0.9; }
+
+    /* ── Map toggle ── */
+    .btn-map-toggle {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: 9px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .btn-map-toggle:hover { border-color: var(--primary); color: var(--primary); }
+    .map-section { display: none; }
+    .map-section.open { display: block; }
+
+    /* ── Photo zones ── */
+    .photo-zone-primary {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 9px; border: 2px solid var(--primary); border-radius: 14px;
+      background: linear-gradient(135deg, rgba(88,129,87,0.06), rgba(163,177,138,0.09));
+      padding: 24px 16px; cursor: pointer; text-align: center;
+      position: relative; overflow: hidden; transition: all 0.2s;
+    }
+    .photo-zone-primary:hover { background: linear-gradient(135deg, rgba(88,129,87,0.1), rgba(163,177,138,0.14)); }
+    .photo-zone-secondary {
+      display: flex; align-items: center; gap: 12px;
+      border: 1.5px dashed var(--border); border-radius: 12px;
+      background: var(--surface2); padding: 13px 16px; cursor: pointer;
+      position: relative; overflow: hidden; transition: all 0.2s;
+    }
+    .photo-zone-secondary:hover { border-color: var(--primary); }
+    .photo-preview-wrap {
+      position: relative; border-radius: 12px; overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+    .photo-preview-wrap img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .photo-remove-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(0,0,0,0.55); color: #fff; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+
+    /* ── Waste chips ── */
+    .wz-waste-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .wz-waste-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 13px; border-radius: 100px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text);
+      transition: all 0.15s;
+    }
+    .wz-waste-chip input { display: none; }
+    .wz-waste-chip.wc-sel { border-color: var(--primary); background: rgba(88,129,87,0.12); color: var(--primary); }
+
+    /* ── Urgency chips ── */
+    .wz-urg-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .wz-urg-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; border: 1.5px solid transparent;
+      cursor: pointer; transition: all 0.2s; opacity: 0.4;
+    }
+    .wz-urg-chip.uc-on { opacity: 1; }
+    .uc-low      { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+    .uc-medium   { background: #fffbeb; border-color: #fde68a; color: #d97706; }
+    .uc-high     { background: #fff7ed; border-color: #fdba74; color: #ea580c; }
+    .uc-critical { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+    .uc-low.uc-on      { background: #dcfce7; border-color: #4ade80; }
+    .uc-medium.uc-on   { background: #fef3c7; border-color: #fbbf24; }
+    .uc-high.uc-on     { background: #ffedd5; border-color: #fb923c; }
+    .uc-critical.uc-on { background: #fee2e2; border-color: #f87171; }
+
+    /* ── Summary ── */
+    .sum-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sum-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 9px 13px; flex: 1; min-width: 130px;
+    }
+    .sum-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin-bottom: 3px; }
+    .sum-val { font-size: 13px; font-weight: 600; color: var(--text); }
+
+    /* ── Modal ── */
+    .wz-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .wz-modal-overlay.hidden { display: none; }
+    .wz-modal-box {
+      background: var(--surface); border-radius: 16px; padding: 26px 24px;
+      width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .wz-modal-icon {
+      width: 54px; height: 54px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin: 0 auto 14px;
+    }
+    .wz-modal-title { font-size: 17px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 6px; }
+    .wz-modal-msg   { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.65; margin-bottom: 20px; }
+    .wz-modal-actions { display: flex; gap: 10px; }
+
+    /* ── Success screen ── */
+    .success-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 16px; box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+      text-align: center; padding: 48px 28px 36px;
+    }
+    .success-icon-wrap {
+      width: 82px; height: 82px; border-radius: 50%;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px; box-shadow: 0 8px 28px rgba(34,197,94,0.3);
+      animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    @keyframes pop-in {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .success-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #16a34a; margin-bottom: 6px; }
+    .success-title   { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.4px; margin-bottom: 8px; }
+    .success-sub     { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+    .success-id-badge {
+      display: inline-block; background: #dcfce7; color: #15803d;
+      border: 1.5px solid #86efac; border-radius: 100px;
+      padding: 5px 18px; font-size: 13px; font-weight: 700; margin-bottom: 28px;
+    }
+    .success-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 420px) {
+      .step-head   { padding: 14px 16px 12px; gap: 10px; }
+      .step-body   { padding: 16px; gap: 14px; }
+      .step-footer { padding: 0 16px 16px; }
+      .success-card { padding: 36px 20px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="citizen-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarUserName">Juan dela Cruz</div>
+          <div class="user-role" id="sidebarUserRole">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="citizen-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Submit Report</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="citizen-dashboard.html">Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">Submit Report</li>
+        </nav>
+        <h1>Submit a Report</h1>
+        <p>Report a trash problem in your barangay — Zamboanga City.</p>
+      </div>
+
+      <!-- KYC gate -->
+      <div id="kyc-blocked-banner" style="display:none;flex-direction:column;align-items:center;text-align:center;padding:52px 24px;background:#f8fafc;border:1.5px solid var(--border);border-radius:16px;gap:18px;margin-bottom:24px;">
+        <div style="width:72px;height:72px;border-radius:50%;background:#fff7ed;border:2px solid #fed7aa;display:flex;align-items:center;justify-content:center;">
+          <i class="fa-solid fa-lock" style="font-size:28px;color:#ea580c;"></i>
+        </div>
+        <div>
+          <div id="kyc-block-badge" style="display:inline-block;padding:3px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:0.4px;margin-bottom:10px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;">KYC Pending</div>
+          <div id="kyc-block-title" style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px;">KYC Verification Required</div>
+          <div id="kyc-block-msg" style="font-size:13px;color:#64748b;max-width:420px;line-height:1.65;margin:0 auto;">Your identity is still being reviewed by your barangay officer. You will be able to submit reports as soon as your KYC is approved.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+          <a href="my-profile.html" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:10px;background:#588157;color:#fff;font-size:13px;font-weight:600;text-decoration:none;">
+            <i class="fa-solid fa-id-card"></i> View My KYC Status
+          </a>
+          <a href="citizen-dashboard.html" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:10px;background:#fff;border:1.5px solid #e2e8f0;color:#475569;font-size:13px;font-weight:600;text-decoration:none;">
+            <i class="fa-solid fa-house"></i> Back to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- Wizard form area -->
+      <div id="report-form-area" style="display:none;">
+        <div class="wizard-wrap">
+
+          <!-- Progress -->
+          <div class="wizard-progress">
+            <div class="wp-step active" id="wp-1">
+              <div class="wp-dot" id="wpdot-1">1</div>
+              <div class="wp-label">Location</div>
+            </div>
+            <div class="wp-line" id="wpline-12"></div>
+            <div class="wp-step" id="wp-2">
+              <div class="wp-dot" id="wpdot-2">2</div>
+              <div class="wp-label">Photo</div>
+            </div>
+            <div class="wp-line" id="wpline-23"></div>
+            <div class="wp-step" id="wp-3">
+              <div class="wp-dot" id="wpdot-3">3</div>
+              <div class="wp-label">Details</div>
+            </div>
+          </div>
+
+          <!-- ── STEP 1: Location ── -->
+          <div id="step-1" class="step-card">
+            <div class="step-head">
+              <div class="step-head-icon" style="background:#dbeafe;color:#2563eb;">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <div>
+                <div class="step-head-title">Where is the waste?</div>
+                <p class="step-head-sub">Tell us the barangay and exact spot.</p>
+              </div>
+            </div>
+            <div class="step-body">
+
+              <div class="form-group" style="margin:0;">
+                <label>Barangay <span style="color:var(--red);">*</span></label>
+                <select id="barangay-select">
+                  <option value="">— Select your barangay —</option>
+                  <option>Barangay Rio Hondo</option>
+                  <option>Barangay Canelar</option>
+                  <option>Barangay Pasonanca</option>
+                  <option>Barangay Sta. Cruz</option>
+                  <option>Barangay Guiwan</option>
+                  <option>Barangay Talon-talon</option>
+                  <option>Barangay Tetuan</option>
+                  <option>Barangay Tumaga</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label>Location Description <span style="color:var(--red);">*</span></label>
+                <input type="text" id="location-desc" placeholder="e.g. Near the elementary school gate, Purok 3" />
+              </div>
+
+              <div>
+                <button class="btn-map-toggle" type="button" id="map-toggle-btn" onclick="toggleMap()">
+                  <i class="fa-solid fa-map-location-dot"></i> Pin on Map instead
+                </button>
+                <div class="map-section" id="map-section" style="margin-top:12px;">
+                  <div id="report-pin-map" style="width:100%;height:220px;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);background:var(--surface2);"></div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                    <button type="button" id="use-loc-btn" onclick="useMyLocation(this)" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:inherit;">
+                      <i class="fa-solid fa-location-crosshairs" style="color:var(--primary);"></i> Use My Location
+                    </button>
+                    <span id="pin-location-text" style="font-size:11px;color:var(--muted);">Click the map or drag the pin to set location</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div class="step-footer">
+              <button class="btn-next" type="button" onclick="goStep(2)">
+                Continue <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── STEP 2: Photo & Type ── -->
+          <div id="step-2" class="step-card" style="display:none;">
+            <div class="step-head">
+              <div class="step-head-icon" style="background:#dcfce7;color:#16a34a;">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+              <div>
+                <div class="step-head-title">Take a photo</div>
+                <p class="step-head-sub">A photo helps officers verify your report faster.</p>
+              </div>
+            </div>
+            <div class="step-body">
+
+              <!-- Photo upload zones -->
+              <div id="photo-picker-area">
+                <label class="photo-zone-primary">
+                  <input type="file" accept="image/*" capture="environment" id="photo-camera"
+                    style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                    onchange="handlePhoto(this)" />
+                  <div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#A3B18A);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(88,129,87,0.3);">
+                    <i class="fa-solid fa-camera" style="color:#fff;font-size:1.4rem;"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:var(--text);">Take Photo</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Open camera directly</div>
+                  </div>
+                  <span style="background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:0.3px;">RECOMMENDED</span>
+                </label>
+                <label class="photo-zone-secondary" style="margin-top:8px;">
+                  <input type="file" accept="image/*" id="photo-gallery"
+                    style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                    onchange="handlePhoto(this)" />
+                  <div style="width:38px;height:38px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fa-solid fa-image" style="color:var(--muted);"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">Upload from Gallery</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:1px;">JPG, PNG — max 10 MB</div>
+                  </div>
+                </label>
+                <div style="margin-top:8px;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);">
+                  <i class="fa-solid fa-circle-info"></i> Photo is optional but strongly recommended
+                </div>
+              </div>
+
+              <!-- Photo preview (after selection) -->
+              <div id="photo-preview-area" style="display:none;">
+                <div class="photo-preview-wrap">
+                  <img id="photo-preview-img" src="" alt="Report photo" />
+                  <button class="photo-remove-btn" type="button" onclick="removePhoto()" title="Remove photo">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+                <div style="margin-top:6px;font-size:11px;color:#16a34a;display:flex;align-items:center;gap:5px;">
+                  <i class="fa-solid fa-circle-check"></i> Photo selected — looking good!
+                </div>
+              </div>
+
+              <!-- Waste type -->
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:9px;">
+                  Waste Type
+                </div>
+                <div class="wz-waste-chips">
+                  <label class="wz-waste-chip wc-sel" id="wc-household" onclick="selectWaste('household',this)">
+                    <input type="radio" name="waste" value="household" checked />
+                    <i class="fa-solid fa-house" style="font-size:11px;"></i> Household
+                  </label>
+                  <label class="wz-waste-chip" id="wc-commercial" onclick="selectWaste('commercial',this)">
+                    <input type="radio" name="waste" value="commercial" />
+                    <i class="fa-solid fa-store" style="font-size:11px;"></i> Commercial
+                  </label>
+                  <label class="wz-waste-chip" id="wc-construction" onclick="selectWaste('construction',this)">
+                    <input type="radio" name="waste" value="construction" />
+                    <i class="fa-solid fa-helmet-safety" style="font-size:11px;"></i> Construction
+                  </label>
+                  <label class="wz-waste-chip" id="wc-hazardous" onclick="selectWaste('hazardous',this)">
+                    <input type="radio" name="waste" value="hazardous" />
+                    <i class="fa-solid fa-radiation" style="font-size:11px;"></i> Hazardous
+                  </label>
+                  <label class="wz-waste-chip" id="wc-other" onclick="selectWaste('other',this)">
+                    <input type="radio" name="waste" value="other" />
+                    <i class="fa-solid fa-box" style="font-size:11px;"></i> Other
+                  </label>
+                </div>
+              </div>
+
+              <!-- Urgency -->
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;">
+                  Urgency Level
+                  <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;"> — auto-set, adjust if needed</span>
+                </div>
+                <input type="hidden" id="current-urgency" value="low" />
+                <div class="wz-urg-chips" style="margin-top:6px;">
+                  <div class="wz-urg-chip uc-low uc-on"   id="uc-low"      onclick="selectUrgency('low')"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Low</div>
+                  <div class="wz-urg-chip uc-medium"       id="uc-medium"   onclick="selectUrgency('medium')"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i> Medium</div>
+                  <div class="wz-urg-chip uc-high"         id="uc-high"     onclick="selectUrgency('high')"><i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i> High</div>
+                  <div class="wz-urg-chip uc-critical"     id="uc-critical" onclick="selectUrgency('critical')"><i class="fa-solid fa-skull-crossbones" style="font-size:9px;"></i> Critical</div>
+                </div>
+                <div id="urgency-hint" style="font-size:11px;color:var(--muted);margin-top:7px;">
+                  <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> Household waste defaults to Low urgency.
+                </div>
+              </div>
+
+            </div>
+            <div class="step-footer">
+              <button class="btn-back" type="button" onclick="goStep(1)">
+                <i class="fa-solid fa-arrow-left"></i> Back
+              </button>
+              <button class="btn-next" type="button" onclick="goStep(3)">
+                Continue <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── STEP 3: Description & Review ── -->
+          <div id="step-3" class="step-card" style="display:none;">
+            <div class="step-head">
+              <div class="step-head-icon" style="background:#fef3c7;color:#d97706;">
+                <i class="fa-solid fa-clipboard-list"></i>
+              </div>
+              <div>
+                <div class="step-head-title">Any final details?</div>
+                <p class="step-head-sub">Add a description if you'd like, then submit.</p>
+              </div>
+            </div>
+            <div class="step-body">
+
+              <!-- Summary -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:5px;">
+                  <i class="fa-solid fa-list-check"></i> Your Report Summary
+                </div>
+                <div class="sum-grid">
+                  <div class="sum-box">
+                    <div class="sum-lbl">Barangay</div>
+                    <div class="sum-val" id="sum-barangay">—</div>
+                  </div>
+                  <div class="sum-box">
+                    <div class="sum-lbl">Waste Type</div>
+                    <div class="sum-val" id="sum-waste">—</div>
+                  </div>
+                </div>
+                <div class="sum-grid" style="margin-top:8px;">
+                  <div class="sum-box" style="flex:2;">
+                    <div class="sum-lbl">Location</div>
+                    <div class="sum-val" id="sum-location">—</div>
+                  </div>
+                  <div class="sum-box">
+                    <div class="sum-lbl">Urgency</div>
+                    <div class="sum-val" id="sum-urgency">—</div>
+                  </div>
+                </div>
+                <div id="sum-photo-row" style="display:none;margin-top:8px;">
+                  <div class="sum-box" style="display:flex;align-items:center;gap:8px;">
+                    <i class="fa-solid fa-image" style="color:var(--primary);font-size:13px;"></i>
+                    <div>
+                      <div class="sum-lbl">Photo</div>
+                      <div class="sum-val" style="color:#16a34a;">Attached</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Optional description -->
+              <div class="form-group" style="margin:0;">
+                <label style="display:flex;align-items:center;gap:7px;">
+                  Description
+                  <span style="font-size:11px;font-weight:400;color:var(--muted);">(optional)</span>
+                </label>
+                <textarea id="report-description"
+                  placeholder="Describe the trash problem — size, smell, hazard level, how long it's been there…"
+                  style="min-height:90px;"></textarea>
+              </div>
+
+            </div>
+            <div class="step-footer">
+              <button class="btn-back" type="button" onclick="goStep(2)">
+                <i class="fa-solid fa-arrow-left"></i> Back
+              </button>
+              <button class="btn-submit-wizard" type="button" onclick="trySubmit()">
+                <i class="fa-solid fa-paper-plane"></i> Submit Report
+              </button>
+            </div>
+          </div>
+
+          <!-- ── SUCCESS SCREEN ── -->
+          <div id="step-success" style="display:none;">
+            <div class="success-card">
+              <div class="success-icon-wrap">
+                <i class="fa-solid fa-check" style="color:#fff;font-size:2.1rem;"></i>
+              </div>
+              <div class="success-eyebrow">Report Submitted</div>
+              <div class="success-title">Report Submitted!</div>
+              <div class="success-sub">
+                Your report has been received by ZamboCollect.<br>
+                A barangay officer will review it shortly.
+              </div>
+              <div class="success-sub" style="font-size:12px;margin-bottom:8px;">Report ID</div>
+              <div class="success-id-badge" id="success-report-id">—</div>
+              <div class="success-actions">
+                <a href="my-reports.html"
+                  style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;">
+                  <i class="fa-solid fa-clipboard-list"></i> View My Reports
+                </a>
+                <button type="button" onclick="resetWizard()"
+                  style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;background:var(--primary);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+                  <i class="fa-solid fa-plus"></i> Submit Another Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /wizard-wrap -->
+      </div><!-- /report-form-area -->
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ── Confirm modal ── -->
+<div id="modal-confirm" class="wz-modal-overlay hidden">
+  <div class="wz-modal-box">
+    <div class="wz-modal-icon" style="background:#f0fdf4;">
+      <i class="fa-solid fa-paper-plane" style="color:var(--primary);"></i>
+    </div>
+    <div class="wz-modal-title">Submit this report?</div>
+    <div class="wz-modal-msg">
+      Once submitted, your report will be sent to a barangay officer for review.
+      You can track its status in My Reports.
+    </div>
+    <div class="wz-modal-actions">
+      <button onclick="closeConfirmModal()"
+        style="flex:0 0 40%;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">
+        Cancel
+      </button>
+      <button onclick="confirmSubmit()"
+        style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:10px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;">
+        <i class="fa-solid fa-check"></i> Yes, Submit
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Wizard state ──────────────────────────────────────────────────
+  var currentStep    = 1;
+  var mapReady       = false;
+  var selectedPhoto  = null;
+
+  var urgencyHints = {
+    low:      'Household waste defaults to Low urgency.',
+    medium:   'Commercial / Construction waste defaults to Medium urgency.',
+    high:     'High urgency — large-scale or blocking waste.',
+    critical: '⚠️ Hazardous waste is Critical — officers will be alerted immediately.'
+  };
+  var wasteUrgencyMap = {
+    household: 'low', commercial: 'medium',
+    construction: 'medium', hazardous: 'critical', other: 'low'
+  };
+
+  // ── Step navigation ───────────────────────────────────────────────
+  function goStep(n) {
+    if (n === 2 && !validateStep1()) return;
+
+    for (var i = 1; i <= 3; i++) {
+      var el = document.getElementById('step-' + i);
+      if (el) el.style.display = 'none';
+    }
+    document.getElementById('step-success').style.display = 'none';
+
+    var target = document.getElementById('step-' + n);
+    if (target) target.style.display = 'block';
+    currentStep = n;
+
+    updateProgress(n);
+    if (n === 3) buildSummary();
+
+    var wrap = document.querySelector('.wizard-wrap');
+    if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function validateStep1() {
+    var bar = document.getElementById('barangay-select');
+    var loc = document.getElementById('location-desc');
+    bar.style.borderColor = '';
+    loc.style.borderColor = '';
+
+    if (!bar.value) {
+      bar.style.borderColor = '#dc2626';
+      bar.focus();
+      return false;
+    }
+    if (!loc.value.trim()) {
+      loc.style.borderColor = '#dc2626';
+      loc.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function updateProgress(step) {
+    for (var i = 1; i <= 3; i++) {
+      var wp  = document.getElementById('wp-' + i);
+      var dot = document.getElementById('wpdot-' + i);
+      wp.classList.remove('active', 'done');
+      if (i < step) {
+        wp.classList.add('done');
+        dot.innerHTML = '<i class="fa-solid fa-check" style="font-size:12px;"></i>';
+      } else if (i === step) {
+        wp.classList.add('active');
+        dot.textContent = i;
+      } else {
+        dot.textContent = i;
+      }
+    }
+    var l12 = document.getElementById('wpline-12');
+    var l23 = document.getElementById('wpline-23');
+    if (l12) l12.classList.toggle('done', step > 1);
+    if (l23) l23.classList.toggle('done', step > 2);
+  }
+
+  function buildSummary() {
+    var bar   = document.getElementById('barangay-select').value || '—';
+    var loc   = document.getElementById('location-desc').value.trim() || '—';
+    var waste = document.querySelector('input[name="waste"]:checked');
+    var wt    = waste ? waste.value : 'household';
+    var urg   = document.getElementById('current-urgency').value;
+
+    var urgColors = { low:'#16a34a', medium:'#d97706', high:'#ea580c', critical:'#dc2626' };
+    var cap = function(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
+
+    document.getElementById('sum-barangay').textContent = bar.replace('Barangay ', '');
+    document.getElementById('sum-location').textContent = loc;
+    document.getElementById('sum-waste').textContent    = cap(wt);
+    document.getElementById('sum-urgency').innerHTML    =
+      '<span style="color:' + (urgColors[urg]||'#16a34a') + ';font-weight:700;">' + cap(urg) + '</span>';
+
+    var photoRow = document.getElementById('sum-photo-row');
+    if (photoRow) photoRow.style.display = selectedPhoto ? '' : 'none';
+  }
+
+  // ── Map toggle ────────────────────────────────────────────────────
+  function toggleMap() {
+    var sec = document.getElementById('map-section');
+    var btn = document.getElementById('map-toggle-btn');
+    var isOpen = sec.classList.contains('open');
+
+    if (isOpen) {
+      sec.classList.remove('open');
+      btn.innerHTML = '<i class="fa-solid fa-map-location-dot"></i> Pin on Map instead';
+    } else {
+      sec.classList.add('open');
+      btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Hide Map';
+      if (!mapReady && typeof google !== 'undefined' && google.maps) {
+        initPinMap();
+        mapReady = true;
+      } else if (mapReady && window.pinMap) {
+        setTimeout(function() {
+          google.maps.event.trigger(window.pinMap, 'resize');
+          window.pinMap.setCenter({ lat: 6.9214, lng: 122.0790 });
+        }, 60);
+      }
+    }
+  }
+
+  // ── Photo handling ────────────────────────────────────────────────
+  function handlePhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    selectedPhoto = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('photo-preview-img').src = e.target.result;
+      document.getElementById('photo-picker-area').style.display  = 'none';
+      document.getElementById('photo-preview-area').style.display = 'block';
+    };
+    reader.readAsDataURL(selectedPhoto);
+  }
+
+  function removePhoto() {
+    selectedPhoto = null;
+    document.getElementById('photo-preview-img').src = '';
+    document.getElementById('photo-camera').value  = '';
+    document.getElementById('photo-gallery').value = '';
+    document.getElementById('photo-picker-area').style.display  = 'block';
+    document.getElementById('photo-preview-area').style.display = 'none';
+  }
+
+  // ── Waste & urgency ───────────────────────────────────────────────
+  function selectWaste(type, el) {
+    document.querySelectorAll('.wz-waste-chip').forEach(function(c) { c.classList.remove('wc-sel'); });
+    el.classList.add('wc-sel');
+    var radio = el.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    selectUrgency(wasteUrgencyMap[type] || 'low');
+  }
+
+  function selectUrgency(level) {
+    ['low','medium','high','critical'].forEach(function(l) {
+      document.getElementById('uc-' + l).classList.remove('uc-on');
+    });
+    var el = document.getElementById('uc-' + level);
+    if (el) el.classList.add('uc-on');
+    document.getElementById('current-urgency').value = level;
+    var hint = document.getElementById('urgency-hint');
+    if (hint) hint.innerHTML = '<i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> ' + urgencyHints[level];
+  }
+
+  // ── Submit flow ───────────────────────────────────────────────────
+  function trySubmit() {
+    document.getElementById('modal-confirm').classList.remove('hidden');
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('modal-confirm').classList.add('hidden');
+  }
+
+  function confirmSubmit() {
+    closeConfirmModal();
+
+    var locationDesc = document.getElementById('location-desc').value.trim();
+    var barangay     = document.getElementById('barangay-select').value.trim();
+    var wasteType    = (document.querySelector('input[name="waste"]:checked') || { value: 'household' }).value;
+    var urgency      = document.getElementById('current-urgency').value;
+    var description  = document.getElementById('report-description').value.trim();
+
+    var session = null;
+    try { session = JSON.parse(localStorage.getItem('zc_session')); } catch(e) {}
+    var citizen    = session ? (session.firstName + ' ' + session.lastName) : 'Juan dela Cruz';
+    var contact    = session ? (session.phone || '—') : '0917 111 2222';
+    var citizenId  = session ? (session.id || '') : '';
+
+    var report = REPORTS_DB.add({
+      location: locationDesc, barangay: barangay,
+      wasteType: wasteType, urgency: urgency,
+      description: description, citizen: citizen,
+      contact: contact, citizenId: citizenId,
+      lat: _pinLat, lng: _pinLng
+    });
+
+    if (typeof NOTIFS_DB !== 'undefined') {
+      NOTIFS_DB.add({
+        citizenId:   citizenId,
+        citizenName: citizen,
+        type:        'submitted',
+        reportId:    report.id,
+        title:       'Report #' + report.id + ' submitted',
+        desc:        'Your report at ' + locationDesc + ' has been received and is pending officer review.',
+        tag:         'Submitted',
+        tagColor:    'yellow',
+        icon:        'fa-file-lines',
+        iconColor:   'sage'
+      });
+    }
+
+    // Hide all steps, mark all done
+    for (var i = 1; i <= 3; i++) {
+      var stepEl = document.getElementById('step-' + i);
+      if (stepEl) stepEl.style.display = 'none';
+      var wp  = document.getElementById('wp-' + i);
+      var dot = document.getElementById('wpdot-' + i);
+      wp.classList.remove('active');
+      wp.classList.add('done');
+      dot.innerHTML = '<i class="fa-solid fa-check" style="font-size:12px;"></i>';
+    }
+    document.getElementById('wpline-12').classList.add('done');
+    document.getElementById('wpline-23').classList.add('done');
+
+    var idEl = document.getElementById('success-report-id');
+    if (idEl) idEl.textContent = '#' + report.id;
+
+    document.getElementById('step-success').style.display = 'block';
+    document.querySelector('.wizard-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetWizard() {
+    document.getElementById('barangay-select').selectedIndex = 0;
+    document.getElementById('location-desc').value = '';
+    document.getElementById('report-description').value = '';
+
+    removePhoto();
+    selectWaste('household', document.getElementById('wc-household'));
+
+    var mapSec = document.getElementById('map-section');
+    mapSec.classList.remove('open');
+    document.getElementById('map-toggle-btn').innerHTML =
+      '<i class="fa-solid fa-map-location-dot"></i> Pin on Map instead';
+
+    document.getElementById('step-success').style.display = 'none';
+    goStep(1);
+  }
+
+  document.getElementById('modal-confirm').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmModal();
+  });
+</script>
+
+<script>
+  var pinMap, pinMarker;
+  var _pinLat = null, _pinLng = null, _geocodeTimer = null;
+
+  function initPinMap() {
+    var zamboanga = { lat: 6.9214, lng: 122.0790 };
+    pinMap = new google.maps.Map(document.getElementById('report-pin-map'), {
+      center: zamboanga, zoom: 15,
+      mapTypeControl: false, streetViewControl: false, fullscreenControl: false
+    });
+    pinMarker = new google.maps.Marker({
+      position: zamboanga, map: pinMap, draggable: true, title: 'Drag to set location',
+      icon: { path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW, scale: 7, fillColor: '#588157', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
+    });
+    pinMap.addListener('click', function(e) {
+      pinMarker.setPosition(e.latLng);
+      updatePinText(e.latLng);
+    });
+    pinMarker.addListener('dragend', function(e) {
+      updatePinText(e.latLng);
+    });
+  }
+
+  function updatePinText(latLng) {
+    var lat = latLng.lat(), lng = latLng.lng();
+    _pinLat = lat; _pinLng = lng;
+    document.getElementById('pin-location-text').textContent =
+      'Detecting address…';
+    clearTimeout(_geocodeTimer);
+    _geocodeTimer = setTimeout(function() { _reverseGeocodePin(lat, lng); }, 600);
+  }
+
+  function _reverseGeocodePin(lat, lng) {
+    var pinText = document.getElementById('pin-location-text');
+    var locEl   = document.getElementById('location-desc');
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var a    = data.address || {};
+        var road = a.road || a.pedestrian || a.footway || a.path || '';
+        var area = a.suburb || a.neighbourhood || a.village || a.hamlet || a.quarter || '';
+        var city = a.city || a.town || a.county || 'Zamboanga City';
+        var parts = [road, area, city].filter(Boolean);
+        var addr  = parts.length ? parts.join(', ') : (lat.toFixed(5) + ', ' + lng.toFixed(5));
+        locEl.value = addr;
+        locEl.style.borderColor = '#4ade80';
+        setTimeout(function() { locEl.style.borderColor = ''; }, 1800);
+        pinText.textContent = 'Pinned: ' + addr;
+        // Auto-select barangay if detectable
+        var brgy = a.suburb || a.neighbourhood || a.quarter || '';
+        if (brgy) {
+          var sel = document.getElementById('barangay-select');
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].text.toLowerCase().indexOf(brgy.toLowerCase()) !== -1) {
+              sel.value = sel.options[i].value; break;
+            }
+          }
+        }
+      })
+      .catch(function() {
+        pinText.textContent = 'Pinned: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+      });
+  }
+  var _FALLBACK_LOCS = [
+    'Near Rio Hondo Mosque, Purok 1, Barangay Rio Hondo',
+    'Corner Veterans Ave. & Zamora St., Zamboanga City',
+    'Near Canelar Public Market, Barangay Canelar',
+    'Along Pilar St., near City Hall, Zamboanga City',
+    'Near Pasonanca Park Gate, Barangay Pasonanca',
+    'Near Tetuan Plaza, Barangay Tetuan',
+    'Along Gov. Alvarez Ave., Barangay Guiwan',
+    'Near Sta. Cruz Church, Barangay Sta. Cruz',
+    'Near Talon-talon Elementary School, Talon-talon',
+    'Corner San Jose Rd. & Nuñez St., Zamboanga City'
+  ];
+
+  function useMyLocation(btn) {
+    var locEl   = document.getElementById('location-desc');
+    var origBtn = btn.innerHTML;
+
+    function _setLoading() {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:var(--primary);"></i> Getting location…';
+    }
+
+    function _resetBtn() {
+      btn.disabled = false;
+      btn.innerHTML = origBtn;
+    }
+
+    function _fillField(text, coords) {
+      _resetBtn();
+      locEl.value = text;
+      locEl.style.borderColor = '#4ade80';
+      setTimeout(function() { locEl.style.borderColor = ''; }, 1800);
+
+      if (coords && mapReady && window.pinMap && window.pinMarker) {
+        window.pinMap.setCenter(coords);
+        window.pinMap.setZoom(17);
+        window.pinMarker.setPosition(coords);
+        document.getElementById('pin-location-text').textContent =
+          'Pinned: ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5);
+      }
+    }
+
+    function _useFallback() {
+      var rnd = _FALLBACK_LOCS[Math.floor(Math.random() * _FALLBACK_LOCS.length)];
+      _fillField(rnd, null);
+    }
+
+    function _reverseGeocode(lat, lon) {
+      var coords = { lat: lat, lng: lon };
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&addressdetails=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var a    = data.address || {};
+          var road = a.road || a.pedestrian || a.footway || a.path || '';
+          var area = a.suburb || a.neighbourhood || a.village || a.hamlet || '';
+          var city = a.city || a.town || a.county || 'Zamboanga City';
+          var parts = [road, area, city].filter(Boolean);
+          var addr  = parts.length ? parts.join(', ') : (lat.toFixed(4) + ', ' + lon.toFixed(4));
+          _fillField(addr, coords);
+        })
+        .catch(function() {
+          _fillField(lat.toFixed(5) + ', ' + lon.toFixed(5), coords);
+        });
+    }
+
+    _setLoading();
+
+    if (!navigator.geolocation) {
+      _useFallback();
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(p) { _reverseGeocode(p.coords.latitude, p.coords.longitude); },
+      function()  { _useFallback(); },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }
+</script>
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU" async defer></script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('zc_session'));
+    if (!u) return;
+    var fullName = [u.firstName, u.middleName, u.lastName].filter(Boolean).join(' ');
+    var nameEl = document.getElementById('sidebarUserName');
+    var roleEl = document.getElementById('sidebarUserRole');
+    if (nameEl) nameEl.textContent = fullName || 'Citizen';
+    if (roleEl) roleEl.textContent = 'Citizen · ' + (u.barangay || 'Zamboanga City');
+  } catch(e) {}
+})();
+
+(function () {
+  try {
+    var session  = JSON.parse(localStorage.getItem('zc_session'));
+    var formArea = document.getElementById('report-form-area');
+    var banner   = document.getElementById('kyc-blocked-banner');
+
+    if (!session || session.role !== 'citizen') {
+      if (formArea) formArea.style.display = '';
+      return;
+    }
+
+    var users = [];
+    try { users = JSON.parse(localStorage.getItem('zc_users')) || []; } catch(e) {}
+    var user = null;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].id === session.id) { user = users[i]; break; }
+    }
+    var kycStatus = user ? (user.kycStatus || 'pending') : (session.kycStatus || 'pending');
+
+    if (kycStatus === 'verified') {
+      if (formArea) formArea.style.display = '';
+    } else {
+      if (banner) banner.style.display = 'flex';
+      if (kycStatus === 'rejected') {
+        var badge = document.getElementById('kyc-block-badge');
+        var title = document.getElementById('kyc-block-title');
+        var msg   = document.getElementById('kyc-block-msg');
+        if (badge) { badge.textContent = 'KYC Rejected'; badge.style.background = '#fff1f2'; badge.style.color = '#dc2626'; badge.style.borderColor = '#fecdd3'; }
+        if (title) title.textContent = 'KYC Application Rejected';
+        if (msg)   msg.textContent   = 'Your identity verification was rejected by the barangay officer. Please review the rejection reason in your profile and resubmit your KYC documents.';
+      }
+    }
+  } catch(e) {}
+})();
+
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('zc_session'));
+    if (!u || !u.role) return;
+    var sec = document.getElementById('role-back-section');
+    if (!sec) return;
+    var lnk = document.getElementById('role-back-link');
+    var ico = document.getElementById('role-back-icon');
+    var txt = document.getElementById('role-back-text');
+    if (u.role === 'officer') {
+      sec.style.display = '';
+      lnk.href = 'officer-dashboard.html';
+      ico.className = 'fa-solid fa-landmark';
+      txt.textContent = 'Officer View';
+    } else if (u.role === 'driver') {
+      sec.style.display = '';
+      lnk.href = 'dashboard-driver.html';
+      ico.className = 'fa-solid fa-truck';
+      txt.textContent = 'Driver View';
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZamboCollect — Smarter Waste Collection for Zamboanga City</title>
+  <link rel="stylesheet" href="css/landing.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon"><i class="fa-solid fa-trash-can"></i></div>
+        <span class="nav-logo-text">ZamboCollect</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#stats">Impact</a>
+        <a href="#roles">For Everyone</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="Login.html" class="btn-outline-sm">Log In</a>
+        <a href="Register.html" class="btn-solid-sm">Get Started</a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <!-- Mobile drawer -->
+    <div class="nav-drawer" id="navDrawer">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#stats">Impact</a>
+      <a href="#roles">For Everyone</a>
+      <div class="drawer-btns">
+        <a href="Login.html" class="btn-outline-sm">Log In</a>
+        <a href="Register.html" class="btn-solid-sm">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Now live across 98 barangays
+        </div>
+        <h1 class="hero-title">
+          Cleaner streets start<br>
+          with <em>smarter</em><br>
+          collection.
+        </h1>
+        <p class="hero-sub">
+          ZamboCollect connects Zamboanga City residents, barangay officers, 
+          collection drivers, and city administrators on one unified platform — 
+          making waste management transparent, efficient, and community-driven.
+        </p>
+        <div class="hero-actions">
+          <a href="Register.html" class="btn-hero-primary">
+            <span>Report a waste issue</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="Login.html" class="btn-hero-ghost">Sign in to your account</a>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-item"><span class="trust-num">18K+</span><span class="trust-label">Verified citizens</span></div>
+          <div class="trust-divider"></div>
+          <div class="trust-item"><span class="trust-num">34</span><span class="trust-label">Active drivers</span></div>
+          <div class="trust-divider"></div>
+          <div class="trust-item"><span class="trust-num">91%</span><span class="trust-label">Collection rate</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-card hero-card-main">
+          <div class="hcard-topbar">
+            <div class="hcard-dots"><span></span><span></span><span></span></div>
+            <span class="hcard-title-bar">ZamboCollect Dashboard</span>
+          </div>
+          <div class="hcard-stats">
+            <div class="hcard-stat green">
+              <div class="hcard-stat-num">12</div>
+              <div class="hcard-stat-label">Stops Done</div>
+            </div>
+            <div class="hcard-stat yellow">
+              <div class="hcard-stat-num">8</div>
+              <div class="hcard-stat-label">Remaining</div>
+            </div>
+            <div class="hcard-stat blue">
+              <div class="hcard-stat-num">91%</div>
+              <div class="hcard-stat-label">City Rate</div>
+            </div>
+          </div>
+          <div class="hcard-route">
+            <div class="hcard-route-label">Today's Route — Rio Hondo</div>
+            <div class="hcard-stop done"><span class="hstop-dot"></span><span class="hstop-name">Pasonanca Road</span><span class="hstop-badge done-badge">Collected</span></div>
+            <div class="hcard-stop done"><span class="hstop-dot"></span><span class="hstop-name">Sta. Cruz District</span><span class="hstop-badge done-badge">Collected</span></div>
+            <div class="hcard-stop active"><span class="hstop-dot active-dot"></span><span class="hstop-name">Rio Hondo Bridge</span><span class="hstop-badge active-badge">Next Stop</span></div>
+            <div class="hcard-stop"><span class="hstop-dot pending-dot"></span><span class="hstop-name">Talisay Road</span><span class="hstop-badge pending-badge">Scheduled</span></div>
+          </div>
+        </div>
+
+        <!-- Floating notification card -->
+        <div class="hero-card hero-card-notif">
+          <div class="notif-icon-wrap"><i class="fa-solid fa-clipboard-list"></i></div>
+          <div class="notif-content">
+            <div class="notif-title">New report submitted</div>
+            <div class="notif-sub">Illegal dump at Canelar Market · Critical</div>
+          </div>
+        </div>
+
+        <!-- Floating stat card -->
+        <div class="hero-card hero-card-stat">
+          <div class="fstat-num">+124</div>
+          <div class="fstat-label">Reports today</div>
+          <div class="fstat-trend">↑ 18% vs yesterday</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>Scroll to explore</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURES
+  ============================================================ -->
+  <section class="section features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Platform Features</div>
+        <h2 class="section-title">Everything you need to manage<br>waste collection — city-wide.</h2>
+        <p class="section-sub">From reporting a single trash pile to overseeing the entire city's collection network, ZamboCollect gives every stakeholder the tools they need.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card feature-card-large">
+          <div class="feature-icon-wrap green-icon"><i class="fa-solid fa-map"></i></div>
+          <h3>Real-Time City Map</h3>
+          <p>View active hotspots, truck locations, and collection status across all 98 barangays on a live city-wide map with color-coded urgency indicators.</p>
+          <div class="feature-tag">Admin & Officers</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap yellow-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+          <h3>Instant Report Submission</h3>
+          <p>Citizens can report illegal dumps, overflow bins, and hazardous waste in seconds — with photo uploads and GPS tagging.</p>
+          <div class="feature-tag">Citizens</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap blue-icon"><i class="fa-solid fa-truck"></i></div>
+          <h3>Driver Route Management</h3>
+          <p>Drivers get optimized daily routes, stop-by-stop task tracking, and real-time updates when priorities change.</p>
+          <div class="feature-tag">Drivers</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap green-icon"><i class="fa-solid fa-chart-bar"></i></div>
+          <h3>System Analytics</h3>
+          <p>Track barangay performance, identify recurring hotspots, and export monthly collection reports with one click.</p>
+          <div class="feature-tag">City Admin</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap sage-icon"><i class="fa-solid fa-id-card"></i></div>
+          <h3>KYC Verification</h3>
+          <p>Barangay officers review and approve citizen identity verification, ensuring a trusted community network.</p>
+          <div class="feature-tag">Officers & Citizens</div>
+        </div>
+        <div class="feature-card feature-card-large">
+          <div class="feature-icon-wrap green-icon"><i class="fa-solid fa-bell"></i></div>
+          <h3>Smart Notifications</h3>
+          <p>Every role gets relevant alerts — route changes for drivers, report updates for citizens, hotspot alerts for officers. No noise, just signal.</p>
+          <div class="feature-tag">All Roles</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+  ============================================================ -->
+  <section class="section how-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">How It Works</div>
+        <h2 class="section-title">From report to resolution<br>in three steps.</h2>
+      </div>
+
+      <div class="steps-track">
+        <div class="steps-line"></div>
+
+        <div class="step-item">
+          <div class="step-circle">
+            <span class="step-num">01</span>
+          </div>
+          <div class="step-body">
+            <div class="step-role-badge citizen-badge"><i class="fa-solid fa-user"></i> Citizen</div>
+            <h3>Report the Problem</h3>
+            <p>A verified citizen spots an illegal dump or overflow bin. They open ZamboCollect, snap a photo, confirm the location, and submit — takes under a minute.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-circle">
+            <span class="step-num">02</span>
+          </div>
+          <div class="step-body">
+            <div class="step-role-badge officer-badge"><i class="fa-solid fa-landmark"></i> Officer</div>
+            <h3>Officer Reviews & Approves</h3>
+            <p>The barangay officer is notified instantly. They review the report, assess priority, and approve it for collection — or flag it for further action.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-circle">
+            <span class="step-num">03</span>
+          </div>
+          <div class="step-body">
+            <div class="step-role-badge driver-badge"><i class="fa-solid fa-truck"></i> Driver</div>
+            <h3>Driver Collects & Closes</h3>
+            <p>The assigned driver gets the stop added to their daily route. They collect the waste, mark it done in the app, and the citizen is notified of resolution.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STATS
+  ============================================================ -->
+  <section class="section stats-section" id="stats">
+    <div class="stats-bg-pattern"></div>
+    <div class="container">
+      <div class="section-header light-header">
+        <div class="section-tag light-tag-text">City Impact</div>
+        <h2 class="section-title light-title">Making a measurable difference<br>across Zamboanga City.</h2>
+      </div>
+
+      <div class="impact-grid">
+        <div class="impact-card">
+          <div class="impact-num">98</div>
+          <div class="impact-label">Barangays served</div>
+          <div class="impact-sub">All active across Zamboanga City</div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-num">18,240</div>
+          <div class="impact-label">Verified citizens</div>
+          <div class="impact-sub">KYC-approved on the platform</div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-num">2,451</div>
+          <div class="impact-label">Active reports</div>
+          <div class="impact-sub">Submitted and being tracked</div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-num">91%</div>
+          <div class="impact-label">Collection rate</div>
+          <div class="impact-sub">↑ 1.8% improvement this week</div>
+        </div>
+      </div>
+
+      <div class="barangay-highlight">
+        <div class="bh-left">
+          <div class="bh-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div>
+            <div class="bh-title">Top performing barangay this week</div>
+            <div class="bh-name">Guiwan — 95% collection rate</div>
+          </div>
+        </div>
+        <a href="Login.html" class="btn-outline-light">See full leaderboard →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ROLES / FOR EVERYONE
+  ============================================================ -->
+  <section class="section roles-section" id="roles">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Four Portals</div>
+        <h2 class="section-title">One platform, built for<br>every role in the system.</h2>
+        <p class="section-sub">Each user type gets a tailored experience with only the tools they need — no clutter, no confusion.</p>
+      </div>
+
+      <div class="roles-grid">
+        <a href="Login.html" class="role-card-lp citizen-card">
+          <div class="role-lp-icon"><i class="fa-solid fa-user"></i></div>
+          <div class="role-lp-body">
+            <div class="role-lp-label">Citizen Portal</div>
+            <h3>Report & Track</h3>
+            <p>Submit waste reports, track their status in real time, view your barangay's collection map, and get notified when your report is resolved.</p>
+          </div>
+          <div class="role-lp-arrow">→</div>
+        </a>
+
+        <a href="Login.html" class="role-card-lp officer-card">
+          <div class="role-lp-icon"><i class="fa-solid fa-landmark"></i></div>
+          <div class="role-lp-body">
+            <div class="role-lp-label">Officer Portal</div>
+            <h3>Review & Approve</h3>
+            <p>Manage KYC applications, approve waste reports from your barangay, and coordinate with drivers assigned to your area.</p>
+          </div>
+          <div class="role-lp-arrow">→</div>
+        </a>
+
+        <a href="Login.html" class="role-card-lp driver-card">
+          <div class="role-lp-icon"><i class="fa-solid fa-truck"></i></div>
+          <div class="role-lp-body">
+            <div class="role-lp-label">Driver Portal</div>
+            <h3>Navigate & Collect</h3>
+            <p>View your daily collection route, mark stops as completed, report vehicle issues, and get real-time route updates from your assigned officer.</p>
+          </div>
+          <div class="role-lp-arrow">→</div>
+        </a>
+
+        <a href="Login.html" class="role-card-lp admin-card">
+          <div class="role-lp-icon"><i class="fa-solid fa-gear"></i>️</div>
+          <div class="role-lp-body">
+            <div class="role-lp-label">Admin Portal</div>
+            <h3>Oversee & Analyze</h3>
+            <p>Monitor city-wide collection performance, manage user accounts, analyze system data, and generate PDF reports for city records.</p>
+          </div>
+          <div class="role-lp-arrow">→</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA BANNER
+  ============================================================ -->
+  <section class="cta-section">
+    <div class="cta-bg-blob"></div>
+    <div class="container">
+      <div class="cta-inner">
+        <div class="cta-text">
+          <h2>Ready to make your barangay cleaner?</h2>
+          <p>Join thousands of Zamboanga City residents already using ZamboCollect to report, track, and resolve waste issues in their communities.</p>
+        </div>
+        <div class="cta-actions">
+          <a href="Register.html" class="btn-cta-primary">Create a free account</a>
+          <a href="Login.html" class="btn-cta-ghost">Sign in instead →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <div class="footer-logo-icon"><i class="fa-solid fa-trash-can"></i></div>
+            <span class="footer-logo-text">ZamboCollect</span>
+          </div>
+          <p class="footer-tagline">Smarter waste collection<br>for Zamboanga City.</p>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <div class="footer-col-title">Platform</div>
+            <a href="Login.html">Citizen Portal</a>
+            <a href="Login.html">Officer Portal</a>
+            <a href="Login.html">Driver Portal</a>
+            <a href="Login.html">Admin Portal</a>
+          </div>
+          <div class="footer-col">
+            <div class="footer-col-title">Get Started</div>
+            <a href="Register.html">Create Account</a>
+            <a href="Login.html">Sign In</a>
+            <a href="kyc-verification.html">KYC Verification</a>
+          </div>
+          <div class="footer-col">
+            <div class="footer-col-title">City</div>
+            <a href="#">Zamboanga City Gov</a>
+            <a href="#">CENRO Office</a>
+            <a href="#">Barangay Directory</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 ZamboCollect — Zamboanga City Environmental & Natural Resources Office</span>
+        <span>Built for a cleaner Zamboanga City <i class="fa-solid fa-leaf"></i></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Mobile nav toggle
+    const hamburger = document.getElementById('navHamburger');
+    const drawer = document.getElementById('navDrawer');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      drawer.classList.toggle('open');
+    });
+
+    // Close drawer on link click
+    drawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        drawer.classList.remove('open');
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Stagger-reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.feature-card, .step-item, .impact-card, .role-card-lp').forEach((el, i) => {
+      el.style.animationDelay = `${i * 0.08}s`;
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>

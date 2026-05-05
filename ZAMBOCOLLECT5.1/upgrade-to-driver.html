@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upgrade to Driver Account — ZamboCollect</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .upgrade-hero {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+      border-radius: 16px; padding: 28px 28px 24px;
+      margin-bottom: 20px; color: #fff; position: relative; overflow: hidden;
+    }
+    .upgrade-hero::before {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .upgrade-hero::after {
+      content: ''; position: absolute; bottom: -20px; right: 80px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .upgrade-hero h2 { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .upgrade-hero p  { font-size: 13px; opacity: 0.85; line-height: 1.6; max-width: 480px; }
+    .hero-badges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 600;
+    }
+    .req-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+    .req-card-title { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .req-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .req-item:last-child { border-bottom: none; }
+    .req-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-glow); border: 1.5px solid var(--primary-tint); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .req-dot i { color: var(--primary); font-size: 13px; }
+    .req-text h5 { font-size: 13px; font-weight: 600; color: var(--text); }
+    .req-text p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; background: var(--surface2); font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; color: var(--text); outline: none; transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .notice-blue {
+      background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;
+      padding: 12px 14px; font-size: 12px; color: #1d4ed8; line-height: 1.6;
+      display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px;
+    }
+    .notice-blue i { margin-top: 2px; flex-shrink: 0; }
+    .btn-submit-upgrade {
+      width: 100%; padding: 13px; background: #2563eb; color: #fff;
+      border: none; border-radius: 11px; font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit-upgrade:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
+    .btn-cancel-link { display: block; text-align: center; margin-top: 10px; font-size: 13px; color: var(--muted); text-decoration: none; }
+    .btn-cancel-link:hover { color: var(--text); }
+    .wizard-steps { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+    .wizard-step { display: flex; gap: 12px; padding: 14px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--surface2); align-items: center; transition: border-color 0.2s, transform 0.2s; }
+    .wizard-step.active { border-color: #2563eb; background: rgba(59,130,246,0.08); transform: translateY(-1px); }
+    .wizard-step .step-number { width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: grid; place-items: center; font-weight: 700; }
+    .wizard-step .step-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .wizard-step .step-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .wizard-panel { display: none; }
+    .wizard-panel.active { display: block; }
+    .capture-zone { position: relative; border: 1.5px dashed #93c5fd; border-radius: 16px; padding: 28px 22px; text-align: center; background: rgba(59,130,246,0.05); margin-bottom: 18px; }
+    .capture-zone input[type=file] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+    .capture-icon { width: 58px; height: 58px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: #2563eb; color: #fff; font-size: 20px; }
+    .capture-zone h4 { font-size: 16px; margin-bottom: 6px; }
+    .capture-zone p { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 420px; margin: 0 auto 14px; }
+    .cam-btn { margin: 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 10px; padding: 11px 18px; font-size: 14px; cursor: pointer; }
+    .cam-btn.blue { background: #2563eb; color: #fff; }
+    .cam-tip { display: inline-flex; align-items: center; gap: 8px; color: #2563eb; font-size: 12px; margin-top: 14px; }
+    .step-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .btn { border: 1.5px solid transparent; border-radius: 10px; padding: 11px 16px; font-size: 13px; cursor: pointer; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-back { background: #fff; color: var(--text); border-color: var(--border); }
+    .btn-back:hover, .btn-primary:hover, .cam-btn:hover { opacity: 0.95; }
+    @media (max-width: 640px) { .wizard-steps { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .name-row { grid-template-columns: 1fr !important; } }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="my-profile.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div><div class="user-name">Juan dela Cruz</div><div class="user-role">Citizen · Barangay Rio Hondo</div></div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <div class="topbar-title">Upgrade to Driver Account</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Apply for Driver Account</h1>
+        <p>Join the waste collection team and serve your community directly.</p>
+      </div>
+
+      <!-- Hero -->
+      <div class="upgrade-hero">
+        <h2><i class="fa-solid fa-truck" style="margin-right:8px;"></i>Become a Collection Driver</h2>
+        <p>As a verified citizen, you're eligible to apply as a ZamboCollect collection driver. Help your barangay by responding to waste reports and completing collection routes.</p>
+        <div class="hero-badges">
+          <span class="hero-badge"><i class="fa-solid fa-check"></i> Citizen Verified</span>
+          <span class="hero-badge"><i class="fa-solid fa-map-location-dot"></i> Route Assignment</span>
+          <span class="hero-badge"><i class="fa-solid fa-bell"></i> Task Notifications</span>
+          <span class="hero-badge"><i class="fa-solid fa-truck"></i> Vehicle Assigned</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Left: Requirements -->
+        <div>
+          <div class="req-card">
+            <div class="req-card-title"><i class="fa-solid fa-clipboard-list" style="color:var(--primary);"></i> Requirements</div>
+            <div class="req-item">
+              <div class="req-dot"><i class="fa-solid fa-id-card"></i></div>
+              <div class="req-text"><h5>Verified Citizen Account</h5><p>Your KYC must be approved before applying</p></div>
+            </div>
+            <div class="req-item">
+              <div class="req-dot"><i class="fa-solid fa-car"></i></div>
+              <div class="req-text"><h5>Valid Driver's License</h5><p>Professional or non-professional license required</p></div>
+            </div>
+            <div class="req-item">
+              <div class="req-dot"><i class="fa-solid fa-location-dot"></i></div>
+              <div class="req-text"><h5>Zamboanga City Resident</h5><p>Must be residing in an assigned barangay</p></div>
+            </div>
+            <div class="req-item">
+              <div class="req-dot"><i class="fa-solid fa-phone"></i></div>
+              <div class="req-text"><h5>Active Contact Number</h5><p>For dispatch notifications and officer communication</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Application Wizard -->
+        <div>
+          <div class="req-card">
+            <div class="req-card-title"><i class="fa-solid fa-file-pen" style="color:#2563eb;"></i> Driver Application Wizard</div>
+
+            <div class="wizard-steps">
+              <div class="wizard-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div>
+                  <div class="step-title">Scan License</div>
+                  <div class="step-desc">Capture your driver's license to autofill details.</div>
+                </div>
+              </div>
+              <div class="wizard-step" data-step="2">
+                <div class="step-number">2</div>
+                <div>
+                  <div class="step-title">Review Info</div>
+                  <div class="step-desc">Confirm your personal information.</div>
+                </div>
+              </div>
+              <div class="wizard-step" data-step="3">
+                <div class="step-number">3</div>
+                <div>
+                  <div class="step-title">Submit Application</div>
+                  <div class="step-desc">Complete driver-specific fields.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-panel active" data-panel="1">
+              <div class="notice-blue">
+                <i class="fa-solid fa-circle-info"></i>
+                Scan your driver's license so ZamboCollect can auto-fill your application details.
+              </div>
+              <div class="capture-zone" id="license-capture-zone">
+                <input id="license-file" type="file" accept="image/*" capture="environment" />
+                <div class="capture-icon"><i class="fa-solid fa-camera"></i></div>
+                <h4>Scan Your Driver's License</h4>
+                <p>Tap to open your camera and capture your license. Use bright lighting and place the ID on a flat surface.</p>
+                <button type="button" class="cam-btn blue">Open Camera</button>
+                <div class="cam-tip"><i class="fa-solid fa-lightbulb"></i> This will auto-fill your name, contact and license details.</div>
+              </div>
+              <div class="form-group">
+                <label>Detected License Number</label>
+                <input id="detected-license" type="text" placeholder="e.g. N01-23-456789" readonly />
+              </div>
+              <div class="two-col">
+                <div class="form-group">
+                  <label>Detected License Type</label>
+                  <input id="detected-type" type="text" placeholder="Professional / Non-Professional" readonly />
+                </div>
+                <div class="form-group">
+                  <label>Detected Expiry</label>
+                  <input id="detected-expiry" type="text" placeholder="e.g. Dec 2027" readonly />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Scan Status</label>
+                <input id="scan-status" type="text" value="Waiting for license scan…" readonly style="background:var(--surface3);" />
+              </div>
+              <div class="step-actions">
+                <button type="button" class="btn btn-back" onclick="goToStep(1)">← Start Over</button>
+                <button type="button" class="btn btn-primary" onclick="goToStep(2)">Continue to Review →</button>
+              </div>
+            </div>
+
+            <div class="wizard-panel" data-panel="2">
+              <div class="notice-blue">
+                <i class="fa-solid fa-id-card"></i>
+                Personal information is auto-filled from your verified citizen account and scanned license.
+              </div>
+              <div class="name-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+                <div class="form-group">
+                  <label>First Name</label>
+                  <input id="first-name" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+                </div>
+                <div class="form-group">
+                  <label>Middle Name</label>
+                  <input id="middle-name" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+                </div>
+                <div class="form-group">
+                  <label>Last Name</label>
+                  <input id="last-name" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Contact Number</label>
+                <input id="contact-number" type="tel" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+              </div>
+              <div class="form-group">
+                <label>Driver's License Number</label>
+                <input id="license-number" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+              </div>
+              <div class="two-col">
+                <div class="form-group">
+                  <label>License Type</label>
+                  <input id="license-type" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+                </div>
+                <div class="form-group">
+                  <label>License Expiry</label>
+                  <input id="license-expiry" type="text" readonly style="background:var(--surface3);color:var(--muted);font-style:italic;" />
+                </div>
+              </div>
+              <div class="step-actions">
+                <button type="button" class="btn btn-back" onclick="goToStep(1)">← Back</button>
+                <button type="button" class="btn btn-primary" onclick="goToStep(3)">Continue to Driver Details →</button>
+              </div>
+            </div>
+
+            <div class="wizard-panel" data-panel="3">
+              <div class="notice-blue">
+                <i class="fa-solid fa-truck"></i>
+                Complete the final details for your driver application.
+              </div>
+              <div class="form-group">
+                <label>Years of Driving Experience</label>
+                <select id="experience">
+                  <option value="">— Select —</option>
+                  <option>Less than 1 year</option>
+                  <option>1–3 years</option>
+                  <option>3–5 years</option>
+                  <option>5+ years</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Preferred Barangay Route</label>
+                <select id="preferred-barangay">
+                  <option value="">— Select barangay —</option>
+                  <option>Barangay Rio Hondo</option>
+                  <option>Barangay Canelar</option>
+                  <option>Barangay Guiwan</option>
+                  <option>Barangay Talon-talon</option>
+                  <option>Barangay Tetuan</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Additional Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+                <textarea id="driver-notes" placeholder="Add a short note for the officer reviewing your application…"></textarea>
+              </div>
+              <button id="submit-driver-app" class="btn-submit-upgrade" type="button">
+                <i class="fa-solid fa-paper-plane"></i> Submit Driver Application
+              </button>
+              <a href="my-profile.html" class="btn-cancel-link">← Cancel, go back to profile</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('zc_session'));
+    if (!u || !u.role) return;
+    var sec = document.getElementById('role-back-section');
+    if (!sec) return;
+    var lnk = document.getElementById('role-back-link');
+    var ico = document.getElementById('role-back-icon');
+    var txt = document.getElementById('role-back-text');
+    if (u.role === 'officer') {
+      sec.style.display = '';
+      lnk.href = 'officer-dashboard.html';
+      ico.className = 'fa-solid fa-landmark';
+      txt.textContent = 'Officer View';
+    } else if (u.role === 'driver') {
+      sec.style.display = '';
+      lnk.href = 'dashboard-driver.html';
+      ico.className = 'fa-solid fa-truck';
+      txt.textContent = 'Driver View';
+    }
+  } catch (e) {}
+})();
+</script>
+<script>
+  const wizardSteps = document.querySelectorAll('.wizard-step');
+  const wizardPanels = document.querySelectorAll('.wizard-panel');
+  const licenseInput = document.getElementById('license-file');
+  const cameraButton = document.querySelector('.cam-btn.blue');
+
+  function goToStep(step) {
+    wizardSteps.forEach(el => el.classList.toggle('active', el.dataset.step === String(step)));
+    wizardPanels.forEach(panel => panel.classList.toggle('active', panel.dataset.panel === String(step)));
+  }
+
+  function setAutoFill(values) {
+    document.getElementById('first-name').value = values.firstName || '';
+    document.getElementById('middle-name').value = values.middleName || '';
+    document.getElementById('last-name').value = values.lastName || '';
+    document.getElementById('contact-number').value = values.contact || '';
+    document.getElementById('license-number').value = values.licenseNumber || '';
+    document.getElementById('license-type').value = values.licenseType || '';
+    document.getElementById('license-expiry').value = values.licenseExpiry || '';
+
+    document.getElementById('detected-license').value = values.licenseNumber || '';
+    document.getElementById('detected-type').value = values.licenseType || '';
+    document.getElementById('detected-expiry').value = values.licenseExpiry || '';
+    document.getElementById('scan-status').value = values.status || 'Waiting for license scan…';
+  }
+
+  function loadProfile() {
+    const session = JSON.parse(localStorage.getItem('zc_session') || '{}');
+    const names = (session.name || '').split(' ');
+    const firstName = names[0] || '';
+    const lastName = names.length > 1 ? names.slice(1).join(' ') : '';
+    setAutoFill({
+      firstName,
+      middleName: session.middleName || '',
+      lastName,
+      contact: session.contact || session.mobile || '',
+      licenseNumber: '',
+      licenseType: '',
+      licenseExpiry: '',
+      status: 'Waiting for license scan…'
+    });
+  }
+
+  function randomLicenseNumber() {
+    const prefix = Math.random() > 0.4 ? 'N' : 'D';
+    const part1 = Math.floor(10 + Math.random() * 89);
+    const part2 = Math.floor(20 + Math.random() * 79);
+    const part3 = Math.floor(100000 + Math.random() * 899999);
+    return `${prefix}${part1}-${part2}-${part3}`;
+  }
+
+  function randomExpiry() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const year = new Date().getFullYear() + Math.floor(2 + Math.random() * 4);
+    return `${months[Math.floor(Math.random() * months.length)]} ${year}`;
+  }
+
+  function applyLicenseScan(file) {
+    if (!file) return;
+    const detectedLicense = randomLicenseNumber();
+    const detectedType = Math.random() > 0.5 ? 'Professional' : 'Non-Professional';
+    const detectedExpiry = randomExpiry();
+
+    setAutoFill({
+      firstName: document.getElementById('first-name').value,
+      middleName: document.getElementById('middle-name').value,
+      lastName: document.getElementById('last-name').value,
+      contact: document.getElementById('contact-number').value,
+      licenseNumber: detectedLicense,
+      licenseType: detectedType,
+      licenseExpiry: detectedExpiry,
+      status: 'Driver license scanned successfully! Please review your details.'
+    });
+  }
+
+  function submitApplication() {
+    const application = {
+      applicantName: `${document.getElementById('first-name').value} ${document.getElementById('last-name').value}`.trim(),
+      contact: document.getElementById('contact-number').value,
+      licenseNumber: document.getElementById('license-number').value,
+      licenseType: document.getElementById('license-type').value,
+      licenseExpiry: document.getElementById('license-expiry').value,
+      experience: document.getElementById('experience').value,
+      preferredBarangay: document.getElementById('preferred-barangay').value,
+      notes: document.getElementById('driver-notes').value,
+      appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      status: 'Pending'
+    };
+
+    const applications = JSON.parse(localStorage.getItem('zc_driver_applications') || '[]');
+    applications.push(application);
+    localStorage.setItem('zc_driver_applications', JSON.stringify(applications));
+
+    alert('Your driver application has been submitted. An officer will review it shortly.');
+    window.location.href = 'citizen-dashboard.html';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    loadProfile();
+    goToStep(1);
+    cameraButton.addEventListener('click', function () { licenseInput.click(); });
+    licenseInput.addEventListener('change', function () {
+      applyLicenseScan(this.files[0]);
+    });
+    document.getElementById('submit-driver-app').addEventListener('click', submitApplication);
+  });
+</script>
+</body>
+</html>

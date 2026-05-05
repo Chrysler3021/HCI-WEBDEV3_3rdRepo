@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Reports — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    button.row-btn { appearance: none; font-family: inherit; }
+
+    /* ── Report View Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(0,0,0,0.52); backdrop-filter: blur(3px);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 20px 16px; overflow-y: auto;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card {
+      background: var(--surface); border-radius: 16px; width: 100%; max-width: 560px;
+      box-shadow: var(--shadow-lg); flex-shrink: 0; margin: auto;
+      animation: modal-in 0.18s ease;
+    }
+    @keyframes modal-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+    .modal-header {
+      padding: 18px 20px 14px; border-bottom: 1.5px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .modal-close {
+      width: 32px; height: 32px; min-width: 32px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 14px; transition: all 0.15s;
+      appearance: none; font-family: inherit;
+    }
+    .modal-close:hover { border-color: var(--text); color: var(--text); }
+    .modal-body { padding: 18px 20px 20px; }
+    .modal-photo {
+      width: 100%; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+      background: var(--surface3); margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .modal-photo-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); }
+    .modal-photo-ph i { font-size: 2rem; }
+    .modal-photo-ph span { font-size: 12px; }
+    .modal-section-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .modal-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+    .modal-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .modal-box-val { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+    .modal-desc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; font-size: 13px;
+      color: var(--text); line-height: 1.6;
+    }
+    .modal-footer {
+      padding: 16px 20px; border-top: 1.5px solid var(--border);
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .modal-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .modal-btn:hover { border-color: var(--text); }
+    .modal-btn.cancel-btn {
+      border-color: #fca5a5; color: #dc2626; background: #fef2f2;
+    }
+    .modal-btn.cancel-btn:hover { border-color: #dc2626; }
+    .modal-btn:disabled {
+      opacity: 0.5; cursor: not-allowed;
+    }
+    @media (max-width: 480px) { .modal-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="citizen-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name">Juan dela Cruz</div>
+          <div class="user-role">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="citizen-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">My Reports</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="citizen-dashboard.html">Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">My Reports</li>
+        </nav>
+        <h1>My Reports</h1>
+        <p>All waste reports you've submitted across Zamboanga City.</p>
+      </div>
+
+      <!-- Summary row -->
+      <div class="summary-row">
+        <div class="summary-chip">
+          <span class="s-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+          <div>
+            <div class="s-num" style="color:var(--text);" id="stat-total">0</div>
+            <div class="s-label">Total</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <span class="s-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+          <div>
+            <div class="s-num" style="color:var(--yellow);" id="stat-pending">0</div>
+            <div class="s-label">Pending</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <span class="s-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <div>
+            <div class="s-num" style="color:var(--blue);" id="stat-approved">0</div>
+            <div class="s-label">Approved</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <span class="s-icon"><i class="fa-solid fa-circle-xmark"></i></span>
+          <div>
+            <div class="s-num" style="color:var(--red);" id="stat-rejected">0</div>
+            <div class="s-label">Rejected</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <span class="s-icon"><i class="fa-solid fa-ban"></i></span>
+          <div>
+            <div class="s-num" style="color:#6b7280;" id="stat-cancelled">0</div>
+            <div class="s-label">Cancelled</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar: filters + search -->
+      <div class="table-toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active" onclick="filterReports('all'); return false;" id="filter-all">All (<span id="count-all">0</span>)</a>
+          <a href="#" class="filter-chip yellow" onclick="filterReports('pending'); return false;" id="filter-pending"><i class="fa-solid fa-hourglass-half"></i> Pending (<span id="count-pending">0</span>)</a>
+          <a href="#" class="filter-chip blue" onclick="filterReports('approved'); return false;" id="filter-approved"><i class="fa-solid fa-circle-check"></i> Approved (<span id="count-approved">0</span>)</a>
+          <a href="#" class="filter-chip red" onclick="filterReports('rejected'); return false;" id="filter-rejected"><i class="fa-solid fa-circle-xmark"></i> Rejected (<span id="count-rejected">0</span>)</a>
+          <a href="#" class="filter-chip gray" onclick="filterReports('cancelled'); return false;" id="filter-cancelled" style="border-color:#d1d5db;color:#6b7280;"><i class="fa-solid fa-ban"></i> Cancelled (<span id="count-cancelled">0</span>)</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" placeholder="Search by ID or location…" id="search-input" onkeyup="filterReports(currentFilter)" />
+        </div>
+      </div>
+
+      <!-- Full reports table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="th-sortable" data-col="id">Report ID</th>
+              <th>Location</th>
+              <th class="th-sortable" data-col="barangay">Barangay</th>
+              <th class="th-sortable" data-col="type">Type</th>
+              <th class="th-sortable" data-col="priority">Priority</th>
+              <th class="th-sortable" data-col="date">Date</th>
+              <th class="th-sortable" data-col="status">Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <!-- Reports will be rendered here dynamically -->
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state-v2" style="display:none;">
+          <div class="es-illustration">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <p class="es-title">No reports found</p>
+          <p class="es-body" id="empty-state-msg">You haven't submitted any reports yet. Help keep Zamboanga City clean by reporting waste in your area.</p>
+          <a href="submit-report.html" class="es-cta"><i class="fa-solid fa-plus"></i> Submit a Report</a>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination-container">
+          <div class="page-info"><span id="page-info">Showing 0 of 0 reports</span></div>
+          <div class="page-btns" id="page-btns-wrap"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Report View Modal ── -->
+<div class="modal-backdrop" id="reportModal" onclick="handleBackdropClick(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Report Details</div>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-lbl"><i class="fa-solid fa-camera"></i> Photo Evidence</div>
+      <div class="modal-photo" id="modalPhotoWrap">
+        <div class="modal-photo-ph" id="modalPhotoPh">
+          <i class="fa-solid fa-image"></i>
+          <span>Loading photo…</span>
+        </div>
+        <img id="modalImg" src="" alt="Report photo">
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>
+      <div class="modal-grid">
+        <div class="modal-box"><div class="modal-box-label">Report ID</div><div class="modal-box-val" id="mId">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Date Filed</div><div class="modal-box-val" id="mDate">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Location</div><div class="modal-box-val" id="mLoc">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Barangay</div><div class="modal-box-val" id="mBrgy">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Waste Type</div><div class="modal-box-val" id="mType">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Priority</div><div class="modal-box-val" id="mPriority">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Status</div><div class="modal-box-val" id="mStatus">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Filed By</div><div class="modal-box-val">Juan dela Cruz</div></div>
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-comment-dots"></i> Description</div>
+      <div class="modal-desc" id="mDesc">—</div>
+    </div>
+    <div class="modal-footer" id="modalFooter" style="display:none;">
+      <button class="modal-btn cancel-btn" id="cancelReportBtn" onclick="cancelReport()">
+        <i class="fa-solid fa-trash-can"></i> Cancel Report
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/reports.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  // ── State & Config ──
+  var currentFilter   = 'all';
+  var allReports      = [];
+  var filteredReports = [];
+  var currentReportId = null;
+  var currentPage     = 1;
+  var PAGE_SIZE       = 10;
+
+  // ── Urgency & Status Mapping ──
+  var WASTE_ICONS = {
+    household:    '<i class="fa-solid fa-house"></i>',
+    commercial:   '<i class="fa-solid fa-store"></i>',
+    construction: '<i class="fa-solid fa-helmet-safety"></i>',
+    hazardous:    '<i class="fa-solid fa-radiation"></i>',
+    other:        '<i class="fa-solid fa-box"></i>'
+  };
+
+  var URG_CLASS = { low: 'badge-sage', medium: 'badge-yellow', high: 'badge-orange', critical: 'badge-red' };
+  var URG_LABEL = { low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical' };
+
+  function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+  function esc(str) { return String(str).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Modal handling ──
+  function openModal(reportId) {
+    var report = allReports.find(function(r) { return r.id === reportId; });
+    if (!report) return;
+
+    currentReportId = reportId;
+
+    var statusBadgeClass = report.status === 'pending' ? 'badge-yellow' : 
+                           report.status === 'approved' ? 'badge-blue' : 'badge-red';
+    var urgencyClass = URG_CLASS[report.urgency] || 'badge-sage';
+
+    document.getElementById('modalTitle').textContent = '#' + report.id;
+    document.getElementById('modalSubtitle').textContent = report.location + ' · ' + report.barangay;
+    document.getElementById('mId').textContent = '#' + report.id;
+    document.getElementById('mDate').textContent = report.dateStr;
+    document.getElementById('mLoc').textContent = report.location;
+    document.getElementById('mBrgy').textContent = report.barangay;
+    document.getElementById('mType').textContent = cap(report.wasteType);
+    document.getElementById('mDesc').textContent = report.description || 'No description provided';
+    document.getElementById('mPriority').innerHTML = '<span class="badge ' + urgencyClass + '">' + URG_LABEL[report.urgency] + '</span>';
+    document.getElementById('mStatus').innerHTML = '<span class="badge ' + statusBadgeClass + '">' + cap(report.status) + '</span>';
+
+    var img = document.getElementById('modalImg');
+    var ph  = document.getElementById('modalPhotoPh');
+    img.style.display = 'none';
+    ph.style.display  = 'flex';
+    ph.querySelector('span').textContent = 'Photo not available';
+
+    // Show/hide cancel button based on report status
+    var modalFooter = document.getElementById('modalFooter');
+    var cancelBtn = document.getElementById('cancelReportBtn');
+    if (report.status === 'pending') {
+      modalFooter.style.display = 'flex';
+      cancelBtn.disabled = false;
+    } else {
+      modalFooter.style.display = 'none';
+    }
+
+    document.getElementById('reportModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('reportModal').classList.remove('open');
+    document.body.style.overflow = '';
+    currentReportId = null;
+  }
+
+  function cancelReport() {
+    if (!currentReportId) return;
+    
+    // Show confirmation
+    if (confirm('Are you sure you want to cancel this report? This action cannot be undone.')) {
+      REPORTS_DB.cancel(currentReportId);
+      closeModal();
+      renderReports(); // Refresh the list
+      
+      // Show success message
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#4ade80;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+      toast.textContent = 'Report cancelled successfully';
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 3000);
+    }
+  }
+
+  function handleBackdropClick(e) {
+    if (e.target === document.getElementById('reportModal')) closeModal();
+  }
+
+  // ── Main Rendering ──
+  function updateStats() {
+    var all = REPORTS_DB.getAll();
+    allReports = all;
+
+    var pending   = all.filter(function(r) { return r.status === 'pending';   }).length;
+    var approved  = all.filter(function(r) { return r.status === 'approved';  }).length;
+    var rejected  = all.filter(function(r) { return r.status === 'rejected';  }).length;
+    var cancelled = all.filter(function(r) { return r.status === 'cancelled'; }).length;
+
+    document.getElementById('stat-total').textContent     = all.length;
+    document.getElementById('stat-pending').textContent   = pending;
+    document.getElementById('stat-approved').textContent  = approved;
+    document.getElementById('stat-rejected').textContent  = rejected;
+    document.getElementById('stat-cancelled').textContent = cancelled;
+
+    document.getElementById('count-all').textContent       = all.length;
+    document.getElementById('count-pending').textContent   = pending;
+    document.getElementById('count-approved').textContent  = approved;
+    document.getElementById('count-rejected').textContent  = rejected;
+    document.getElementById('count-cancelled').textContent = cancelled;
+  }
+
+  function renderReports() {
+    updateStats();
+    applyFilter(); // re-render current page without resetting currentPage
+  }
+
+  function filterReports(status) {
+    currentFilter = status;
+    currentPage   = 1; // only reset page when the user changes the filter/search
+    applyFilter();
+  }
+
+  function applyFilter() {
+    var all    = REPORTS_DB.getAll();
+    var search = document.getElementById('search-input').value.toLowerCase();
+
+    filteredReports = all.filter(function(r) {
+      if (currentFilter !== 'all' && r.status !== currentFilter) return false;
+      if (search) {
+        return r.id.toLowerCase().indexOf(search) !== -1 ||
+               r.location.toLowerCase().indexOf(search) !== -1;
+      }
+      return true;
+    });
+
+    document.querySelectorAll('.filter-chip').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById('filter-' + currentFilter).classList.add('active');
+
+    renderPage();
+  }
+
+  function renderPage() {
+    var tbody = document.getElementById('reports-tbody');
+    var empty = document.getElementById('empty-state');
+    var total = filteredReports.length;
+
+    if (total === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'flex';
+      var msgEl = document.getElementById('empty-state-msg');
+      var search = document.getElementById('search-input').value;
+      if (msgEl) {
+        if (search) {
+          msgEl.textContent = 'No reports match your search "' + search + '". Try different keywords.';
+        } else if (currentFilter !== 'all') {
+          msgEl.textContent = 'You have no ' + currentFilter + ' reports at this time.';
+        } else {
+          msgEl.textContent = "You haven't submitted any reports yet. Help keep Zamboanga City clean by reporting waste in your area.";
+        }
+      }
+      document.getElementById('pagination-container').style.display = 'none';
+      document.getElementById('page-info').textContent = 'No reports found';
+      return;
+    }
+
+    empty.style.display = 'none';
+    document.getElementById('pagination-container').style.display = 'flex';
+
+    var pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (currentPage > pages) currentPage = pages;
+    var start    = (currentPage - 1) * PAGE_SIZE;
+    var pageData = filteredReports.slice(start, start + PAGE_SIZE);
+
+    var html = '';
+    pageData.forEach(function(r) {
+      var wasteType    = r.wasteType || 'other';
+      var urgency      = r.urgency   || 'low';
+      var statusClass  = r.status === 'pending'   ? 'badge-yellow'
+                       : r.status === 'approved'  ? 'badge-blue'
+                       : r.status === 'rejected'  ? 'badge-red'
+                       : 'badge-gray';
+      var urgencyClass = URG_CLASS[urgency] || 'badge-sage';
+      var wasteIcon    = WASTE_ICONS[wasteType] || WASTE_ICONS.other;
+
+      html += '<tr>' +
+        '<td class="col-id">#' + esc(r.id) + '</td>' +
+        '<td>' + esc(r.location) + '</td>' +
+        '<td>' + esc(r.barangay) + '</td>' +
+        '<td><span class="type-chip">' + wasteIcon + ' ' + cap(wasteType) + '</span></td>' +
+        '<td><span class="badge ' + urgencyClass + '">' + URG_LABEL[urgency] + '</span></td>' +
+        '<td>' + esc(r.dateStr) + '</td>' +
+        '<td><span class="badge ' + statusClass + '">' + cap(r.status) + '</span></td>' +
+        '<td><button class="row-btn" onclick="openModal(\'' + esc(r.id) + '\')">View</button></td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = html;
+
+    var showing = (start + 1) + '–' + Math.min(start + PAGE_SIZE, total);
+    document.getElementById('page-info').textContent = 'Showing ' + showing + ' of ' + total + ' reports';
+
+    renderPagination(total, pages);
+  }
+
+  function renderPagination(total, pages) {
+    var wrap = document.getElementById('page-btns-wrap');
+    if (!wrap) return;
+    if (pages <= 1) { wrap.innerHTML = ''; return; }
+
+    var prevDis = currentPage === 1;
+    var nextDis = currentPage === pages;
+
+    var btns = '<div class="page-btn' + (prevDis ? ' disabled' : '') + '" id="pg-prev">‹</div>';
+
+    var nums = [];
+    if (pages <= 7) {
+      for (var i = 1; i <= pages; i++) nums.push(i);
+    } else {
+      nums.push(1);
+      if (currentPage > 3) nums.push('…');
+      for (var p = Math.max(2, currentPage - 1); p <= Math.min(pages - 1, currentPage + 1); p++) nums.push(p);
+      if (currentPage < pages - 2) nums.push('…');
+      nums.push(pages);
+    }
+
+    nums.forEach(function(n) {
+      if (n === '…') {
+        btns += '<div class="page-btn" style="cursor:default;">…</div>';
+      } else {
+        btns += '<div class="page-btn' + (n === currentPage ? ' active' : '') + '" data-page="' + n + '">' + n + '</div>';
+      }
+    });
+
+    btns += '<div class="page-btn' + (nextDis ? ' disabled' : '') + '" id="pg-next">›</div>';
+    wrap.innerHTML = btns;
+
+    if (!prevDis) {
+      document.getElementById('pg-prev').addEventListener('click', function() { currentPage--; renderPage(); });
+    }
+    if (!nextDis) {
+      document.getElementById('pg-next').addEventListener('click', function() { currentPage++; renderPage(); });
+    }
+    wrap.querySelectorAll('.page-btn[data-page]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        currentPage = parseInt(this.getAttribute('data-page'));
+        renderPage();
+      });
+    });
+  }
+
+  // ── Initialize on Page Load ──
+  document.addEventListener('DOMContentLoaded', function() {
+    renderReports();
+    
+    // Auto-refresh every 2 seconds to catch officer updates
+    setInterval(function() {
+      renderReports();
+    }, 2000);
+  });
+
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('reportModal').onclick = function(e) { handleBackdropClick(e); };
+</script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('zc_session'));
+    if (!u || !u.role) return;
+    var sec = document.getElementById('role-back-section');
+    if (!sec) return;
+    var lnk = document.getElementById('role-back-link');
+    var ico = document.getElementById('role-back-icon');
+    var txt = document.getElementById('role-back-text');
+    if (u.role === 'officer') {
+      sec.style.display = '';
+      lnk.href = 'officer-dashboard.html';
+      ico.className = 'fa-solid fa-landmark';
+      txt.textContent = 'Officer View';
+    } else if (u.role === 'driver') {
+      sec.style.display = '';
+      lnk.href = 'dashboard-driver.html';
+      ico.className = 'fa-solid fa-truck';
+      txt.textContent = 'Driver View';
+    }
+  } catch (e) {}
+})();
+</script>
+
+<button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+</body>
+</html>
