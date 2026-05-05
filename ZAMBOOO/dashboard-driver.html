@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Driver Dashboard — ZamboCollect</title>
+<link rel="stylesheet" href="css/driver.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ── Tabs ── */
+.page-tabs {
+  display: flex; gap: 4px; margin-bottom: 28px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 5px;
+}
+.tab-btn {
+  flex: 1; padding: 9px 16px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; border: none; background: transparent; color: var(--muted);
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tab-btn:hover { color: var(--text); background: var(--surface2); }
+.tab-btn.active { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(88,129,87,0.3); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: pageIn 0.2s ease; }
+
+/* ── Nav badge ── */
+.nav-badge {
+  margin-left: auto; background: var(--red); color: #fff;
+  border-radius: 100px; padding: 1px 7px; font-size: 10px; font-weight: 700;
+}
+
+/* ── Report cards ── */
+.report-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; margin-bottom: 12px;
+  box-shadow: var(--shadow-sm); overflow: visible;
+}
+.report-card-body { padding: 16px 20px; }
+.report-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+.report-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.report-icon.household    { background: #dcfce7; color: #16a34a; }
+.report-icon.commercial   { background: #fef3c7; color: #d97706; }
+.report-icon.illegal      { background: #fee2e2; color: var(--red); }
+.report-icon.construction { background: #dbeafe; color: #2563eb; }
+.report-icon.hazardous    { background: #fce7f3; color: #be185d; }
+.report-icon.other        { background: #f3f4f6; color: #6b7280; }
+.report-id  { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.report-loc { font-size: 14px; font-weight: 700; color: var(--text); margin: 1px 0; }
+.report-meta { font-size: 12px; color: var(--muted); }
+.report-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.btn-view-rpt {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  color: var(--text); cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-view-rpt:hover { border-color: var(--green); color: var(--green); }
+
+.btn-collect-rpt {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: var(--green); color: #fff; border: none;
+  cursor: pointer; font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-collect-rpt:hover { background: var(--green-dim); transform: translateY(-1px); }
+
+/* ── Report drawer ── */
+.report-drawer {
+  display: none; border-top: 1.5px dashed var(--border);
+  background: var(--surface2); border-radius: 0 0 12px 12px; padding: 18px 20px 20px;
+}
+.report-drawer.open { display: block; }
+
+.drawer-photo {
+  width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
+  background: var(--surface3); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border);
+}
+.drawer-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.drawer-photo-ph {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; color: var(--muted); font-size: 13px;
+}
+.drawer-photo-ph i { font-size: 2rem; }
+
+.drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.drawer-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+.drawer-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.drawer-box-val   { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.drawer-desc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px;
+  color: var(--text); line-height: 1.6; margin-bottom: 14px;
+}
+.drawer-section-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.drawer-footer {
+  display: flex; gap: 8px; padding-top: 14px; border-top: 1.5px solid var(--border);
+}
+.drawer-close-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--muted); cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+}
+.drawer-close-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── Card states ── */
+.card-approved  { border-color: rgba(88,129,87,0.35); background: linear-gradient(135deg,#f8faf7,var(--surface)); }
+.card-collected { border-color: rgba(88,129,87,0.2); opacity: 0.8; }
+
+/* ── Urgency chips ── */
+.urg-low      { background:#dcfce7; color:#16a34a; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-medium   { background:#fef3c7; color:#d97706; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-high     { background:#ffedd5; color:#ea580c; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+.urg-critical { background:#fee2e2; color:#dc2626; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+
+/* ── Section divider ── */
+.section-divider {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; border-bottom: 1.5px solid var(--border); margin-bottom: 12px;
+}
+
+/* ── Collect modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--surface); border-radius: 16px; padding: 24px;
+  max-width: 460px; width: 100%; box-shadow: var(--shadow-lg);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+.modal-sub   { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 14px; }
+.modal-info  {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px;
+  font-weight: 600; color: var(--text); margin-bottom: 16px;
+}
+.modal-actions { display: flex; gap: 10px; }
+.btn-modal-cancel {
+  flex: 0 0 42%; padding: 9px 0; border-radius: 9px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+}
+.btn-modal-cancel:hover { border-color: var(--border2); }
+.btn-modal-confirm {
+  flex: 1; padding: 9px 0; border-radius: 9px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: none; background: var(--green); color: #fff;
+  font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-modal-confirm:hover:not(:disabled) { background: var(--green-dim); }
+.btn-modal-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Collect photo upload ── */
+.collect-photo-label {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 18px 16px; border: 2px dashed var(--border); border-radius: 10px;
+  cursor: pointer; background: var(--surface2); transition: all 0.15s;
+  margin-bottom: 0;
+}
+.collect-photo-label:hover { border-color: var(--green); background: var(--green-glow); }
+.collect-photo-label:hover .cpl-icon { color: var(--green); }
+.cpl-icon { font-size: 1.5rem; color: var(--muted); transition: color 0.15s; }
+.collect-photo-preview {
+  display: none; width: 100%; aspect-ratio: 16/9; border-radius: 10px;
+  overflow: hidden; border: 1.5px solid var(--border); position: relative;
+  margin-bottom: 8px;
+}
+.collect-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.collect-photo-clear {
+  position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+  border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: background 0.15s;
+}
+.collect-photo-clear:hover { background: rgba(0,0,0,0.8); }
+.collect-field-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--muted); margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+}
+.collect-note-ta {
+  width: 100%; min-height: 68px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--text); font-family: 'Source Sans 3', sans-serif;
+  font-size: 13px; padding: 9px 12px; resize: vertical; box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.collect-note-ta:focus { outline: none; border-color: var(--green); }
+
+/* ── Task detail modal ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.52); backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 20px 16px; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal-card {
+  background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px;
+  box-shadow: var(--shadow-lg); flex-shrink: 0; margin: auto; animation: modal-in 0.18s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.modal-header {
+  padding: 18px 20px 14px; border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.t-modal-title    { font-size: 15px; font-weight: 700; color: var(--text); }
+.t-modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.modal-close {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 14px; transition: all 0.15s; appearance: none; font-family: inherit;
+}
+.modal-close:hover { border-color: var(--text); color: var(--text); }
+.modal-body { padding: 18px 20px 20px; }
+.modal-photo {
+  width: 100%; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+  background: var(--surface3); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-photo-ph { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); }
+.modal-photo-ph i { font-size: 2rem; }
+.modal-photo-ph span { font-size: 12px; }
+.modal-section-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.modal-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+.modal-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.modal-box-val   { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.modal-desc {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text); line-height: 1.6;
+}
+
+/* ── View task btn ── */
+.view-task-btn {
+  padding: 4px 11px; border-radius: 6px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  cursor: pointer; font-family: inherit; appearance: none;
+  transition: all 0.15s; white-space: nowrap;
+}
+.view-task-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+
+/* ── Route map ── */
+#route-map { width: 100%; height: 360px; border-radius: 10px; border: 1.5px solid var(--border); }
+
+@media (max-width: 600px) {
+  .drawer-grid { grid-template-columns: 1fr; }
+  .modal-grid  { grid-template-columns: 1fr; }
+  .tab-btn .tab-lbl { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <a href="dashboard-driver.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">
+        <i class="fa-solid fa-truck"></i> Driver Portal
+      </span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="dashboard-driver.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="driver-notification.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+        Notifications <span class="nav-badge">2</span>
+      </a>
+      <a href="driver-profile.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile
+      </a>
+      
+      <a href="citizen-dashboard.html" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarDriverName">Driver</div>
+          <div class="user-role" id="sidebarDriverRole">Collection Driver</div>
+        </div>
+      </div>
+      <a href="#" class="logout-link" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="dashboard-driver.html" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+          <li><a href="driver-notification.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="driver-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house-user"></i> Citizen View</a></li>
+          <li><a href="#" onclick="ZC_DB.clearSession(); window.location.href='Login.html'; return false;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Driver Dashboard</div>
+      <div class="topbar-right">
+        <a href="driver-notification.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i> <span class="notif-badge">2</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page active">
+      <div class="page-header">
+        <h1 id="driver-greeting">Good morning, Driver</h1>
+        <p>Your complete operations hub — reports, route, and tasks all in one place.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="page-tabs">
+        <button class="tab-btn active" onclick="switchTab('overview',this)">
+          <i class="fa-solid fa-house"></i><span class="tab-lbl"> Overview</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('route',this)">
+          <i class="fa-solid fa-map"></i><span class="tab-lbl"> Daily Route</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tasks',this)">
+          <i class="fa-solid fa-clipboard-list"></i><span class="tab-lbl"> Assigned Tasks</span>
+        </button>
+      </div>
+
+      <!-- ════════ TAB: OVERVIEW ════════ -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fa-solid fa-clipboard-check" style="color:var(--blue);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--blue);" id="stat-to-collect">—</div>
+              <div class="stat-label">Pending Collection</div>
+            </div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--green);" id="stat-collected">—</div>
+              <div class="stat-label">Collected</div>
+            </div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fa-solid fa-clipboard-list" style="color:var(--yellow);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--yellow);" id="stat-total-assigned">—</div>
+              <div class="stat-label">Total Assigned</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <i class="fa-solid fa-clipboard-check" style="color:var(--blue);"></i> Pending Collection
+        </div>
+        <div id="approved-container"></div>
+
+        <div class="section-divider" style="margin-top:28px;">
+          <i class="fa-solid fa-circle-check" style="color:var(--green);"></i> Already Collected
+        </div>
+        <div id="collected-container"></div>
+      </div>
+
+      <!-- ════════ TAB: DAILY ROUTE ════════ -->
+      <div class="tab-panel" id="tab-route">
+        <div class="stats-grid">
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fa-solid fa-map-pin" style="color:var(--green);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--green);" id="route-completed">2</div>
+              <div class="stat-label">Stops Completed</div>
+            </div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fa-solid fa-hourglass-half" style="color:var(--yellow);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--yellow);" id="route-remaining">8</div>
+              <div class="stat-label">Remaining Stops</div>
+            </div>
+          </div>
+          <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fa-solid fa-clock" style="color:var(--orange);"></i></div>
+            <div>
+              <div class="stat-num" style="color:var(--orange);" id="route-eta">2.5h</div>
+              <div class="stat-label">Estimated Time Left</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-route"></i> Route Map</div>
+          <div id="route-map"></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;font-weight:600;">
+            <span style="display:flex;align-items:center;gap:5px;color:#16a34a;"><span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block;"></span>Completed</span>
+            <span style="display:flex;align-items:center;gap:5px;color:#2563eb;"><span style="width:10px;height:10px;border-radius:50%;background:#2563eb;display:inline-block;"></span>In Progress</span>
+            <span style="display:flex;align-items:center;gap:5px;color:#9ca3af;"><span style="width:10px;height:10px;border-radius:50%;background:#9ca3af;display:inline-block;"></span>Pending</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Route Sequence</div>
+          <div class="route-sequence" id="route-sequence"></div>
+        </div>
+      </div>
+
+      <!-- ════════ TAB: ASSIGNED TASKS ════════ -->
+      <div class="tab-panel" id="tab-tasks">
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1d4ed8;display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <i class="fa-solid fa-rotate" style="flex-shrink:0;"></i>
+          <span>Tasks are <strong>automatically assigned</strong> from citizen reports approved by the officer. Complete each stop and mark it as collected.</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <div><div class="stat-num" id="task-total">—</div><div class="stat-label">Total Stops</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div><div class="stat-num" style="color:var(--green);" id="task-done">—</div><div class="stat-label">Completed</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+            <div><div class="stat-num" style="color:var(--yellow);" id="task-pending">—</div><div class="stat-label">Pending</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-ban"></i></div>
+            <div><div class="stat-num" style="color:var(--red);" id="task-skipped">—</div><div class="stat-label">Skipped</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="progress-bar-wrap" style="border:none;box-shadow:none;padding:0;margin-bottom:16px;">
+            <span class="prog-label">Today's progress</span>
+            <div class="prog-bg"><div class="prog-fill" id="prog-fill-bar"></div></div>
+            <span class="prog-label" style="color:var(--green);font-weight:600;" id="prog-text">— / — stops</span>
+          </div>
+
+          <div class="filter-row" style="margin-bottom:16px;">
+            <span class="filter-label">Show:</span>
+            <button class="filter-btn active-filter" onclick="filterTasks('all',this)">All</button>
+            <button class="filter-btn" onclick="filterTasks('done',this)">Completed</button>
+            <button class="filter-btn" onclick="filterTasks('pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterTasks('skipped',this)">Skipped</button>
+            <span class="date-label"><i class="fa-solid fa-calendar-days"></i> <span id="today-date"></span></span>
+          </div>
+
+          <div class="tasks-card">
+            <div class="tasks-header">
+              <div>#</div>
+              <div>Address</div>
+              <div>Waste Type</div>
+              <div>Time Window</div>
+              <div>Status</div>
+              <div style="text-align:center;">Details</div>
+            </div>
+            <div id="task-rows"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- .page -->
+  </main>
+</div>
+
+<!-- ── Collect Confirmation Modal ── -->
+<div class="modal-overlay hidden" id="modal-collect">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:var(--green-glow);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid rgba(88,129,87,0.2);">
+        <i class="fa-solid fa-truck" style="color:var(--green);font-size:16px;"></i>
+      </div>
+      <div class="modal-title">Mark as Collected</div>
+    </div>
+    <div class="modal-sub">Take a photo of the collected waste as proof of pickup. An optional note can also be added.</div>
+    <div class="modal-info" id="modal-collect-info">—</div>
+
+    <!-- Photo (required) -->
+    <div style="margin-bottom:16px;">
+      <div class="collect-field-lbl">
+        <i class="fa-solid fa-camera"></i> Proof Photo
+        <span style="color:var(--red);font-size:11px;">* required</span>
+      </div>
+      <div class="collect-photo-preview" id="collect-photo-preview">
+        <img id="collect-photo-img" src="" alt="Collection photo">
+        <button class="collect-photo-clear" onclick="clearCollectPhoto()" title="Remove photo">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <label class="collect-photo-label" for="collect-photo-input" id="collect-photo-label">
+        <i class="fa-solid fa-camera cpl-icon"></i>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Take or upload a photo</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Required before confirming collection</div>
+        </div>
+      </label>
+      <input type="file" id="collect-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleCollectPhoto(this)">
+    </div>
+
+    <!-- Optional note -->
+    <div style="margin-bottom:20px;">
+      <div class="collect-field-lbl">
+        <i class="fa-solid fa-comment-dots"></i> Driver Note
+        <span style="font-weight:400;text-transform:none;font-size:10px;">(optional)</span>
+      </div>
+      <textarea class="collect-note-ta" id="collect-message" placeholder="Add any notes about this collection (e.g. extra bags, access issues, weight estimate)…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeCollectModal()">Cancel</button>
+      <button class="btn-modal-confirm" id="btn-confirm-collect" onclick="confirmCollect()" disabled>
+        <i class="fa-solid fa-circle-check"></i> Confirm Collection
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Task Detail Modal ── -->
+<div class="modal-backdrop" id="taskModal" onclick="handleBackdropClick(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="tModalTitle">Stop Details</div>
+        <div class="modal-subtitle" id="tModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeTaskModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>
+      <div class="modal-photo" id="tPhotoWrap">
+        <div class="modal-photo-ph" id="tPhotoPh">
+          <i class="fa-solid fa-image"></i>
+          <span>Loading photo…</span>
+        </div>
+        <img id="tModalImg" src="" alt="Task photo" style="display:none;">
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-circle-info"></i> Task Details</div>
+      <div class="modal-grid">
+        <div class="modal-box"><div class="modal-box-label">Stop #</div><div class="modal-box-val" id="tStop">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Status</div><div class="modal-box-val" id="tStatus">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Address</div><div class="modal-box-val" id="tAddr">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Waste Type</div><div class="modal-box-val" id="tType">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Time Window</div><div class="modal-box-val" id="tTime">—</div></div>
+        <div class="modal-box"><div class="modal-box-label">Assigned Driver</div><div class="modal-box-val" id="tDriver">—</div></div>
+      </div>
+      <div class="modal-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Report</div>
+      <div class="modal-desc" id="tDesc">—</div>
+      <div id="tMarkCollectedWrap" style="margin-top:14px;display:none;">
+        <button class="btn-collect-rpt" id="tMarkCollectedBtn" style="width:100%;justify-content:center;">
+          <i class="fa-solid fa-truck"></i> Mark as Collected
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/profile-modal.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+// USER / GREETING
+// ═══════════════════════════════════════════════
+(function () {
+  var user = ZC_DB.getSession();
+  if (!user) return;
+  var fullName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
+  var nameEl = document.getElementById('sidebarDriverName');
+  var roleEl = document.getElementById('sidebarDriverRole');
+  if (nameEl) nameEl.textContent = fullName;
+  if (roleEl) roleEl.textContent = 'Collection Driver' + (user.barangay ? ' · ' + user.barangay : '');
+  var hour = new Date().getHours();
+  var g = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  var greetEl = document.getElementById('driver-greeting');
+  if (greetEl) greetEl.textContent = g + ', ' + (user.firstName || 'Driver') + ' 👋';
+})();
+
+// ═══════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'route' && !window._mapInit) initRouteMap();
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+var WASTE_ICONS = {
+  household:    '<i class="fa-solid fa-house"></i>',
+  commercial:   '<i class="fa-solid fa-store"></i>',
+  construction: '<i class="fa-solid fa-helmet-safety"></i>',
+  hazardous:    '<i class="fa-solid fa-radiation"></i>',
+  other:        '<i class="fa-solid fa-box"></i>'
+};
+var WASTE_CHIPS = {
+  household:    '<span style="background:#dcfce7;color:#16a34a;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-house" style="font-size:9px;"></i> Household</span>',
+  commercial:   '<span style="background:#fef3c7;color:#d97706;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-store" style="font-size:9px;"></i> Commercial</span>',
+  construction: '<span style="background:#dbeafe;color:#2563eb;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-helmet-safety" style="font-size:9px;"></i> Construction</span>',
+  hazardous:    '<span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-radiation" style="font-size:9px;"></i> Hazardous</span>',
+  other:        '<span style="background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-box" style="font-size:9px;"></i> Other</span>'
+};
+var URG_CLASS = { low:'urg-low', medium:'urg-medium', high:'urg-high', critical:'urg-critical' };
+var URG_ICON  = {
+  low:      '<i class="fa-solid fa-circle-check" style="font-size:9px;"></i>',
+  medium:   '<i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i>',
+  high:     '<i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i>',
+  critical: '<i class="fa-solid fa-skull-crossbones" style="font-size:9px;"></i>'
+};
+
+// ═══════════════════════════════════════════════
+// REPORT DRAWER
+// ═══════════════════════════════════════════════
+var _openDrawerId   = null;
+var _collectContext = null; // {type:'report',id} | {type:'task',idx} | {type:'stop',idx}
+
+function openDrawer(id) {
+  closeDrawer();
+  _openDrawerId = id;
+  var el = document.getElementById('drawer-' + id);
+  if (el) el.classList.add('open');
+}
+function closeDrawer() {
+  if (_openDrawerId) {
+    var el = document.getElementById('drawer-' + _openDrawerId);
+    if (el) el.classList.remove('open');
+  }
+  _openDrawerId = null;
+}
+
+function buildPhotoHtml(photo) {
+  if (photo && (photo.startsWith('data:') || photo.startsWith('http') || photo.startsWith('/'))) {
+    return '<div class="drawer-photo"><img src="' + esc(photo) + '" alt="Report photo" onerror="this.parentNode.innerHTML=\'<div class=drawer-photo-ph><i class=fa-solid fa-image></i><span>Photo not available</span></div>\'"></div>';
+  }
+  return '<div class="drawer-photo"><div class="drawer-photo-ph"><i class="fa-solid fa-camera"></i><span>No photo submitted</span></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+// CARD BUILDERS (Overview tab)
+// ═══════════════════════════════════════════════
+function buildApprovedCard(r) {
+  var wt  = r.wasteType || 'other';
+  var urg = r.urgency   || 'low';
+  var iconCls = (wt === 'hazardous') ? 'illegal' : (WASTE_ICONS[wt] ? wt : 'other');
+
+  return '<div class="report-card card-approved">' +
+    '<div class="report-card-body">' +
+      '<div class="report-top">' +
+        '<div class="report-icon ' + iconCls + '">' + (WASTE_ICONS[wt] || WASTE_ICONS.other) + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="report-id">#' + esc(r.id) + ' &nbsp;&middot;&nbsp; ' + esc(r.dateStr) + '</div>' +
+          '<div class="report-loc">' + esc(r.location) + '</div>' +
+          '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;&middot;&nbsp; ' + esc(r.barangay) + '</div>' +
+        '</div>' +
+        '<span class="badge badge-blue">Approved</span>' +
+      '</div>' +
+      '<div class="report-chips">' +
+        (WASTE_CHIPS[wt] || WASTE_CHIPS.other) +
+        '<span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + (URG_ICON[urg] || '') + ' ' + cap(urg) + ' Urgency</span>' +
+      '</div>' +
+      '<div class="report-actions">' +
+        '<button class="btn-view-rpt" onclick="openDrawer(\'' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Details</button>' +
+        '<button class="btn-collect-rpt" onclick="openCollectModal(\'' + esc(r.id) + '\')"><i class="fa-solid fa-truck"></i> Mark as Collected</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="report-drawer" id="drawer-' + esc(r.id) + '">' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>' +
+      buildPhotoHtml(r.photo) +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+      '<div class="drawer-grid">' +
+        '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Contact</div><div class="drawer-box-val">' + esc(r.contact || '—') + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Barangay</div><div class="drawer-box-val">' + esc(r.barangay) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Approved By</div><div class="drawer-box-val">' + esc(r.approvedBy || '—') + '</div></div>' +
+      '</div>' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+      '<div class="drawer-desc">“' + esc(r.description || 'No description provided.') + '”</div>' +
+      '<div class="drawer-footer">' +
+        '<button class="drawer-close-btn" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+        '<button class="btn-collect-rpt" onclick="openCollectModal(\'' + esc(r.id) + '\')" style="flex:1;justify-content:center;"><i class="fa-solid fa-truck"></i> Mark as Collected</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildCollectedCard(r) {
+  var wt  = r.wasteType || 'other';
+  var urg = r.urgency   || 'low';
+  var iconCls = (wt === 'hazardous') ? 'illegal' : (WASTE_ICONS[wt] ? wt : 'other');
+
+  return '<div class="report-card card-collected">' +
+    '<div class="report-card-body">' +
+      '<div class="report-top">' +
+        '<div class="report-icon ' + iconCls + '">' + (WASTE_ICONS[wt] || WASTE_ICONS.other) + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="report-id">#' + esc(r.id) + ' &nbsp;&middot;&nbsp; ' + esc(r.dateStr) + '</div>' +
+          '<div class="report-loc">' + esc(r.location) + '</div>' +
+          '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;&middot;&nbsp; ' + esc(r.barangay) + '</div>' +
+        '</div>' +
+        '<span class="badge badge-green">Collected</span>' +
+      '</div>' +
+      '<div class="report-chips">' +
+        (WASTE_CHIPS[wt] || WASTE_CHIPS.other) +
+        '<span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + (URG_ICON[urg] || '') + ' ' + cap(urg) + ' Urgency</span>' +
+        '<span style="background:#dcfce7;color:#166534;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Collected' + (r.collectedDate ? ' ' + esc(r.collectedDate) : '') + '</span>' +
+      '</div>' +
+      '<div class="report-actions">' +
+        '<button class="btn-view-rpt" onclick="openDrawer(\'c' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Details</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="report-drawer" id="drawer-c' + esc(r.id) + '">' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-camera"></i> Report Photo</div>' +
+      buildPhotoHtml(r.photo) +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+      '<div class="drawer-grid">' +
+        '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Contact</div><div class="drawer-box-val">' + esc(r.contact || '—') + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg] || 'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Barangay</div><div class="drawer-box-val">' + esc(r.barangay) + '</div></div>' +
+        '<div class="drawer-box"><div class="drawer-box-label">Collected By</div><div class="drawer-box-val">' + esc(r.collectedBy || '—') + '</div></div>' +
+      '</div>' +
+      '<div class="drawer-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+      '<div class="drawer-desc">“' + esc(r.description || 'No description provided.') + '”</div>' +
+      '<div class="drawer-footer">' +
+        '<button class="drawer-close-btn" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+        '<div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);padding:0 10px;"><i class="fa-solid fa-circle-check"></i> Collected on ' + esc(r.collectedDate || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER OVERVIEW
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  var reports   = REPORTS_DB.getAll();
+  var approved  = reports.filter(function(r){ return r.status === 'approved'; });
+  var collected = reports.filter(function(r){ return r.status === 'collected'; });
+
+  var sta = document.getElementById('stat-to-collect');
+  var stc = document.getElementById('stat-collected');
+  var stt = document.getElementById('stat-total-assigned');
+  if (sta) sta.textContent = approved.length;
+  if (stc) stc.textContent = collected.length;
+  if (stt) stt.textContent = approved.length + collected.length;
+
+  var ac = document.getElementById('approved-container');
+  if (ac) {
+    ac.innerHTML = approved.length === 0
+      ? '<div style="text-align:center;padding:32px;color:var(--muted);font-size:14px;"><i class="fa-solid fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>No approved reports pending collection.</div>'
+      : approved.map(buildApprovedCard).join('');
+  }
+
+  var cc = document.getElementById('collected-container');
+  if (cc) {
+    cc.innerHTML = collected.length === 0
+      ? '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No reports collected yet.</div>'
+      : collected.map(buildCollectedCard).join('');
+  }
+
+  if (_openDrawerId) {
+    var el = document.getElementById('drawer-' + _openDrawerId);
+    if (el) el.classList.add('open');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// COLLECT MODAL
+// ═══════════════════════════════════════════════
+function _openCollectModal(infoText, context) {
+  var infoEl = document.getElementById('modal-collect-info');
+  if (infoEl) infoEl.textContent = infoText;
+  _collectContext = context;
+  _resetCollectModal();
+  document.getElementById('modal-collect').classList.remove('hidden');
+}
+
+function openCollectModal(id) {
+  var reports = REPORTS_DB.getAll();
+  var r = null;
+  for (var i = 0; i < reports.length; i++) {
+    if (reports[i].id === id) { r = reports[i]; break; }
+  }
+  _openCollectModal(
+    r ? '#' + r.id + ' — ' + r.location + ' (' + r.barangay + ')' : id,
+    { type: 'report', id: id }
+  );
+}
+
+function openTaskCollectModal(idx) {
+  var t = TASK_DATA[idx];
+  _openCollectModal('Stop #' + t.stop + ' — ' + t.addr, { type: 'task', idx: idx });
+}
+
+function openStopCollectModal(idx) {
+  var s = STOPS[idx];
+  _openCollectModal('Stop #' + s.label + ' — ' + s.addr, { type: 'stop', idx: idx });
+}
+
+function closeCollectModal() {
+  _collectContext = null;
+  _resetCollectModal();
+  document.getElementById('modal-collect').classList.add('hidden');
+}
+
+function _resetCollectModal() {
+  clearCollectPhoto();
+  var msg = document.getElementById('collect-message');
+  if (msg) msg.value = '';
+}
+
+function handleCollectPhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('collect-photo-img').src = e.target.result;
+    document.getElementById('collect-photo-preview').style.display = 'block';
+    document.getElementById('collect-photo-label').style.display   = 'none';
+    document.getElementById('btn-confirm-collect').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearCollectPhoto() {
+  var input = document.getElementById('collect-photo-input');
+  if (input) input.value = '';
+  var img = document.getElementById('collect-photo-img');
+  if (img) img.src = '';
+  var preview = document.getElementById('collect-photo-preview');
+  if (preview) preview.style.display = 'none';
+  var label = document.getElementById('collect-photo-label');
+  if (label) label.style.display = 'flex';
+  var btn = document.getElementById('btn-confirm-collect');
+  if (btn) btn.disabled = true;
+}
+
+function confirmCollect() {
+  if (!_collectContext) return;
+  var preview = document.getElementById('collect-photo-preview');
+  if (!preview || preview.style.display === 'none') return;
+
+  var photo   = document.getElementById('collect-photo-img').src;
+  var message = (document.getElementById('collect-message').value || '').trim();
+
+  if (_collectContext.type === 'report') {
+    var session = ZC_DB.getSession();
+    var driverName = session
+      ? [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ')
+      : 'Driver';
+    REPORTS_DB.collect(_collectContext.id, driverName);
+    closeCollectModal();
+    closeDrawer();
+    renderDashboard();
+  } else if (_collectContext.type === 'task') {
+    var idx = _collectContext.idx;
+    TASK_DATA[idx].collectionPhoto = photo;
+    TASK_DATA[idx].collectionNote  = message;
+    TASK_DATA[idx].status = 'done';
+    closeCollectModal();
+    closeTaskModal();
+    renderTasks(_currentFilter);
+    updateTaskStats();
+  } else if (_collectContext.type === 'stop') {
+    _applyMarkRouteStop(_collectContext.idx);
+    closeCollectModal();
+  }
+}
+
+document.getElementById('modal-collect').addEventListener('click', function(e) {
+  if (e.target === this) closeCollectModal();
+});
+
+// ═══════════════════════════════════════════════
+// ROUTE MAP (Leaflet — no API key needed)
+// ═══════════════════════════════════════════════
+var STOPS = [
+  { lat:6.9338, lng:122.0532, label:'1',  addr:'Pasonanca Rd, near McDonald\'s', type:'Plastic & Bottles',  time:'8:15 AM',  status:'completed' },
+  { lat:6.8930, lng:122.0768, label:'2',  addr:'Sta. Cruz District',             type:'General Waste',      time:'9:30 AM',  status:'completed' },
+  { lat:6.9162, lng:122.0851, label:'3',  addr:'Rio Hondo Bridge',               type:'Hazardous Waste',    time:'10:45 AM', status:'active'    },
+  { lat:6.8989, lng:122.0994, label:'4',  addr:'Talisay Road',                   type:'Organic Waste',      time:'11:15 AM', status:'pending'   },
+  { lat:6.9205, lng:122.0870, label:'5',  addr:'San Jose Road',                  type:'Plastic & Bottles',  time:'11:45 AM', status:'pending'   },
+  { lat:6.9092, lng:122.0730, label:'6',  addr:'Mabini Street',                  type:'General Waste',      time:'12:30 PM', status:'pending'   },
+  { lat:6.9072, lng:122.0748, label:'7',  addr:'Rizal Avenue',                   type:'Hazardous Waste',    time:'1:00 PM',  status:'pending'   },
+  { lat:6.9045, lng:122.0720, label:'8',  addr:'Bonifacio Drive',                type:'Organic Waste',      time:'1:30 PM',  status:'pending'   },
+  { lat:6.9065, lng:122.0714, label:'9',  addr:'Del Pilar Street',               type:'Plastic & Bottles',  time:'2:00 PM',  status:'pending'   },
+  { lat:6.9100, lng:122.0732, label:'10', addr:'Burgos Avenue',                  type:'General Waste',      time:'2:30 PM',  status:'pending'   },
+];
+var STATUS_COLOR = { completed:'#16a34a', active:'#2563eb', pending:'#9ca3af' };
+
+function initRouteMap() {
+  window._mapInit = true;
+  var map = L.map('route-map').setView([6.9100, 122.0750], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 19
+  }).addTo(map);
+
+  var latlngs = [];
+  STOPS.forEach(function(s) {
+    var col = STATUS_COLOR[s.status] || '#9ca3af';
+    var icon = L.divIcon({
+      html: '<div style="width:28px;height:28px;border-radius:50%;background:' + col + ';border:2px solid #fff;' +
+            'display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;' +
+            'box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + s.label + '</div>',
+      className: '', iconSize: [28,28], iconAnchor: [14,14]
+    });
+    var marker = L.marker([s.lat, s.lng], { icon: icon }).addTo(map);
+    marker.bindPopup('<strong>Stop #' + s.label + '</strong><br>' + s.addr + '<br>' +
+      '<span style="color:' + col + ';font-weight:600;text-transform:capitalize;">' + s.status + '</span>');
+    latlngs.push([s.lat, s.lng]);
+  });
+
+  L.polyline(latlngs, { color:'#588157', weight:3, opacity:0.7 }).addTo(map);
+  map.fitBounds(latlngs, { padding:[20,20] });
+}
+
+function updateRouteStats() {
+  var completed = STOPS.filter(function(s){ return s.status === 'completed'; }).length;
+  var remaining = STOPS.length - completed;
+  var el;
+  el = document.getElementById('route-completed'); if (el) el.textContent = completed;
+  el = document.getElementById('route-remaining'); if (el) el.textContent = remaining;
+}
+
+function renderRouteSequence() {
+  var html = STOPS.map(function(s, i) {
+    var cls = s.status === 'completed' ? 'completed' : s.status === 'active' ? 'active' : '';
+    var right = '';
+    if (s.status === 'completed') {
+      right = '<span class="badge badge-green">Collected</span>';
+    } else {
+      var btnCls = s.status === 'active' ? 'btn-small btn-green' : 'btn-small btn-outline';
+      right = '<div class="stop-actions"><button class="' + btnCls + '" onclick="openStopCollectModal(' + i + ')"><i class="fa-solid fa-check"></i> Mark Collected</button></div>';
+    }
+    return '<div class="route-stop ' + cls + '" id="rs-' + i + '">' +
+      '<div class="stop-number">' + s.label + '</div>' +
+      '<div class="stop-content">' +
+        '<div class="stop-address">' + s.addr + '</div>' +
+        '<div class="stop-details">' + s.type + ' &middot; ' + (s.status === 'completed' ? 'Completed at ' : 'Scheduled ') + s.time + '</div>' +
+      '</div>' +
+      '<div class="stop-status">' + right + '</div>' +
+    '</div>';
+  }).join('');
+  var el = document.getElementById('route-sequence');
+  if (el) el.innerHTML = html;
+}
+
+function markRouteStop(idx) { openStopCollectModal(idx); }
+
+function _applyMarkRouteStop(idx) {
+  STOPS[idx].status = 'completed';
+  var stopEl = document.getElementById('rs-' + idx);
+  if (stopEl) {
+    stopEl.className = 'route-stop completed';
+    stopEl.querySelector('.stop-status').innerHTML = '<span class="badge badge-green">Collected</span>';
+    stopEl.querySelector('.stop-details').textContent = STOPS[idx].type + ' · Completed at ' + STOPS[idx].time;
+  }
+  updateRouteStats();
+}
+
+// ═══════════════════════════════════════════════
+// ASSIGNED TASKS
+// ═══════════════════════════════════════════════
+var TASK_DATA = [
+  { stop:1,  addr:'Purok 1, Jolo St.',        sub:'Rio Hondo, Zamboanga', type:'Biodegradable',     time:'6:00 – 6:30 AM',     status:'done',    img:'images/report-sample-1.jpg', desc:'Mixed biodegradable household waste collected from residences along Jolo St. Purok 1. 3 large bags of kitchen scraps and garden trimmings.' },
+  { stop:2,  addr:'Purok 2, Bagonsilang',     sub:'Rio Hondo, Zamboanga', type:'Non-biodegradable', time:'6:30 – 7:00 AM',     status:'done',    img:'images/report-sample-4.jpg', desc:'Assorted non-biodegradable waste — plastics, bottles, and packaging material. Multiple bags reported by citizen. Area cleared successfully.' },
+  { stop:3,  addr:'Purok 3, Magsaysay Ave.',  sub:'Rio Hondo, Zamboanga', type:'Biodegradable',     time:'7:00 – 7:30 AM',     status:'done',    img:'images/report-sample-2.jpg', desc:'Organic kitchen waste and yard clippings in black bags piled along Magsaysay Ave. Reported by two households. Collection completed.' },
+  { stop:4,  addr:'Purok 4, Rizal St.',       sub:'Rio Hondo, Zamboanga', type:'Recyclable',        time:'7:30 – 8:00 AM',     status:'done',    img:'images/report-sample-4.jpg', desc:'Recyclable items — cardboard boxes, glass bottles, and clean plastic containers. Citizen pre-sorted the waste. Transferred to recycling station.' },
+  { stop:5,  addr:'Purok 5, Mabini St.',      sub:'Rio Hondo, Zamboanga', type:'Biodegradable',     time:'8:00 – 8:30 AM',     status:'done',    img:'images/report-sample-1.jpg', desc:'Biodegradable waste from a small eatery — food scraps and plant matter. Collected and disposed at composting facility.' },
+  { stop:6,  addr:'Purok 6, Del Pilar St.',   sub:'Rio Hondo, Zamboanga', type:'Non-biodegradable', time:'8:30 – 9:00 AM',     status:'done',    img:'images/report-sample-2.jpg', desc:'Non-biodegradable household trash — plastic bags, foam containers, and packaging. Accumulated over 2 days. Area cleared.' },
+  { stop:7,  addr:'Purok 7, Luna St.',        sub:'Rio Hondo, Zamboanga', type:'Recyclable',        time:'9:00 – 9:30 AM',     status:'done',    img:'images/report-sample-3.jpg', desc:'Recyclable waste — assorted cans, glass bottles, and cardboard. Citizen reported a large accumulation over several weeks. Fully cleared.' },
+  { stop:8,  addr:'Purok 8, Pag-asa St.',     sub:'Rio Hondo, Zamboanga', type:'Biodegradable',     time:'9:30 – 10:00 AM',    status:'inprog',  img:'images/report-sample-4.jpg', desc:'Biodegradable waste from residential households on Pag-asa St. Citizen reported large pile of kitchen and garden waste near the corner. Currently being collected.' },
+  { stop:9,  addr:'Purok 9, Laksamana St.',   sub:'Rio Hondo, Zamboanga', type:'Non-biodegradable', time:'10:00 – 10:30 AM',   status:'pending', img:'images/report-sample-1.jpg', desc:'Non-biodegradable items reported by residents — foam containers, plastic bags, and packaging waste scattered along Laksamana St. roadside.' },
+  { stop:10, addr:'Purok 10, Bathala St.',    sub:'Rio Hondo, Zamboanga', type:'Recyclable',        time:'10:30 – 11:00 AM',   status:'pending', img:'images/report-sample-2.jpg', desc:'Recyclable waste — metal scraps, bottles, and cardboard piled along Bathala St. fence. Citizen says it has been there for 4 days.' },
+  { stop:11, addr:'Purok 11, Tandang Sora',   sub:'Rio Hondo, Zamboanga', type:'Biodegradable',     time:'11:00 – 11:30 AM',   status:'skipped', img:'images/report-sample-3.jpg', desc:'Mixed biodegradable waste reported near Tandang Sora. Stop was skipped — narrow alley blocked by parked vehicles. Rescheduled for next collection day.' },
+  { stop:12, addr:'Purok 12, Bagong Silang',  sub:'Rio Hondo, Zamboanga', type:'Non-biodegradable', time:'11:30 AM – 12:00 PM', status:'pending', img:'images/report-sample-4.jpg', desc:'Assorted non-biodegradable waste piled along the roadside in Bagong Silang. Multiple bags reported by citizen. Estimated 5–6 large sacks.' },
+];
+var _currentFilter = 'all';
+
+function getStatusBadge(s) {
+  if (s === 'done')    return '<span class="badge badge-done">Completed</span>';
+  if (s === 'inprog')  return '<span class="badge badge-inprog">In Progress</span>';
+  if (s === 'skipped') return '<span class="badge badge-skipped">Skipped</span>';
+  return '<span class="badge badge-pending">Pending</span>';
+}
+
+function renderTasks(filter) {
+  _currentFilter = filter || 'all';
+  var rows = TASK_DATA.filter(function(t) {
+    if (_currentFilter === 'all')     return true;
+    if (_currentFilter === 'done')    return t.status === 'done';
+    if (_currentFilter === 'pending') return t.status === 'pending' || t.status === 'inprog';
+    if (_currentFilter === 'skipped') return t.status === 'skipped';
+    return true;
+  });
+
+  var html = rows.map(function(t) {
+    var realIdx = TASK_DATA.indexOf(t);
+    var rowStyle = (t.status === 'inprog') ? ' style="background:var(--green-glow);"' : '';
+    var rowCls   = (t.status === 'done')   ? 'task-row done' : 'task-row';
+    var numCls   = (t.status === 'skipped') ? 'skipped' : (t.status === 'done' ? '' : 'pending');
+    return '<div class="' + rowCls + '"' + rowStyle + '>' +
+      '<div class="stop-num ' + numCls + '">' + t.stop + '</div>' +
+      '<div><div class="stop-address">' + t.addr + '</div><div class="stop-sub">' + t.sub + '</div></div>' +
+      '<div class="waste-type">' + t.type + '</div>' +
+      '<div class="time-val">' + t.time + '</div>' +
+      '<div>' + getStatusBadge(t.status) + '</div>' +
+      '<div class="notes-icon"><button class="view-task-btn" onclick="openTaskModal(' + realIdx + ')">View</button></div>' +
+    '</div>';
+  }).join('');
+
+  var container = document.getElementById('task-rows');
+  if (container) container.innerHTML = html || '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No tasks match this filter.</div>';
+}
+
+function filterTasks(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active-filter'); });
+  btn.classList.add('active-filter');
+  renderTasks(filter);
+}
+
+function updateTaskStats() {
+  var done    = TASK_DATA.filter(function(t){ return t.status === 'done'; }).length;
+  var pending = TASK_DATA.filter(function(t){ return t.status === 'pending' || t.status === 'inprog'; }).length;
+  var skipped = TASK_DATA.filter(function(t){ return t.status === 'skipped'; }).length;
+  var total   = TASK_DATA.length;
+  var pct     = Math.round(done / total * 100);
+  var el;
+  el = document.getElementById('task-total');    if (el) el.textContent = total;
+  el = document.getElementById('task-done');     if (el) el.textContent = done;
+  el = document.getElementById('task-pending');  if (el) el.textContent = pending;
+  el = document.getElementById('task-skipped');  if (el) el.textContent = skipped;
+  el = document.getElementById('prog-fill-bar'); if (el) el.style.width = pct + '%';
+  el = document.getElementById('prog-text');     if (el) el.textContent = done + ' / ' + total + ' stops';
+}
+
+function markTaskDone(idx) {
+  TASK_DATA[idx].status = 'done';
+  closeTaskModal();
+  renderTasks(_currentFilter);
+  updateTaskStats();
+}
+
+// ═══════════════════════════════════════════════
+// TASK DETAIL MODAL
+// ═══════════════════════════════════════════════
+function openTaskModal(idx) {
+  var t = TASK_DATA[idx];
+
+  document.getElementById('tModalTitle').textContent    = 'Stop #' + t.stop + ' — ' + t.addr;
+  document.getElementById('tModalSubtitle').textContent = t.sub + '  ·  ' + t.time;
+  document.getElementById('tStop').textContent  = '#' + t.stop;
+  document.getElementById('tAddr').textContent  = t.addr;
+  document.getElementById('tType').textContent  = t.type;
+  document.getElementById('tTime').textContent  = t.time;
+  document.getElementById('tStatus').innerHTML  = getStatusBadge(t.status);
+  document.getElementById('tDesc').textContent  = t.desc;
+
+  var session = ZC_DB.getSession();
+  var driverName = session
+    ? [session.firstName, session.middleName, session.lastName].filter(Boolean).join(' ')
+    : 'Driver';
+  document.getElementById('tDriver').textContent = driverName;
+
+  var img = document.getElementById('tModalImg');
+  var ph  = document.getElementById('tPhotoPh');
+  img.style.display = 'none';
+  ph.style.display  = 'flex';
+  ph.querySelector('span').textContent = 'Loading photo…';
+  img.onload  = function() { img.style.display = 'block'; ph.style.display = 'none'; };
+  img.onerror = function() { ph.querySelector('span').textContent = 'Photo not available'; };
+  img.src = t.img;
+
+  var markWrap = document.getElementById('tMarkCollectedWrap');
+  if (t.status === 'done' || t.status === 'skipped') {
+    markWrap.style.display = 'none';
+  } else {
+    markWrap.style.display = 'block';
+    document.getElementById('tMarkCollectedBtn').onclick = function() { openTaskCollectModal(idx); };
+  }
+
+  document.getElementById('taskModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('taskModal')) closeTaskModal();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeTaskModal(); closeCollectModal(); }
+});
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  renderDashboard();
+  renderRouteSequence();
+  updateRouteStats();
+  renderTasks('all');
+  updateTaskStats();
+
+  var todayEl = document.getElementById('today-date');
+  if (todayEl) {
+    todayEl.textContent = new Date().toLocaleDateString('en-US', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
+    });
+  }
+});
+
+setInterval(renderDashboard, 3000);
+</script>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
