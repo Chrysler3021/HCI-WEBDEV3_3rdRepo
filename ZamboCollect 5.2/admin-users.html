@@ -1,0 +1,1298 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users &amp; Accounts — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+  /* ── Modal overlay ─────────────────────────────────────── */
+  .um-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.52);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10001; padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .um-overlay.um-open { opacity: 1; pointer-events: all; }
+
+  .um-modal {
+    background: #fff; border-radius: 16px; width: 100%; max-width: 480px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    opacity: 0; transform: translateY(14px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    max-height: 90vh; display: flex; flex-direction: column;
+  }
+  .um-overlay.um-open .um-modal { opacity: 1; transform: translateY(0) scale(1); }
+  .um-hidden { display: none !important; }
+
+  /* ── Modal header ──────────────────────────────────────── */
+  .um-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px 16px;
+    border-bottom: 1.5px solid #f1f5f9; flex-shrink: 0;
+  }
+  .um-header-warn { background: #fffbeb; border-color: #fef3c7; }
+
+  .um-avatar {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; color: #fff;
+    background: linear-gradient(135deg,#64748b,#94a3b8);
+  }
+  .um-avatar.role-officer { background: linear-gradient(135deg,#2563eb,#60a5fa); }
+  .um-avatar.role-driver  { background: linear-gradient(135deg,#588157,#A3B18A); }
+  .um-warn-icon {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; color: #fff;
+    background: linear-gradient(135deg,#f59e0b,#fcd34d);
+  }
+
+  .um-header-info { flex: 1; min-width: 0; }
+  .um-modal-name { font-size: 16px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .um-modal-role-wrap { margin-top: 4px; }
+  .um-suspend-title { font-size: 15px; font-weight: 700; color: #92400e; }
+  .um-suspend-sub   { font-size: 12px; color: #b45309; margin-top: 2px; }
+
+  .um-x {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    border: 1.5px solid #e2e8f0; background: #f8fafc; color: #64748b;
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .um-x:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+
+  /* ── Modal body ────────────────────────────────────────── */
+  .um-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+
+  .um-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #94a3b8; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .um-section-title:first-child { margin-top: 0; }
+
+  .um-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .um-info-box {
+    background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .um-info-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 3px;
+  }
+  .um-info-label i { margin-right: 3px; }
+  .um-info-value { font-size: 13px; font-weight: 600; color: #1e293b; }
+
+  .um-activity-row {
+    display: flex; gap: 8px; margin-top: 2px;
+  }
+  .um-activity-box {
+    flex: 1; background: #f0fdf4; border: 1.5px solid #bbf7d0;
+    border-radius: 10px; padding: 10px 12px; text-align: center;
+  }
+  .um-activity-num { font-size: 20px; font-weight: 800; color: #16a34a; }
+  .um-activity-lbl { font-size: 10px; font-weight: 600; color: #15803d; margin-top: 1px; }
+
+  .um-suspend-banner {
+    background: #fff1f2; border: 1.5px solid #fecdd3;
+    border-radius: 10px; padding: 10px 13px;
+    display: flex; align-items: flex-start; gap: 10px; margin-top: 2px;
+  }
+  .um-suspend-banner i { color: #e11d48; margin-top: 1px; flex-shrink: 0; }
+  .um-suspend-banner-text { font-size: 12px; color: #9f1239; line-height: 1.5; }
+  .um-suspend-banner-label { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* ── Reason select ─────────────────────────────────────── */
+  .um-reason-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+  .um-reason-select {
+    width: 100%; padding: 10px 36px 10px 13px;
+    border-radius: 9px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; font-weight: 500;
+    color: #334155; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    transition: border-color 0.15s;
+  }
+  .um-reason-select:focus { outline: none; border-color: #588157; box-shadow: 0 0 0 3px rgba(88,129,87,0.15); }
+  .um-reason-select.um-select-error { border-color: #dc2626; background-color: #fff5f5; }
+  .um-reason-error {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 7px; font-size: 12px; font-weight: 600; color: #dc2626;
+  }
+  .um-reason-notes {
+    width: 100%; margin-top: 10px; padding: 9px 12px;
+    border-radius: 9px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; font-family: inherit;
+    color: #334155; resize: vertical; min-height: 72px;
+    transition: border-color 0.15s;
+  }
+  .um-reason-notes:focus { outline: none; border-color: #588157; box-shadow: 0 0 0 3px rgba(88,129,87,0.15); }
+
+  @keyframes um-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-7px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .um-shake { animation: um-shake 0.35s ease; }
+
+  /* ── Modal footer ──────────────────────────────────────── */
+  .um-footer {
+    display: flex; gap: 8px; padding: 13px 20px;
+    border-top: 1.5px solid #f1f5f9; background: #fafafa; flex-shrink: 0;
+  }
+  .um-btn-ghost {
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid #e2e8f0; background: #fff;
+    color: #64748b; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .um-btn-ghost:hover { background: #f1f5f9; color: #334155; }
+  .um-btn-danger {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #dc2626; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-danger:hover { opacity: 0.88; }
+  .um-btn-unsuspend {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #16a34a; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-unsuspend:hover { opacity: 0.88; }
+  .um-btn-demote {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #f97316; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-demote:hover { opacity: 0.88; }
+
+  /* ── Sort headers ──────────────────────────────────────── */
+  th[data-sort] { cursor: pointer; user-select: none; white-space: nowrap; }
+  th[data-sort]:hover { color: var(--primary); }
+  th[data-sort].sort-active { color: var(--primary); }
+  .sort-icon { font-size: 10px; color: var(--muted2); margin-left: 3px; }
+  th[data-sort].sort-active .sort-icon { color: var(--primary); }
+
+  /* ── Toast ─────────────────────────────────────────────── */
+  .adm-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1e293b; color: #fff; border-radius: 10px;
+    padding: 11px 20px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 9px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 20000; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0;
+    white-space: nowrap;
+  }
+  .adm-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .adm-toast.toast-green i { color: #4ade80; }
+  .adm-toast.toast-yellow i { color: #fbbf24; }
+
+  @media (max-width: 500px) { .um-info-grid { grid-template-columns: 1fr; } }
+
+  /* ── Pagination ─────────────────────────────────────────── */
+  .page-btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  .um-btn-promote {
+    flex: 1; padding: 8px 16px; border-radius: 8px;
+    border: none; background: #2563eb; color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .um-btn-promote:hover { opacity: 0.88; }
+
+  .um-btn-activity {
+    padding: 8px 14px; border-radius: 8px;
+    border: 1.5px solid #e2e8f0; background: #f8fafc;
+    color: #475569; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .um-btn-activity:hover { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+
+  /* ── Activity timeline ───────────────────────────────────── */
+  .tl-item { display:flex; gap:12px; margin-bottom:12px; }
+  .tl-left { display:flex; flex-direction:column; align-items:center; width:36px; flex-shrink:0; }
+  .tl-dot {
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; border:2px solid; flex-shrink:0;
+  }
+  .tl-line { width:2px; flex:1; background:#f1f5f9; margin-top:4px; min-height:16px; }
+  .tl-right { flex:1; padding-top:6px; }
+  .tl-event-label { font-size:12px; font-weight:700; margin-bottom:2px; }
+  .tl-note { font-size:12px; color:#64748b; line-height:1.5; }
+  .tl-time { font-size:11px; color:#94a3b8; margin-top:3px; }
+
+  .tl-dot.dot-created      { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
+  .tl-dot.dot-suspended    { background:#fff1f2; color:#e11d48; border-color:#fecdd3; }
+  .tl-dot.dot-unsuspended  { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
+  .tl-dot.dot-role-changed { background:#fef3c7; color:#b45309; border-color:#fcd34d; }
+  .tl-dot.dot-default      { background:#f8fafc; color:#64748b; border-color:#e2e8f0; }
+
+  .tl-event-label.ev-created      { color:#16a34a; }
+  .tl-event-label.ev-suspended    { color:#e11d48; }
+  .tl-event-label.ev-unsuspended  { color:#16a34a; }
+  .tl-event-label.ev-role-changed { color:#b45309; }
+  .tl-event-label.ev-default      { color:#475569; }
+
+  .uact-pg-btn {
+    padding:5px 12px; border-radius:7px;
+    border:1.5px solid #e2e8f0; background:#f8fafc;
+    font-size:12px; font-weight:600; color:#64748b;
+    cursor:pointer; font-family:inherit; transition:all 0.15s;
+  }
+  .uact-pg-btn:hover:not(:disabled) { border-color:#588157; color:#588157; }
+  .uact-pg-btn:disabled { opacity:0.35; cursor:default; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-driver-applications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Applications</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar"><i class="fa-solid fa-gear"></i></div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-driver-applications.html"><i class="fa-solid fa-truck"></i> Driver Applications</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Users &amp; Accounts</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-dashboard.html" class="topbar-btn"><i class="fa-solid fa-building"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <nav class="breadcrumb" aria-label="breadcrumb">
+            <li class="breadcrumb-item"><a href="admin-dashboard.html">City Dashboard</a></li>
+            <li class="breadcrumb-sep">›</li>
+            <li class="breadcrumb-item active">Users &amp; Accounts</li>
+          </nav>
+          <h1>Users &amp; Accounts</h1>
+          <p>Manage all system accounts across Zamboanga City.</p>
+        </div>
+        <div class="header-actions"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-blue"><span class="stat-icon"><i class="fa-solid fa-users"></i></span><div class="stat-num blue" id="stat-total">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon"><i class="fa-solid fa-landmark"></i></span><div class="stat-num yellow" id="stat-officers">—</div><div class="stat-label">Officers</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-truck"></i></span><div class="stat-num green" id="stat-drivers">—</div><div class="stat-label">Drivers</div></div>
+        <div class="stat-card stat-sage"><span class="stat-icon"><i class="fa-solid fa-user"></i></span><div class="stat-num sage" id="stat-citizens">—</div><div class="stat-label">Citizens</div></div>
+      </div>
+
+      <div class="notice red">
+        <span class="notice-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span><strong style="color:var(--red);">Admin access:</strong> To make someone an Officer, open their citizen account and use <strong>Promote to Officer</strong>. Driver accounts are managed by Officers. Citizens self-register.</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row" id="filter-chips">
+          <a href="#" class="filter-chip active" data-filter="all">All</a>
+          <a href="#" class="filter-chip" data-filter="officer"><i class="fa-solid fa-landmark"></i> Officers</a>
+          <a href="#" class="filter-chip" data-filter="driver"><i class="fa-solid fa-truck"></i> Drivers</a>
+          <a href="#" class="filter-chip" data-filter="citizen"><i class="fa-solid fa-user"></i> Citizens</a>
+          <a href="#" class="filter-chip" data-filter="kyc-pending"><i class="fa-solid fa-hourglass-half"></i> KYC Pending</a>
+          <a href="#" class="filter-chip" data-filter="suspended"><i class="fa-solid fa-ban"></i> Suspended</a>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="user-search" placeholder="Search name, email, barangay…" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="name">Name <span class="sort-icon">↕</span></th>
+              <th data-sort="role">Role <span class="sort-icon">↕</span></th>
+              <th data-sort="barangay">Barangay <span class="sort-icon">↕</span></th>
+              <th>Created By</th>
+              <th data-sort="kyc">KYC <span class="sort-icon">↕</span></th>
+              <th data-sort="status">Status <span class="sort-icon">↕</span></th>
+              <th data-sort="joinedTs">Joined <span class="sort-icon">↓</span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info" id="page-info">Showing — users</div>
+          <div id="pagination-wrap" class="page-btns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────── -->
+<div id="adm-toast" class="adm-toast toast-green">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="adm-toast-msg">Done.</span>
+</div>
+
+<!-- ── Profile modal ──────────────────────────────────────── -->
+<div id="um-overlay" class="um-overlay" role="dialog" aria-modal="true">
+  <div class="um-modal">
+
+    <!-- PROFILE VIEW -->
+    <div id="um-profile-view">
+      <div class="um-header">
+        <div class="um-avatar" id="um-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="um-header-info">
+          <div class="um-modal-name" id="um-modal-name">—</div>
+          <div class="um-modal-role-wrap" id="um-modal-role"></div>
+        </div>
+        <button class="um-x" id="um-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="um-body">
+        <!-- Contact -->
+        <div class="um-section-title"><i class="fa-solid fa-address-card"></i> Contact</div>
+        <div class="um-info-grid">
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-envelope"></i> Email</div>
+            <div class="um-info-value" id="um-email" style="font-size:12px;">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-phone"></i> Phone</div>
+            <div class="um-info-value" id="um-phone">—</div>
+          </div>
+        </div>
+
+        <!-- Account details -->
+        <div class="um-section-title"><i class="fa-solid fa-circle-info"></i> Account Details</div>
+        <div class="um-info-grid">
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-location-dot"></i> Barangay</div>
+            <div class="um-info-value" id="um-barangay">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-user-plus"></i> Created By</div>
+            <div class="um-info-value" id="um-created-by">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-id-card"></i> KYC Status</div>
+            <div class="um-info-value" id="um-kyc">—</div>
+          </div>
+          <div class="um-info-box">
+            <div class="um-info-label"><i class="fa-solid fa-circle-dot"></i> Account Status</div>
+            <div class="um-info-value" id="um-acc-status">—</div>
+          </div>
+          <div class="um-info-box" style="grid-column:1/-1;">
+            <div class="um-info-label"><i class="fa-solid fa-calendar-days"></i> Joined</div>
+            <div class="um-info-value" id="um-joined">—</div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="um-section-title"><i class="fa-solid fa-chart-simple"></i> Activity</div>
+        <div class="um-activity-row" id="um-activity-row"></div>
+
+        <!-- Suspension banner (shown only if suspended) -->
+        <div id="um-suspend-banner" class="um-suspend-banner um-hidden" style="margin-top:14px;">
+          <i class="fa-solid fa-ban"></i>
+          <div class="um-suspend-banner-text">
+            <div class="um-suspend-banner-label">Account Suspended</div>
+            <div id="um-suspend-reason-text">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-close-btn">Close</button>
+        <button class="um-btn-activity" id="um-activity-btn">
+          <i class="fa-solid fa-clock-rotate-left"></i> Activity
+        </button>
+        <button class="um-btn-promote um-hidden" id="um-promote-btn">
+          <i class="fa-solid fa-user-tie"></i> Promote to Officer
+        </button>
+        <button class="um-btn-demote um-hidden" id="um-demote-btn">
+          <i class="fa-solid fa-user-minus"></i> Demote
+        </button>
+        <button class="um-btn-unsuspend um-hidden" id="um-unsuspend-btn">
+          <i class="fa-solid fa-circle-check"></i> Unsuspend
+        </button>
+        <button class="um-btn-danger um-hidden" id="um-to-suspend-btn">
+          <i class="fa-solid fa-ban"></i> Suspend Account
+        </button>
+      </div>
+    </div>
+
+    <!-- SUSPEND VIEW -->
+    <div id="um-suspend-view" class="um-hidden">
+      <div class="um-header um-header-warn">
+        <div class="um-warn-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="um-header-info">
+          <div class="um-suspend-title">Suspend Account</div>
+          <div class="um-suspend-sub">Suspending: <strong id="um-suspend-name">—</strong></div>
+        </div>
+        <button class="um-x" id="um-suspend-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="um-body">
+        <label class="um-reason-label" for="um-reason-select">Reason for suspension <span style="color:#dc2626;">*</span></label>
+        <select id="um-reason-select" class="um-reason-select">
+          <option value="">— Choose a reason —</option>
+          <option>Submitting Fake Reports</option>
+          <option>Inappropriate Behavior</option>
+          <option>Multiple Policy Violations</option>
+          <option>Spam or Abuse</option>
+          <option>Identity Fraud</option>
+          <option>Unauthorized Access Attempt</option>
+          <option>Other</option>
+        </select>
+        <div id="um-reason-error" class="um-reason-error um-hidden">
+          <i class="fa-solid fa-circle-exclamation"></i> Please select a reason before continuing.
+        </div>
+        <textarea id="um-reason-notes" class="um-reason-notes" placeholder="Additional notes for this suspension (optional)…"></textarea>
+      </div>
+
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="um-btn-danger" id="um-confirm-btn">
+          <i class="fa-solid fa-ban"></i> Confirm Suspension
+        </button>
+      </div>
+    </div>
+
+    <!-- PROMOTE VIEW -->
+    <div id="um-promote-view" class="um-hidden">
+      <div class="um-header" style="background:#eff6ff;border-color:#bfdbfe;">
+        <div class="um-warn-icon" style="background:linear-gradient(135deg,#2563eb,#60a5fa);"><i class="fa-solid fa-user-tie"></i></div>
+        <div class="um-header-info">
+          <div class="um-suspend-title" style="color:#1d4ed8;">Promote to Officer</div>
+          <div class="um-suspend-sub" style="color:#2563eb;">Promoting: <strong id="um-promote-name">—</strong></div>
+        </div>
+        <button class="um-x" id="um-promote-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="um-body">
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px 16px;font-size:13px;color:#1e3a8a;display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;">
+          <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;color:#2563eb;font-size:15px;"></i>
+          <div>
+            <strong>Are you sure you want to promote this citizen to Officer?</strong><br>
+            <span id="um-promote-desc">This citizen</span> will gain access to the Officer Portal, KYC review, report management, and driver oversight. This action can be reversed by demoting them back to Citizen.
+          </div>
+        </div>
+      </div>
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-promote-back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="um-btn-promote" id="um-confirm-promote-btn">
+          <i class="fa-solid fa-user-tie"></i> Yes, Promote to Officer
+        </button>
+      </div>
+    </div>
+
+    <!-- DEMOTE VIEW -->
+    <div id="um-demote-view" class="um-hidden">
+      <div class="um-header" style="background:#fff7ed;border-color:#fed7aa;">
+        <div class="um-warn-icon" style="background:linear-gradient(135deg,#f97316,#fb923c);"><i class="fa-solid fa-user-minus"></i></div>
+        <div class="um-header-info">
+          <div class="um-suspend-title" style="color:#c2410c;">Demote to Citizen</div>
+          <div class="um-suspend-sub" style="color:#ea580c;">Demoting: <strong id="um-demote-name">—</strong></div>
+        </div>
+        <button class="um-x" id="um-demote-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="um-body">
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px 16px;font-size:13px;color:#9a3412;display:flex;align-items:flex-start;gap:10px;">
+          <i class="fa-solid fa-triangle-exclamation" style="flex-shrink:0;margin-top:1px;color:#f97316;font-size:15px;"></i>
+          <div>
+            <strong>This will remove Officer access permanently.</strong><br>
+            <span id="um-demote-desc">This officer</span> will be downgraded to a regular Citizen account and will immediately lose access to the Officer Portal, KYC review, reports, and driver management. To restore Officer access they must be re-created as an Officer.
+          </div>
+        </div>
+      </div>
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-demote-back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="um-btn-demote" id="um-confirm-demote-btn">
+          <i class="fa-solid fa-user-minus"></i> Confirm Demotion
+        </button>
+      </div>
+    </div>
+
+    <!-- ACTIVITY VIEW -->
+    <div id="um-activity-view" class="um-hidden">
+      <div class="um-header">
+        <div class="um-avatar" id="um-act-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="um-header-info">
+          <div class="um-modal-name" id="um-act-name">—</div>
+          <div class="um-modal-role-wrap" id="um-act-role"></div>
+        </div>
+        <button class="um-x" id="um-act-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="um-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:600;color:#64748b;">
+            <i class="fa-solid fa-clock-rotate-left" style="margin-right:5px;"></i>
+            <span id="um-act-count-label">Activity History</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <label style="font-size:11px;font-weight:600;color:#94a3b8;">From</label>
+            <input type="date" id="um-act-date-from" oninput="filterUActLog()"
+              style="padding:4px 8px;border-radius:7px;border:1.5px solid #e2e8f0;font-size:12px;font-family:inherit;color:#334155;background:#f8fafc;">
+            <label style="font-size:11px;font-weight:600;color:#94a3b8;">To</label>
+            <input type="date" id="um-act-date-to" oninput="filterUActLog()"
+              style="padding:4px 8px;border-radius:7px;border:1.5px solid #e2e8f0;font-size:12px;font-family:inherit;color:#334155;background:#f8fafc;">
+            <button onclick="clearUActFilter()"
+              style="padding:4px 10px;border-radius:7px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;font-family:inherit;">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div id="um-act-timeline"></div>
+        <div id="um-act-pagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;"></div>
+      </div>
+      <div class="um-footer">
+        <button class="um-btn-ghost" id="um-act-back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── localStorage helpers ───────────────────────────────────
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('zc_users')) || []; }
+  catch(e) { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem('zc_users', JSON.stringify(users));
+}
+function getUserById(id) {
+  var users = getUsers();
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === id) return users[i];
+  }
+  return null;
+}
+
+// ── Map a localStorage user to a display row ───────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtTs(iso) {
+  if (!iso) return 0;
+  var d = new Date(iso);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
+function userToRow(u) {
+  var status;
+  if (u.suspended) {
+    status = 'suspended';
+  } else if (u.role === 'citizen' && u.kycStatus === 'pending') {
+    status = 'kyc-pending';
+  } else {
+    status = 'active';
+  }
+  var createdBy = u.role === 'officer' ? 'Admin'
+                : u.role === 'driver'  ? 'Officer'
+                : 'Self-registered';
+  var actLabel  = u.role === 'officer' ? 'Reports Reviewed'
+                : u.role === 'driver'  ? 'Routes Completed'
+                : 'Reports Submitted';
+  var kyc = (u.role === 'officer' || u.role === 'driver') ? '—' : (u.kycStatus || '—');
+  return {
+    id:            u.id,
+    name:          (u.firstName || '') + ' ' + (u.lastName || ''),
+    email:         u.email || '—',
+    phone:         u.phone || '—',
+    role:          u.role,
+    barangay:      u.barangay || '—',
+    createdBy:     createdBy,
+    kyc:           kyc,
+    status:        status,
+    joined:        fmtDate(u.createdAt),
+    joinedTs:      fmtTs(u.createdAt),
+    activityNum:   0,
+    activityLabel: actLabel,
+    suspendReason: u.suspendReason || null,
+    suspendNote:   u.suspendNote   || null
+  };
+}
+
+// ── Load non-admin users from localStorage ─────────────────
+function loadUsers() {
+  var raw = getUsers();
+  var rows = [];
+  for (var i = 0; i < raw.length; i++) {
+    var r = raw[i];
+    if (r.role === 'admin' || r.role === 'superadmin') continue;
+    rows.push(userToRow(r));
+  }
+  return rows;
+}
+
+// ── Update stat cards ──────────────────────────────────────
+function updateStats() {
+  var rows = loadUsers();
+  var officers = 0, drivers = 0, citizens = 0;
+  for (var i = 0; i < rows.length; i++) {
+    if      (rows[i].role === 'officer') officers++;
+    else if (rows[i].role === 'driver')  drivers++;
+    else if (rows[i].role === 'citizen') citizens++;
+  }
+  document.getElementById('stat-total').textContent    = rows.length;
+  document.getElementById('stat-officers').textContent = officers;
+  document.getElementById('stat-drivers').textContent  = drivers;
+  document.getElementById('stat-citizens').textContent = citizens;
+}
+
+// ── State ──────────────────────────────────────────────────
+var sortCol       = 'joinedTs';
+var sortDir       = 'desc';
+var filterRole    = 'all';
+var searchQ       = '';
+var currentUserId = null;
+var currentPage   = 1;
+var PAGE_SIZE     = 10;
+
+// ── Helpers ────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function roleBadge(role) {
+  if (role === 'officer') return '<span class="badge badge-officer"><i class="fa-solid fa-landmark"></i> Officer</span>';
+  if (role === 'driver')  return '<span class="badge badge-driver"><i class="fa-solid fa-truck"></i> Driver</span>';
+  return '<span class="badge badge-citizen"><i class="fa-solid fa-user"></i> Citizen</span>';
+}
+function kycBadge(kyc) {
+  if (kyc === 'verified') return '<span class="badge badge-green">Verified</span>';
+  if (kyc === 'pending')  return '<span class="badge badge-yellow">Pending</span>';
+  return '—';
+}
+function statusBadge(status) {
+  if (status === 'active')      return '<span class="badge badge-green">Active</span>';
+  if (status === 'kyc-pending') return '<span class="badge badge-yellow">KYC Pending</span>';
+  if (status === 'suspended')   return '<span class="badge badge-red">Suspended</span>';
+  return '<span class="badge">' + esc(status) + '</span>';
+}
+
+// ── Filtered data ──────────────────────────────────────────
+function getFiltered() {
+  return loadUsers().filter(function(u) {
+    if (filterRole === 'officer'     && u.role   !== 'officer')    return false;
+    if (filterRole === 'driver'      && u.role   !== 'driver')     return false;
+    if (filterRole === 'citizen'     && u.role   !== 'citizen')    return false;
+    if (filterRole === 'kyc-pending' && u.kyc    !== 'pending')    return false;
+    if (filterRole === 'suspended'   && u.status !== 'suspended')  return false;
+    if (searchQ) {
+      var q = searchQ.toLowerCase();
+      return u.name.toLowerCase().indexOf(q)     !== -1 ||
+             u.email.toLowerCase().indexOf(q)    !== -1 ||
+             u.barangay.toLowerCase().indexOf(q) !== -1;
+    }
+    return true;
+  });
+}
+
+// ── Pagination ─────────────────────────────────────────────
+function renderPagination(total, pages) {
+  var wrap = document.getElementById('pagination-wrap');
+  if (!wrap) return;
+  if (pages <= 1) { wrap.innerHTML = ''; return; }
+
+  var btns = '';
+  var prevDisabled = currentPage === 1;
+  btns += '<div class="page-btn' + (prevDisabled ? ' disabled' : '') + '" id="pg-prev">‹</div>';
+
+  var nums = [];
+  if (pages <= 7) {
+    for (var i = 1; i <= pages; i++) nums.push(i);
+  } else {
+    nums.push(1);
+    if (currentPage > 3) nums.push('…');
+    for (var p = Math.max(2, currentPage - 1); p <= Math.min(pages - 1, currentPage + 1); p++) nums.push(p);
+    if (currentPage < pages - 2) nums.push('…');
+    nums.push(pages);
+  }
+  nums.forEach(function(n) {
+    if (n === '…') {
+      btns += '<div class="page-btn" style="width:auto;padding:0 8px;cursor:default;">…</div>';
+    } else {
+      btns += '<div class="page-btn' + (n === currentPage ? ' active' : '') + '" data-page="' + n + '">' + n + '</div>';
+    }
+  });
+
+  var nextDisabled = currentPage === pages;
+  btns += '<div class="page-btn' + (nextDisabled ? ' disabled' : '') + '" id="pg-next">›</div>';
+  wrap.innerHTML = btns;
+
+  if (!prevDisabled) {
+    document.getElementById('pg-prev').addEventListener('click', function() { currentPage--; renderTable(); });
+  }
+  if (!nextDisabled) {
+    document.getElementById('pg-next').addEventListener('click', function() { currentPage++; renderTable(); });
+  }
+  wrap.querySelectorAll('.page-btn[data-page]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentPage = parseInt(this.getAttribute('data-page'));
+      renderTable();
+    });
+  });
+}
+
+// ── Table render ───────────────────────────────────────────
+function renderTable() {
+  var data = getFiltered();
+
+  data.sort(function(a, b) {
+    var av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    var cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  var total = data.length;
+  var pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > pages) currentPage = pages;
+  var start    = (currentPage - 1) * PAGE_SIZE;
+  var pageData = data.slice(start, start + PAGE_SIZE);
+
+  var tbody = document.getElementById('user-tbody');
+  if (pageData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">No users match your search or filter.</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(function(u) {
+      var canSuspend = u.role === 'officer' && u.status !== 'suspended';
+      var actionBtns = '<a href="#" class="action-btn" data-action="view" data-id="' + esc(u.id) + '">View</a>';
+      if (canSuspend) {
+        actionBtns += '<a href="#" class="action-btn danger" data-action="suspend" data-id="' + esc(u.id) + '">Suspend</a>';
+      }
+      return '<tr>' +
+        '<td class="col-strong">' + esc(u.name) + '</td>' +
+        '<td>' + roleBadge(u.role) + '</td>' +
+        '<td>' + esc(u.barangay) + '</td>' +
+        '<td>' + esc(u.createdBy) + '</td>' +
+        '<td>' + kycBadge(u.kyc) + '</td>' +
+        '<td>' + statusBadge(u.status) + '</td>' +
+        '<td>' + esc(u.joined) + '</td>' +
+        '<td style="display:flex;gap:6px;">' + actionBtns + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  var showing = total === 0 ? '0' : (start + 1) + '–' + Math.min(start + PAGE_SIZE, total);
+  document.getElementById('page-info').textContent = 'Showing ' + showing + ' of ' + total + ' users';
+
+  document.querySelectorAll('th[data-sort]').forEach(function(th) {
+    var col  = th.getAttribute('data-sort');
+    var icon = th.querySelector('.sort-icon');
+    if (!icon) return;
+    if (col === sortCol) {
+      icon.textContent = sortDir === 'asc' ? ' ↑' : ' ↓';
+      th.classList.add('sort-active');
+    } else {
+      icon.textContent = ' ↕';
+      th.classList.remove('sort-active');
+    }
+  });
+
+  renderPagination(total, pages);
+  updateStats();
+}
+
+// ── Sort ───────────────────────────────────────────────────
+document.querySelectorAll('th[data-sort]').forEach(function(th) {
+  th.addEventListener('click', function() {
+    var col = this.getAttribute('data-sort');
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = 'asc'; }
+    currentPage = 1;
+    renderTable();
+  });
+});
+
+// ── Filter chips ───────────────────────────────────────────
+document.getElementById('filter-chips').addEventListener('click', function(e) {
+  var chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  e.preventDefault();
+  filterRole = chip.getAttribute('data-filter');
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  currentPage = 1;
+  renderTable();
+});
+
+// ── Search ─────────────────────────────────────────────────
+document.getElementById('user-search').addEventListener('input', function() {
+  searchQ = this.value.trim();
+  currentPage = 1;
+  renderTable();
+});
+
+// ── Modal elements ─────────────────────────────────────────
+var overlay       = document.getElementById('um-overlay');
+var profileView   = document.getElementById('um-profile-view');
+var suspendView   = document.getElementById('um-suspend-view');
+var demoteView    = document.getElementById('um-demote-view');
+var promoteView   = document.getElementById('um-promote-view');
+var btnToSuspend  = document.getElementById('um-to-suspend-btn');
+var btnUnsuspend  = document.getElementById('um-unsuspend-btn');
+var btnDemote     = document.getElementById('um-demote-btn');
+var btnPromote    = document.getElementById('um-promote-btn');
+var btnBack       = document.getElementById('um-back-btn');
+var btnConfirm    = document.getElementById('um-confirm-btn');
+var reasonSelect  = document.getElementById('um-reason-select');
+var reasonError   = document.getElementById('um-reason-error');
+var reasonNotes   = document.getElementById('um-reason-notes');
+var suspendBanner = document.getElementById('um-suspend-banner');
+
+function openModal() {
+  overlay.classList.add('um-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  overlay.classList.remove('um-open');
+  document.body.style.overflow = '';
+  reasonSelect.value = '';
+  reasonNotes.value  = '';
+  reasonSelect.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+  demoteView.classList.add('um-hidden');
+  promoteView.classList.add('um-hidden');
+  document.getElementById('um-activity-view').classList.add('um-hidden');
+}
+function showProfileView() {
+  profileView.classList.remove('um-hidden');
+  suspendView.classList.add('um-hidden');
+  demoteView.classList.add('um-hidden');
+  promoteView.classList.add('um-hidden');
+  document.getElementById('um-activity-view').classList.add('um-hidden');
+}
+function showPromoteView() {
+  var raw = getUserById(currentUserId);
+  if (raw) {
+    var pName = (raw.firstName || '') + ' ' + (raw.lastName || '');
+    document.getElementById('um-promote-name').textContent = pName;
+    document.getElementById('um-promote-desc').textContent = pName;
+  }
+  profileView.classList.add('um-hidden');
+  suspendView.classList.add('um-hidden');
+  demoteView.classList.add('um-hidden');
+  promoteView.classList.remove('um-hidden');
+}
+function showDemoteView() {
+  var raw = getUserById(currentUserId);
+  if (raw) {
+    var dName = (raw.firstName || '') + ' ' + (raw.lastName || '');
+    document.getElementById('um-demote-name').textContent = dName;
+    document.getElementById('um-demote-desc').textContent = dName;
+  }
+  profileView.classList.add('um-hidden');
+  suspendView.classList.add('um-hidden');
+  demoteView.classList.remove('um-hidden');
+}
+function showSuspendView() {
+  var raw = getUserById(currentUserId);
+  if (raw) document.getElementById('um-suspend-name').textContent = (raw.firstName || '') + ' ' + (raw.lastName || '');
+  profileView.classList.add('um-hidden');
+  suspendView.classList.remove('um-hidden');
+}
+
+// ── Populate profile modal ─────────────────────────────────
+function openProfile(userId) {
+  var raw = getUserById(userId);
+  if (!raw) return;
+  var u = userToRow(raw);
+  currentUserId = userId;
+
+  var avatarEl = document.getElementById('um-avatar');
+  avatarEl.className = 'um-avatar' + (u.role === 'officer' ? ' role-officer' : u.role === 'driver' ? ' role-driver' : '');
+  avatarEl.innerHTML = '<i class="fa-solid ' + (u.role === 'officer' ? 'fa-landmark' : u.role === 'driver' ? 'fa-truck' : 'fa-user') + '"></i>';
+
+  document.getElementById('um-modal-name').textContent  = u.name;
+  document.getElementById('um-modal-role').innerHTML    = roleBadge(u.role);
+  document.getElementById('um-email').textContent       = u.email;
+  document.getElementById('um-phone').textContent       = u.phone;
+  document.getElementById('um-barangay').textContent    = u.barangay;
+  document.getElementById('um-created-by').textContent  = u.createdBy;
+  document.getElementById('um-kyc').innerHTML           = kycBadge(u.kyc);
+  document.getElementById('um-acc-status').innerHTML    = statusBadge(u.status);
+  document.getElementById('um-joined').textContent      = u.joined;
+
+  document.getElementById('um-activity-row').innerHTML =
+    '<div class="um-activity-box">' +
+      '<div class="um-activity-num">' + u.activityNum + '</div>' +
+      '<div class="um-activity-lbl">' + esc(u.activityLabel) + '</div>' +
+    '</div>';
+
+  if (u.status === 'suspended') {
+    suspendBanner.classList.remove('um-hidden');
+    var reasonText = u.suspendReason || 'No reason recorded';
+    if (u.suspendNote) reasonText += ' — ' + u.suspendNote;
+    document.getElementById('um-suspend-reason-text').textContent = reasonText;
+    btnToSuspend.classList.add('um-hidden');
+    // Admin can only unsuspend officers — citizens/drivers are managed by officers
+    btnUnsuspend.classList.toggle('um-hidden', u.role !== 'officer');
+    btnPromote.classList.add('um-hidden');
+  } else {
+    suspendBanner.classList.add('um-hidden');
+    btnUnsuspend.classList.add('um-hidden');
+    // Admin can only suspend officers
+    btnToSuspend.classList.toggle('um-hidden', u.role !== 'officer');
+    btnPromote.classList.toggle('um-hidden', u.role !== 'citizen');
+  }
+  btnDemote.classList.toggle('um-hidden', u.role !== 'officer');
+
+  showProfileView();
+  openModal();
+}
+
+// ── Table click delegation ─────────────────────────────────
+document.getElementById('user-tbody').addEventListener('click', function(e) {
+  var btn = e.target.closest('a.action-btn');
+  if (!btn) return;
+  e.preventDefault();
+  var id     = btn.getAttribute('data-id');
+  var action = btn.getAttribute('data-action');
+  if (action === 'suspend') { openProfile(id); showSuspendView(); }
+  else                      { openProfile(id); }
+});
+
+// ── Confirm suspension ─────────────────────────────────────
+btnConfirm.addEventListener('click', function() {
+  if (!reasonSelect.value) {
+    reasonSelect.classList.add('um-select-error');
+    reasonError.classList.remove('um-hidden');
+    reasonSelect.classList.remove('um-shake');
+    void reasonSelect.offsetWidth;
+    reasonSelect.classList.add('um-shake');
+    reasonSelect.addEventListener('animationend', function(){ reasonSelect.classList.remove('um-shake'); }, { once: true });
+    return;
+  }
+  reasonSelect.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+
+  var users = getUsers();
+  var userName = '', userEmail = '', suspendReason = reasonSelect.value, suspendNotes = reasonNotes.value.trim();
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].suspended     = true;
+      users[i].suspendReason = suspendReason;
+      users[i].suspendNote   = suspendNotes || null;
+      userName  = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      userEmail = users[i].email || '';
+      if (!users[i].activityLog) users[i].activityLog = [];
+      users[i].activityLog.push({ event: 'suspended', by: getActorName(), at: new Date().toISOString(), note: 'Reason: ' + suspendReason + (suspendNotes ? '; ' + suspendNotes : '') });
+      break;
+    }
+  }
+  saveUsers(users);
+  logAdminAction('user-suspended', 'Suspended ' + userName.trim() + ' (' + userEmail + ') — Reason: ' + suspendReason + (suspendNotes ? '; ' + suspendNotes : ''));
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-ban"></i>', userName + ' has been suspended.', 'toast-yellow');
+});
+
+// ── Unsuspend ──────────────────────────────────────────────
+btnUnsuspend.addEventListener('click', function() {
+  var users = getUsers();
+  var userName = '', userEmail = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].suspended     = false;
+      users[i].suspendReason = null;
+      users[i].suspendNote   = null;
+      userName  = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      userEmail = users[i].email || '';
+      if (!users[i].activityLog) users[i].activityLog = [];
+      users[i].activityLog.push({ event: 'unsuspended', by: getActorName(), at: new Date().toISOString(), note: 'Account suspension lifted' });
+      break;
+    }
+  }
+  saveUsers(users);
+  logAdminAction('user-unsuspended', 'Unsuspended ' + userName.trim() + ' (' + userEmail + ')');
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-circle-check"></i>', userName + '\'s account has been restored.', 'toast-green');
+});
+
+// ── Modal controls ─────────────────────────────────────────
+document.getElementById('um-x').addEventListener('click', closeModal);
+document.getElementById('um-suspend-x').addEventListener('click', closeModal);
+document.getElementById('um-demote-x').addEventListener('click', closeModal);
+document.getElementById('um-promote-x').addEventListener('click', closeModal);
+document.getElementById('um-close-btn').addEventListener('click', closeModal);
+btnToSuspend.addEventListener('click', showSuspendView);
+btnDemote.addEventListener('click', showDemoteView);
+btnPromote.addEventListener('click', showPromoteView);
+btnBack.addEventListener('click', showProfileView);
+document.getElementById('um-demote-back-btn').addEventListener('click', showProfileView);
+document.getElementById('um-promote-back-btn').addEventListener('click', showProfileView);
+overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('um-open')) closeModal(); });
+reasonSelect.addEventListener('change', function(){
+  this.classList.remove('um-select-error');
+  reasonError.classList.add('um-hidden');
+});
+
+// ── Demote to Citizen ──────────────────────────────────────
+document.getElementById('um-confirm-demote-btn').addEventListener('click', function() {
+  var users = getUsers();
+  var userName = '', userEmail = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].role = 'citizen';
+      userName  = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      userEmail = users[i].email || '';
+      if (!users[i].activityLog) users[i].activityLog = [];
+      users[i].activityLog.push({ event: 'role-changed', by: getActorName(), at: new Date().toISOString(), note: 'Demoted from Officer to Citizen' });
+      break;
+    }
+  }
+  saveUsers(users);
+  logAdminAction('user-role-changed', 'Demoted ' + userName.trim() + ' (' + userEmail + ') from Officer to Citizen');
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-user-minus"></i>', userName + ' has been demoted to Citizen.', 'toast-yellow');
+});
+
+// ── Promote to Officer ─────────────────────────────────────
+document.getElementById('um-confirm-promote-btn').addEventListener('click', function() {
+  var users = getUsers();
+  var userName = '', userEmail = '';
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === currentUserId) {
+      users[i].role      = 'officer';
+      users[i].kycStatus = 'verified';
+      userName  = (users[i].firstName || '') + ' ' + (users[i].lastName || '');
+      userEmail = users[i].email || '';
+      if (!users[i].activityLog) users[i].activityLog = [];
+      users[i].activityLog.push({ event: 'role-changed', by: getActorName(), at: new Date().toISOString(), note: 'Promoted from Citizen to Officer' });
+      break;
+    }
+  }
+  saveUsers(users);
+  logAdminAction('user-role-changed', 'Promoted ' + userName.trim() + ' (' + userEmail + ') from Citizen to Officer');
+  closeModal();
+  renderTable();
+  showToast('<i class="fa-solid fa-user-tie"></i>', userName + ' has been promoted to Officer.', 'toast-green');
+});
+
+// ── Toast ──────────────────────────────────────────────────
+function showToast(iconHtml, msg, cls) {
+  var t = document.getElementById('adm-toast');
+  t.className = 'adm-toast ' + (cls || 'toast-green');
+  var icon = t.querySelector('i');
+  if (icon) icon.remove();
+  t.insertAdjacentHTML('afterbegin', iconHtml + ' ');
+  document.getElementById('adm-toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+// ── Get the logged-in admin's display name ─────────────────
+function getActorName() {
+  var session = null;
+  try { session = JSON.parse(localStorage.getItem('zc_session')); } catch(e) {}
+  if (!session) return 'Admin';
+  return ((session.firstName || '') + ' ' + (session.lastName || '')).trim() || session.email || 'Admin';
+}
+
+// ── Log an action to the current admin's activity log ─────
+function logAdminAction(eventType, note) {
+  var session = null;
+  try { session = JSON.parse(localStorage.getItem('zc_session')); } catch(e) {}
+  if (!session || !session.id) return;
+  var users = getUsers();
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === session.id) {
+      if (!users[i].activityLog) users[i].activityLog = [];
+      var actorName = ((session.firstName || '') + ' ' + (session.lastName || '')).trim() || session.email || 'Admin';
+      users[i].activityLog.push({ event: eventType, by: actorName, at: new Date().toISOString(), note: note || '' });
+      saveUsers(users);
+      return;
+    }
+  }
+}
+
+// ── User Activity View ─────────────────────────────────────
+var _uActLog      = [];
+var _uActPage     = 1;
+var U_ACT_PER_PAGE = 4;
+
+var U_EVENT_CFG = {
+  'created':      { dotCls:'dot-created',      evCls:'ev-created',      icon:'fa-user-plus',     label:'Account Created' },
+  'suspended':    { dotCls:'dot-suspended',    evCls:'ev-suspended',    icon:'fa-ban',           label:'Account Suspended' },
+  'unsuspended':  { dotCls:'dot-unsuspended',  evCls:'ev-unsuspended',  icon:'fa-circle-check',  label:'Account Restored' },
+  'role-changed': { dotCls:'dot-role-changed', evCls:'ev-role-changed', icon:'fa-shield-halved', label:'Role Changed' }
+};
+
+function getUActFiltered() {
+  var from = document.getElementById('um-act-date-from').value;
+  var to   = document.getElementById('um-act-date-to').value;
+  return _uActLog.filter(function(entry) {
+    if (!entry.at) return true;
+    var d = entry.at.slice(0, 10);
+    if (from && d < from) return false;
+    if (to   && d > to)   return false;
+    return true;
+  });
+}
+
+function renderUActTimeline() {
+  var filtered  = getUActFiltered();
+  var total     = filtered.length;
+  var pages     = Math.max(1, Math.ceil(total / U_ACT_PER_PAGE));
+  if (_uActPage > pages) _uActPage = pages;
+  var start     = (_uActPage - 1) * U_ACT_PER_PAGE;
+  var pageItems = filtered.slice(start, start + U_ACT_PER_PAGE);
+
+  var countLabel = document.getElementById('um-act-count-label');
+  if (countLabel) {
+    countLabel.textContent = total === 0 ? 'No activity found'
+      : 'Showing ' + (start + 1) + '–' + Math.min(start + U_ACT_PER_PAGE, total) + ' of ' + total + ' entries';
+  }
+
+  var tl = document.getElementById('um-act-timeline');
+  if (pageItems.length === 0) {
+    tl.innerHTML = '<div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px;"><i class="fa-regular fa-calendar-xmark" style="font-size:22px;margin-bottom:8px;display:block;"></i>No activity found for this period.</div>';
+  } else {
+    tl.innerHTML = pageItems.map(function(entry, idx) {
+      var cfg = U_EVENT_CFG[entry.event] || { dotCls:'dot-default', evCls:'ev-default', icon:'fa-circle-info', label: entry.event || 'Event' };
+      var isLast = (idx === pageItems.length - 1);
+      var d = entry.at ? new Date(entry.at) : null;
+      var timeStr = d && !isNaN(d)
+        ? d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) + ' · ' +
+          d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' })
+        : '—';
+      return '<div class="tl-item">' +
+        '<div class="tl-left">' +
+          '<div class="tl-dot ' + cfg.dotCls + '"><i class="fa-solid ' + cfg.icon + '"></i></div>' +
+          (isLast ? '' : '<div class="tl-line"></div>') +
+        '</div>' +
+        '<div class="tl-right">' +
+          '<div class="tl-event-label ' + cfg.evCls + '">' + esc(cfg.label) + '</div>' +
+          (entry.note ? '<div class="tl-note">' + esc(entry.note) + '</div>' : '') +
+          '<div class="tl-time"><i class="fa-regular fa-clock" style="margin-right:3px;"></i>' + timeStr +
+            (entry.by ? ' &nbsp;·&nbsp; <i class="fa-solid fa-user-gear" style="margin-right:3px;"></i>' + esc(entry.by) : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var pgDiv = document.getElementById('um-act-pagination');
+  if (pages <= 1) {
+    pgDiv.innerHTML = '';
+  } else {
+    pgDiv.innerHTML =
+      '<button class="uact-pg-btn" id="uact-prev"' + (_uActPage === 1 ? ' disabled' : '') + '>&#8249; Prev</button>' +
+      '<span style="font-size:12px;color:#64748b;font-weight:600;">Page ' + _uActPage + ' of ' + pages + '</span>' +
+      '<button class="uact-pg-btn" id="uact-next"' + (_uActPage === pages ? ' disabled' : '') + '>Next &#8250;</button>';
+    if (_uActPage > 1) {
+      document.getElementById('uact-prev').addEventListener('click', function() { _uActPage--; renderUActTimeline(); });
+    }
+    if (_uActPage < pages) {
+      document.getElementById('uact-next').addEventListener('click', function() { _uActPage++; renderUActTimeline(); });
+    }
+  }
+}
+
+function filterUActLog() {
+  _uActPage = 1;
+  renderUActTimeline();
+}
+
+function clearUActFilter() {
+  document.getElementById('um-act-date-from').value = '';
+  document.getElementById('um-act-date-to').value   = '';
+  _uActPage = 1;
+  renderUActTimeline();
+}
+
+function openUserActivity(userId) {
+  var raw = getUserById(userId);
+  if (!raw) return;
+
+  var avatarEl = document.getElementById('um-act-avatar');
+  avatarEl.className = 'um-avatar' + (raw.role === 'officer' ? ' role-officer' : raw.role === 'driver' ? ' role-driver' : '');
+  avatarEl.innerHTML = '<i class="fa-solid ' + (raw.role === 'officer' ? 'fa-landmark' : raw.role === 'driver' ? 'fa-truck' : 'fa-user') + '"></i>';
+  document.getElementById('um-act-name').textContent = ((raw.firstName || '') + ' ' + (raw.lastName || '')).trim();
+  document.getElementById('um-act-role').innerHTML   = roleBadge(raw.role);
+
+  var log = raw.activityLog ? raw.activityLog.slice().reverse() : [];
+  var hasCreated = log.some(function(e) { return e.event === 'created'; });
+  if (!hasCreated && raw.createdAt) {
+    log.push({ event: 'created', by: 'System', at: raw.createdAt, note: 'Account registered' });
+  }
+  _uActLog  = log;
+  _uActPage = 1;
+  document.getElementById('um-act-date-from').value = '';
+  document.getElementById('um-act-date-to').value   = '';
+  renderUActTimeline();
+
+  profileView.classList.add('um-hidden');
+  suspendView.classList.add('um-hidden');
+  demoteView.classList.add('um-hidden');
+  promoteView.classList.add('um-hidden');
+  document.getElementById('um-activity-view').classList.remove('um-hidden');
+}
+
+document.getElementById('um-activity-btn').addEventListener('click', function() { openUserActivity(currentUserId); });
+document.getElementById('um-act-x').addEventListener('click', closeModal);
+document.getElementById('um-act-back-btn').addEventListener('click', showProfileView);
+
+// ── Init ───────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>

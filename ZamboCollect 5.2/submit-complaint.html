@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report a Problem — ZamboCollect</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .complaint-wrap { max-width: 560px; margin: 0 auto; }
+
+    .report-ref-card {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 24px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .report-ref-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #dbeafe; color: #2563eb;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .report-ref-id   { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .report-ref-loc  { font-size: 14px; font-weight: 700; color: var(--text); margin: 2px 0; }
+    .report-ref-meta { font-size: 12px; color: var(--muted); }
+
+    .complaint-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    }
+    .complaint-head {
+      padding: 20px 22px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .complaint-head-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: #fee2e2; color: #dc2626;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .complaint-head-title { font-size: 16px; font-weight: 700; color: var(--text); margin: 0 0 2px; }
+    .complaint-head-sub   { font-size: 12px; color: var(--muted); margin: 0; }
+    .complaint-body   { padding: 20px 22px; display: flex; flex-direction: column; gap: 18px; }
+    .complaint-footer { padding: 0 22px 20px; }
+
+    .photo-zone {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 28px 20px; border: 2px dashed var(--border);
+      border-radius: 12px; cursor: pointer; background: var(--surface2);
+      transition: all 0.15s; position: relative; text-align: center;
+    }
+    .photo-zone:hover { border-color: var(--primary); background: rgba(88,129,87,0.04); }
+    .photo-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .photo-zone-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #A3B18A);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(88,129,87,0.3);
+    }
+    .photo-zone-icon i { color: #fff; font-size: 1.3rem; }
+    .photo-zone-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .photo-zone-sub   { font-size: 12px; color: var(--muted); }
+
+    .photo-preview-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border);
+    }
+    .photo-preview-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-remove-btn {
+      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+      border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: #fff;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+    }
+
+    .field-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--muted); margin-bottom: 7px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .complaint-textarea {
+      width: 100%; min-height: 90px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: inherit; font-size: 14px;
+      padding: 10px 14px; resize: vertical; box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+    .complaint-textarea:focus { outline: none; border-color: var(--primary); }
+
+    .btn-submit-complaint {
+      width: 100%; padding: 13px 20px; border-radius: 12px; font-size: 15px;
+      font-weight: 700; background: #dc2626; color: #fff; border: none;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit-complaint:hover { opacity: 0.88; }
+    .btn-submit-complaint:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .alert-info {
+      background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px;
+      padding: 12px 16px; font-size: 13px; color: #92400e; line-height: 1.55;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .alert-info i { margin-top: 2px; flex-shrink: 0; }
+
+    .success-screen {
+      text-align: center; padding: 48px 24px; display: none;
+    }
+    .success-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: #dcfce7; margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: #16a34a;
+    }
+    .success-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+    .success-sub   { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0 0 24px; }
+    .btn-back-reports {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      background: var(--primary); color: #fff; border: none; cursor: pointer;
+      font-family: inherit; text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Sidebar injected by shared.js -->
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-wrap">
+    <div class="page-header" style="margin-bottom:24px;">
+      <a href="my-reports.html" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;margin-bottom:10px;">
+        <i class="fa-solid fa-arrow-left"></i> Back to My Reports
+      </a>
+      <h1 style="font-size:22px;font-weight:800;color:var(--text);margin:0 0 4px;">Report a Problem</h1>
+      <p style="font-size:13px;color:var(--muted);margin:0;">The waste was marked as collected but it's still there? Let us know.</p>
+    </div>
+
+    <div class="complaint-wrap">
+
+      <!-- Referenced report card -->
+      <div class="report-ref-card" id="report-ref-card" style="display:none;">
+        <div class="report-ref-icon"><i class="fa-solid fa-file-lines"></i></div>
+        <div>
+          <div class="report-ref-id" id="ref-id">—</div>
+          <div class="report-ref-loc" id="ref-loc">—</div>
+          <div class="report-ref-meta" id="ref-meta">—</div>
+        </div>
+      </div>
+
+      <!-- Complaint form card -->
+      <div class="complaint-card" id="complaint-form-card">
+        <div class="complaint-head">
+          <div class="complaint-head-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="complaint-head-title">Submit Problem Report</div>
+            <p class="complaint-head-sub">Take a current photo proving the waste is still there.</p>
+          </div>
+        </div>
+        <div class="complaint-body">
+
+          <div class="alert-info">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Your photo will be compared side-by-side with the original report photo by the barangay officer. If verified, the driver's account will be suspended.</span>
+          </div>
+
+          <!-- Photo upload -->
+          <div>
+            <div class="field-label"><i class="fa-solid fa-camera" style="color:var(--primary);"></i> Current photo of the waste <span style="color:var(--red);">*</span></div>
+            <div id="photo-picker">
+              <label class="photo-zone">
+                <input type="file" accept="image/*" capture="environment" id="complaint-photo-input" onchange="handlePhoto(this)" />
+                <div class="photo-zone-icon"><i class="fa-solid fa-camera"></i></div>
+                <div class="photo-zone-title">Take Photo Now</div>
+                <div class="photo-zone-sub">Open camera to capture proof</div>
+              </label>
+            </div>
+            <div id="photo-preview" style="display:none;">
+              <div class="photo-preview-wrap">
+                <img id="preview-img" src="" alt="Complaint photo" />
+                <button class="photo-remove-btn" type="button" onclick="removePhoto()" title="Remove photo">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:#16a34a;display:flex;align-items:center;gap:5px;">
+                <i class="fa-solid fa-circle-check"></i> Photo captured — evidence recorded
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <div class="field-label"><i class="fa-solid fa-comment-dots" style="color:var(--primary);"></i> Description <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:11px;">(optional)</span></div>
+            <textarea class="complaint-textarea" id="complaint-desc" placeholder="Describe the situation — e.g. 'Driver passed by but did not pick up the waste near the gate.'"></textarea>
+          </div>
+
+        </div>
+        <div class="complaint-footer">
+          <button class="btn-submit-complaint" id="btn-submit" onclick="submitComplaint()" disabled>
+            <i class="fa-solid fa-paper-plane"></i> Submit Problem Report
+          </button>
+          <div style="margin-top:10px;text-align:center;font-size:12px;color:var(--muted);">
+            False complaints may affect your account standing.
+          </div>
+        </div>
+      </div>
+
+      <!-- Success screen -->
+      <div class="success-screen" id="success-screen">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="success-title">Complaint Submitted</div>
+        <div class="success-sub">Your problem report has been submitted to the barangay officer for review. You will be notified once a decision has been made.</div>
+        <a href="my-reports.html" class="btn-back-reports">
+          <i class="fa-solid fa-arrow-left"></i> Back to My Reports
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/complaints.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  var _reportId    = null;
+  var _reportData  = null;
+  var _photoData   = null;
+
+  (function init() {
+    var params   = new URLSearchParams(window.location.search);
+    _reportId    = params.get('reportId');
+
+    if (!_reportId) {
+      document.querySelector('.page-header p').textContent = 'No report specified. Please go back and try again.';
+      document.getElementById('complaint-form-card').style.display = 'none';
+      return;
+    }
+
+    _reportData = REPORTS_DB.getById(_reportId);
+    if (!_reportData) {
+      document.querySelector('.page-header p').textContent = 'Report not found.';
+      document.getElementById('complaint-form-card').style.display = 'none';
+      return;
+    }
+
+    if (_reportData.status !== 'collected') {
+      document.querySelector('.page-header p').textContent = 'This report has not been marked as collected yet.';
+      document.getElementById('complaint-form-card').style.display = 'none';
+      return;
+    }
+
+    // Already has a complaint
+    if (COMPLAINTS_DB.getByReportId(_reportId)) {
+      document.querySelector('.page-header p').textContent = 'You have already submitted a complaint for this report.';
+      document.getElementById('complaint-form-card').style.display = 'none';
+      return;
+    }
+
+    var refCard = document.getElementById('report-ref-card');
+    document.getElementById('ref-id').textContent  = 'Report #' + _reportData.id;
+    document.getElementById('ref-loc').textContent = _reportData.location;
+    document.getElementById('ref-meta').textContent =
+      _reportData.barangay + ' · Collected by ' + (_reportData.collectedBy || 'Driver') +
+      (_reportData.collectedDate ? ' on ' + _reportData.collectedDate : '');
+    refCard.style.display = 'flex';
+  }());
+
+  function handlePhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      _photoData = e.target.result;
+      document.getElementById('preview-img').src = _photoData;
+      document.getElementById('photo-picker').style.display  = 'none';
+      document.getElementById('photo-preview').style.display = 'block';
+      document.getElementById('btn-submit').disabled = false;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function removePhoto() {
+    _photoData = null;
+    document.getElementById('complaint-photo-input').value = '';
+    document.getElementById('preview-img').src = '';
+    document.getElementById('photo-preview').style.display = 'none';
+    document.getElementById('photo-picker').style.display  = 'block';
+    document.getElementById('btn-submit').disabled = true;
+  }
+
+  function submitComplaint() {
+    if (!_photoData || !_reportData) return;
+
+    var session = null;
+    try { session = JSON.parse(localStorage.getItem('zc_session')); } catch (e) {}
+    var citizenId   = session ? session.id   : '';
+    var citizenName = session ? ((session.firstName || '') + ' ' + (session.lastName || '')).trim() : 'Citizen';
+
+    // Resolve driver ID from users list
+    var driverId   = '';
+    var driverName = _reportData.collectedBy || 'Driver';
+    try {
+      var users = JSON.parse(localStorage.getItem('zc_users')) || [];
+      for (var i = 0; i < users.length; i++) {
+        if (users[i].role === 'driver') {
+          var fullName = ((users[i].firstName || '') + ' ' + (users[i].lastName || '')).trim();
+          if (fullName === driverName || driverName.indexOf(fullName) !== -1) {
+            driverId = users[i].id;
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+
+    COMPLAINTS_DB.add({
+      reportId:            _reportId,
+      citizenId:           citizenId,
+      citizenName:         citizenName,
+      driverId:            driverId,
+      driverName:          driverName,
+      barangay:            _reportData.barangay  || '',
+      location:            _reportData.location  || '',
+      complaintPhoto:      _photoData,
+      originalReportPhoto: _reportData.photo || null,
+      description:         document.getElementById('complaint-desc').value.trim()
+    });
+
+    if (typeof NOTIFS_DB !== 'undefined') {
+      NOTIFS_DB.add({
+        citizenId:   citizenId,
+        citizenName: citizenName,
+        type:        'complaint-submitted',
+        reportId:    _reportId,
+        title:       'Problem report submitted for #' + _reportId,
+        desc:        'Your problem report has been submitted to the barangay officer. You will be notified once they review it.',
+        tag:         'Under Review',
+        tagColor:    'yellow',
+        icon:        'fa-triangle-exclamation',
+        iconColor:   'yellow'
+      });
+    }
+
+    document.getElementById('complaint-form-card').style.display = 'none';
+    document.getElementById('report-ref-card').style.display     = 'none';
+    document.getElementById('success-screen').style.display      = 'block';
+  }
+</script>
+</body>
+</html>

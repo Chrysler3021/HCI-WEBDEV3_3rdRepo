@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaints Review — ZamboCollect Officer Portal</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .complaint-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .complaint-card-body { padding: 18px 20px; }
+    .c-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .c-icon {
+      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+      background: #fee2e2; color: #dc2626;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .c-id   { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .c-loc  { font-size: 14px; font-weight: 700; color: var(--text); margin: 2px 0; }
+    .c-meta { font-size: 12px; color: var(--muted); }
+
+    .photo-compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;
+    }
+    .photo-box { border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); }
+    .photo-box-label {
+      background: var(--surface2); padding: 6px 12px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .photo-box-img {
+      aspect-ratio: 4/3; background: var(--surface3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-box-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-box-img .no-photo { color: var(--muted); font-size: 12px; text-align: center; padding: 8px; }
+    .photo-box-img .no-photo i { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+
+    .c-desc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; font-size: 13px;
+      color: var(--text); line-height: 1.6; margin-bottom: 14px;
+    }
+    .c-driver-box {
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 8px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .c-driver-box i { color: #ea580c; font-size: 16px; }
+    .c-driver-name { font-size: 13px; font-weight: 700; color: #9a3412; }
+    .c-driver-sub  { font-size: 11px; color: #c2410c; margin-top: 1px; }
+
+    .c-actions { display: flex; gap: 10px; }
+    .btn-verify {
+      flex: 1; padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 700;
+      background: #dc2626; color: #fff; border: none; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.15s;
+    }
+    .btn-verify:hover { opacity: 0.88; }
+    .btn-dismiss {
+      flex: 0 0 auto; padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .btn-dismiss:hover { border-color: var(--text); color: var(--text); }
+
+    .status-badge-approved { background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .status-badge-rejected { background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .status-badge-pending  { background:#fef3c7; color:#b45309; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--surface); border-radius: 16px; padding: 24px;
+      max-width: 440px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+    .modal-sub   { font-size: 13px; color: var(--muted); margin: 0 0 16px; line-height: 1.55; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+    .modal-input {
+      width: 100%; padding: 9px 12px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: inherit; font-size: 13px;
+      box-sizing: border-box; transition: border-color 0.15s;
+    }
+    .modal-input:focus { outline: none; border-color: var(--primary); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .btn-modal-cancel  {
+      flex: 0 0 40%; padding: 9px 0; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: inherit;
+    }
+    .btn-modal-confirm {
+      flex: 1; padding: 9px 0; border-radius: 9px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; background: #dc2626; color: #fff;
+      font-family: inherit; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-modal-confirm:hover { opacity: 0.88; }
+
+    /* Reactivate modal specific */
+    .reactivate-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .reactivate-option {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .reactivate-option.selected { border-color: var(--primary); background: rgba(88,129,87,0.05); }
+    .reactivate-option input { accent-color: var(--primary); }
+    .reactivate-option-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .reactivate-option-sub   { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 28px;
+    }
+    .stat-mini {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; text-align: center;
+    }
+    .stat-mini-num   { font-size: 22px; font-weight: 800; color: var(--text); }
+    .stat-mini-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .filter-chip {
+      padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; transition: all 0.15s; text-decoration: none;
+    }
+    .filter-chip:hover  { border-color: var(--text); color: var(--text); }
+    .filter-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .filter-chip.yellow.active { background: #d97706; border-color: #d97706; color: #fff; }
+    .filter-chip.green.active  { background: #16a34a; border-color: #16a34a; color: #fff; }
+    .filter-chip.red.active    { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+    .empty-state {
+      text-align: center; padding: 56px 24px; color: var(--muted);
+    }
+    .empty-state i    { font-size: 3rem; display: block; margin-bottom: 14px; opacity: 0.4; }
+    .empty-state p    { font-size: 15px; font-weight: 600; margin: 0 0 6px; color: var(--text); }
+    .empty-state span { font-size: 13px; }
+
+    .driver-suspend-section {
+      background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 12px;
+      padding: 16px 18px; margin-bottom: 16px;
+    }
+    .driver-suspend-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .driver-suspend-header i { color: #ea580c; font-size: 18px; }
+    .driver-suspend-title { font-size: 14px; font-weight: 700; color: #9a3412; margin: 0; }
+    .driver-suspend-sub   { font-size: 12px; color: #c2410c; margin: 2px 0 0; }
+    .suspended-badge { background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+
+    <a class="sidebar-logo" href="index.html" aria-label="ZamboCollect home">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div class="role-indicator" id="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal</div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard
+        </a>
+        <a href="officer-kyc-review.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review
+        </a>
+        <a href="officer-pending-reports.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports
+        </a>
+        <a href="officer-complaints.html" class="nav-item active" aria-current="page">
+          <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Complaints
+          <span class="nav-badge" id="sidebar-pending-count" style="display:none;background:#dc2626;"></span>
+        </a>
+        <a href="officer-density-map.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map
+        </a>
+        <a href="officer-manage-users.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-users"></i></span> Users &amp; Accounts
+        </a>
+        <a href="officer-analytics.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile
+        </a>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div>
+          <div class="user-name" id="sidebar-user-name">Officer</div>
+          <div class="user-role" id="sidebar-user-role">Officer</div>
+        </div>
+      </a>
+      <a class="logout-btn" href="index.html">
+        <span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content" id="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle">
+          <span></span><span></span><span></span>
+        </label>
+        <span class="topbar-title">Complaints Review</span>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="page-header">
+        <h1 class="page-title">Complaints Review</h1>
+        <p class="page-subtitle" id="page-subtitle">Review citizen problem reports for your barangay</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-mini">
+          <div class="stat-mini-num" id="stat-total">0</div>
+          <div class="stat-mini-label">Total</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-num" style="color:#d97706;" id="stat-pending">0</div>
+          <div class="stat-mini-label">Pending</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-num" style="color:#dc2626;" id="stat-verified">0</div>
+          <div class="stat-mini-label">Verified</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <a href="#" class="filter-chip active" id="filter-all"     onclick="setFilter('all');return false;">All</a>
+        <a href="#" class="filter-chip yellow" id="filter-pending" onclick="setFilter('pending');return false;"><i class="fa-solid fa-hourglass-half"></i> Pending</a>
+        <a href="#" class="filter-chip red"    id="filter-approved" onclick="setFilter('approved');return false;"><i class="fa-solid fa-circle-check"></i> Verified</a>
+        <a href="#" class="filter-chip"        id="filter-rejected" onclick="setFilter('rejected');return false;"><i class="fa-solid fa-circle-xmark"></i> Dismissed</a>
+      </div>
+
+      <!-- List -->
+      <div id="complaints-list"></div>
+
+    </div><!-- /content-area -->
+  </main>
+</div><!-- /app-shell -->
+
+<!-- ── Reject / Dismiss modal ── -->
+<div class="modal-overlay hidden" id="reject-modal">
+  <div class="modal-box">
+    <div class="modal-title">Dismiss Complaint</div>
+    <div class="modal-sub">Provide a reason why this complaint is not valid. The citizen will be notified.</div>
+    <div class="modal-field">
+      <div class="modal-label">Reason (optional)</div>
+      <input type="text" class="modal-input" id="reject-reason" placeholder="e.g. Photo does not match the report location" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeRejectModal()">Cancel</button>
+      <button class="btn-modal-confirm" style="background:#6b7280;" onclick="confirmReject()">
+        <i class="fa-solid fa-circle-xmark"></i> Dismiss
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reactivate driver modal ── -->
+<div class="modal-overlay hidden" id="reactivate-modal">
+  <div class="modal-box">
+    <div class="modal-title">Reactivate Driver</div>
+    <div class="modal-sub" id="reactivate-modal-sub">Choose how to reactivate this driver's account.</div>
+    <div class="reactivate-options">
+      <label class="reactivate-option selected" id="opt-immediate-wrap">
+        <input type="radio" name="reactivate-type" value="immediate" checked onchange="toggleReactivateType()" />
+        <div>
+          <div class="reactivate-option-label">Reactivate Immediately</div>
+          <div class="reactivate-option-sub">Driver's account will be restored right now.</div>
+        </div>
+      </label>
+      <label class="reactivate-option" id="opt-date-wrap">
+        <input type="radio" name="reactivate-type" value="scheduled" onchange="toggleReactivateType()" />
+        <div>
+          <div class="reactivate-option-label">Set Reactivation Date</div>
+          <div class="reactivate-option-sub">Account will be automatically restored on the chosen date.</div>
+        </div>
+      </label>
+    </div>
+    <div class="modal-field" id="date-field" style="display:none;">
+      <div class="modal-label">Reactivation Date</div>
+      <input type="date" class="modal-input" id="reactivate-date" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeReactivateModal()">Cancel</button>
+      <button class="btn-modal-confirm" style="background:var(--primary);" onclick="confirmReactivate()">
+        <i class="fa-solid fa-circle-check"></i> Reactivate
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/complaints.js"></script>
+<script>
+  var _officerSession  = null;
+  var _officerBarangay = '';
+  var _officerName     = '';
+  var _officerId       = '';
+  var _currentFilter   = 'all';
+  var _pendingRejectId = null;
+  var _pendingDriverId = null;
+
+  // ── Session ───────────────────────────────────────────────
+  (function () {
+    try { _officerSession = JSON.parse(localStorage.getItem('zc_session')); } catch (e) {}
+    if (!_officerSession) return;
+
+    _officerBarangay = _officerSession.barangay || '';
+    _officerName     = ((_officerSession.firstName || '') + ' ' + (_officerSession.lastName || '')).trim() || 'Officer';
+    _officerId       = _officerSession.id || '';
+
+    var sn = document.getElementById('sidebar-user-name');
+    var sr = document.getElementById('sidebar-user-role');
+    var ri = document.getElementById('role-indicator');
+    var ps = document.getElementById('page-subtitle');
+    if (sn) sn.textContent = _officerName;
+    if (sr) sr.textContent = 'Officer' + (_officerBarangay ? ' · ' + _officerBarangay : '');
+    if (ri) ri.innerHTML   = '<i class="fa-solid fa-landmark"></i> Officer Portal' + (_officerBarangay ? ' — ' + _officerBarangay : '');
+    if (ps) ps.textContent = 'Problem reports from citizens in ' + (_officerBarangay || 'your barangay');
+  }());
+
+  // ── Helpers ──────────────────────────────────────────────
+  function esc(s) { return String(s || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function photoHtml(src, label, icon) {
+    var img = (src && (src.startsWith('data:') || src.startsWith('http') || src.startsWith('/')))
+      ? '<div class="photo-box-img"><img src="' + esc(src) + '" alt="' + esc(label) + '" onerror="this.parentNode.innerHTML=\'<div class=no-photo><i class=fa-solid fa-image></i><span>Not available</span></div>\'"></div>'
+      : '<div class="photo-box-img"><div class="no-photo"><i class="fa-solid ' + icon + '"></i><span>No photo</span></div></div>';
+    return '<div class="photo-box">' +
+      '<div class="photo-box-label"><i class="fa-solid ' + icon + '"></i> ' + esc(label) + '</div>' + img + '</div>';
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  function render() {
+    var all = _officerBarangay
+      ? COMPLAINTS_DB.getByBarangay(_officerBarangay)
+      : COMPLAINTS_DB.getAll();
+
+    var counts = { total: all.length, pending: 0, approved: 0, rejected: 0 };
+    all.forEach(function (c) {
+      if (c.status === 'pending')  counts.pending++;
+      if (c.status === 'approved') counts.approved++;
+      if (c.status === 'rejected') counts.rejected++;
+    });
+
+    document.getElementById('stat-total').textContent   = counts.total;
+    document.getElementById('stat-pending').textContent = counts.pending;
+    document.getElementById('stat-verified').textContent = counts.approved;
+
+    var pendingCount = document.getElementById('sidebar-pending-count');
+    if (pendingCount) {
+      if (counts.pending > 0) { pendingCount.textContent = counts.pending; pendingCount.style.display = ''; }
+      else { pendingCount.style.display = 'none'; }
+    }
+
+    var filtered = all.filter(function (c) {
+      if (_currentFilter === 'all') return true;
+      return c.status === _currentFilter;
+    });
+
+    var list = document.getElementById('complaints-list');
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No complaints found</p><span>There are no ' + (_currentFilter !== 'all' ? _currentFilter + ' ' : '') + 'complaints for your barangay.</span></div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(buildCard).join('');
+
+    // Render suspended driver sections
+    filtered.forEach(function (c) {
+      if (c.status === 'approved') renderDriverSection(c);
+    });
+  }
+
+  function buildCard(c) {
+    var report = REPORTS_DB.getById(c.reportId);
+
+    var statusBadge = c.status === 'approved'
+      ? '<span class="status-badge-approved"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Verified</span>'
+      : c.status === 'rejected'
+      ? '<span class="status-badge-rejected"><i class="fa-solid fa-circle-xmark" style="font-size:9px;"></i> Dismissed</span>'
+      : '<span class="status-badge-pending"><i class="fa-solid fa-hourglass-half" style="font-size:9px;"></i> Pending</span>';
+
+    var actions = c.status === 'pending'
+      ? '<div class="c-actions">' +
+          '<button class="btn-verify" onclick="verifyComplaint(\'' + esc(c.id) + '\')"><i class="fa-solid fa-circle-check"></i> Verify &amp; Suspend Driver</button>' +
+          '<button class="btn-dismiss" onclick="openRejectModal(\'' + esc(c.id) + '\')"><i class="fa-solid fa-circle-xmark"></i> Dismiss</button>' +
+        '</div>'
+      : (c.status === 'approved'
+          ? '<div id="driver-section-' + esc(c.id) + '"></div>'
+          : '<div style="font-size:12px;color:var(--muted);padding:2px 0;">Reviewed on ' + esc(c.reviewedAt ? new Date(c.reviewedAt).toLocaleDateString() : '—') + ' by ' + esc(c.officerName || '—') + (c.reviewNotes ? ' — ' + esc(c.reviewNotes) : '') + '</div>');
+
+    return '<div class="complaint-card" id="card-' + esc(c.id) + '">' +
+      '<div class="complaint-card-body">' +
+        '<div class="c-top">' +
+          '<div class="c-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="c-id">' + esc(c.id) + ' &nbsp;·&nbsp; Re: Report #' + esc(c.reportId) + ' &nbsp;·&nbsp; ' + esc(c.dateStr) + '</div>' +
+            '<div class="c-loc">' + esc(c.location || (report ? report.location : '—')) + '</div>' +
+            '<div class="c-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(c.citizenName) + ' &nbsp;·&nbsp; ' + esc(c.barangay) + '</div>' +
+          '</div>' +
+          statusBadge +
+        '</div>' +
+        '<div class="c-driver-box">' +
+          '<i class="fa-solid fa-truck"></i>' +
+          '<div><div class="c-driver-name">' + esc(c.driverName) + '</div>' +
+          '<div class="c-driver-sub">Marked this report as collected</div></div>' +
+        '</div>' +
+        '<div class="photo-compare">' +
+          photoHtml(c.originalReportPhoto, 'Original Report Photo', 'file-image') +
+          photoHtml(c.complaintPhoto,      'Complaint Photo (Now)',  'camera') +
+        '</div>' +
+        (c.description ? '<div class="c-desc"><i class="fa-solid fa-quote-left" style="color:var(--muted);margin-right:6px;font-size:11px;"></i>' + esc(c.description) + '</div>' : '') +
+        actions +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderDriverSection(c) {
+    var el = document.getElementById('driver-section-' + c.id);
+    if (!el) return;
+
+    var users = [];
+    try { users = JSON.parse(localStorage.getItem('zc_users')) || []; } catch (e) {}
+    var driver = null;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].id === c.driverId) { driver = users[i]; break; }
+    }
+    if (!driver) return;
+
+    if (driver.suspended) {
+      el.innerHTML = '<div class="driver-suspend-section">' +
+        '<div class="driver-suspend-header">' +
+          '<i class="fa-solid fa-ban"></i>' +
+          '<div><div class="driver-suspend-title">' + esc(driver.firstName + ' ' + driver.lastName) + ' <span class="suspended-badge">SUSPENDED</span></div>' +
+          '<div class="driver-suspend-sub">' + (driver.suspendedUntil ? 'Reactivation scheduled: ' + new Date(driver.suspendedUntil).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'No reactivation date set — manual reactivation required') + '</div></div>' +
+        '</div>' +
+        '<button onclick="openReactivateModal(\'' + esc(c.driverId) + '\',\'' + esc(driver.firstName + ' ' + driver.lastName) + '\',\'' + esc(c.id) + '\')" style="padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;background:var(--primary);color:#fff;border:none;cursor:pointer;font-family:inherit;">' +
+          '<i class="fa-solid fa-circle-check"></i> Reactivate Account' +
+        '</button>' +
+      '</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:12px;color:#16a34a;padding:4px 0;"><i class="fa-solid fa-circle-check"></i> Driver account has been reactivated.</div>';
+    }
+  }
+
+  // ── Actions ──────────────────────────────────────────────
+  function setFilter(f) {
+    _currentFilter = f;
+    ['all','pending','approved','rejected'].forEach(function (x) {
+      document.getElementById('filter-' + x).classList.toggle('active', x === f);
+    });
+    render();
+  }
+
+  function verifyComplaint(id) {
+    if (!confirm('Verify this complaint? The driver\'s account will be suspended immediately.')) return;
+    COMPLAINTS_DB.approve(id, _officerName, _officerId, _officerBarangay);
+    render();
+  }
+
+  function openRejectModal(id) {
+    _pendingRejectId = id;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-modal').classList.remove('hidden');
+  }
+  function closeRejectModal() {
+    _pendingRejectId = null;
+    document.getElementById('reject-modal').classList.add('hidden');
+  }
+  function confirmReject() {
+    if (!_pendingRejectId) return;
+    var reason = document.getElementById('reject-reason').value.trim();
+    COMPLAINTS_DB.reject(_pendingRejectId, _officerName, _officerId, _officerBarangay, reason);
+    closeRejectModal();
+    render();
+  }
+
+  var _reactivateComplaintId = null;
+  function openReactivateModal(driverId, driverName, complaintId) {
+    _pendingDriverId       = driverId;
+    _reactivateComplaintId = complaintId;
+    document.getElementById('reactivate-modal-sub').textContent =
+      'Choose how to reactivate ' + driverName + '\'s account.';
+    document.querySelector('input[name="reactivate-type"][value="immediate"]').checked = true;
+    document.getElementById('opt-immediate-wrap').classList.add('selected');
+    document.getElementById('opt-date-wrap').classList.remove('selected');
+    document.getElementById('date-field').style.display = 'none';
+    document.getElementById('reactivate-date').value = '';
+    document.getElementById('reactivate-modal').classList.remove('hidden');
+  }
+  function closeReactivateModal() {
+    _pendingDriverId = null;
+    document.getElementById('reactivate-modal').classList.add('hidden');
+  }
+  function toggleReactivateType() {
+    var isScheduled = document.querySelector('input[name="reactivate-type"]:checked').value === 'scheduled';
+    document.getElementById('date-field').style.display = isScheduled ? '' : 'none';
+    document.getElementById('opt-immediate-wrap').classList.toggle('selected', !isScheduled);
+    document.getElementById('opt-date-wrap').classList.toggle('selected', isScheduled);
+  }
+  function confirmReactivate() {
+    if (!_pendingDriverId) return;
+    var type = document.querySelector('input[name="reactivate-type"]:checked').value;
+    var until = null;
+    if (type === 'scheduled') {
+      until = document.getElementById('reactivate-date').value;
+      if (!until) { alert('Please select a reactivation date.'); return; }
+      until = new Date(until).toISOString();
+    }
+    ZC_DB.reactivateDriver(_pendingDriverId, _officerName, _officerId, until);
+    closeReactivateModal();
+    render();
+  }
+
+  // Close modals on backdrop click
+  document.getElementById('reject-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeRejectModal();
+  });
+  document.getElementById('reactivate-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeReactivateModal();
+  });
+
+  // ── Boot ─────────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>

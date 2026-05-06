@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZamboCollect — Sign In</title>
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v5M14 11v5"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <span class="logo-text">ZamboCollect</span>
+    </div>
+
+    <div class="left-body">
+      <h1 class="headline">Welcome back<br/>to a cleaner<br/>Zamboanga City.</h1>
+      <p class="subtext">Select your role to access your portal and stay connected with your barangay's cleanup effort.</p>
+    </div>
+
+    <div class="stats">
+      <div>
+        <div class="stat-value">98</div>
+        <div class="stat-label">Barangays</div>
+      </div>
+      <div>
+        <div class="stat-value">2.4k</div>
+        <div class="stat-label">Reports Today</div>
+      </div>
+      <div>
+        <div class="stat-value">91%</div>
+        <div class="stat-label">Collection Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="form-title">Sign in</div>
+    <div class="form-subtitle">Enter your email to continue</div>
+
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="emailInput">Email Address</label>
+        <input type="email" id="emailInput" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label for="passwordInput">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="passwordInput" placeholder="Enter your password" required style="width:100%;padding-right:40px;" />
+          <button type="button" onclick="togglePasswordVisibility()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9cad8e;font-size:14px;" tabindex="-1" id="togglePwBtn">
+            <i class="fa-solid fa-eye" id="togglePwIcon"></i>
+          </button>
+        </div>
+      </div>
+      <div id="errorMsg" style="display:none;color:#dc2626;font-size:13px;margin-top:-8px;margin-bottom:10px;font-weight:500;">
+        <i class="fa-solid fa-circle-exclamation"></i> <span id="errorText">Invalid email or password.</span>
+      </div>
+      <button type="submit" class="btn-login">Sign In →</button>
+    </form>
+
+    <div class="quick-access">
+      <button class="demo-toggle-btn" id="demoToggleBtn" onclick="toggleDemo()" type="button">
+        <span><i class="fa-solid fa-key" style="margin-right:6px;"></i>Try a demo account</span>
+        <span class="demo-arrow">&#9660;</span>
+      </button>
+      <div class="demo-credentials" id="demoCredentials">
+        <div class="demo-grid">
+          <span class="dg-header">Role</span>
+          <span class="dg-header">Email</span>
+          <span class="dg-header">Password</span>
+
+          <span class="dg-role">Citizen</span>
+          <span class="dg-email" onclick="fillDemo('citizen@gmail.com','citizen123')">citizen@gmail.com</span>
+          <span class="dg-pass">citizen123</span>
+
+          <span class="dg-role">Officer</span>
+          <span class="dg-email" onclick="fillDemo('officer@gmail.com','officer123')">officer@gmail.com</span>
+          <span class="dg-pass">officer123</span>
+
+          <span class="dg-role">Driver</span>
+          <span class="dg-email" onclick="fillDemo('driver@gmail.com','driver123')">driver@gmail.com</span>
+          <span class="dg-pass">driver123</span>
+
+          <span class="dg-role">Admin</span>
+          <span class="dg-email" onclick="fillDemo('admin@gmail.com','admin123')">admin@gmail.com</span>
+          <span class="dg-pass">admin123</span>
+
+          <span class="dg-role dg-superadmin">Super Admin</span>
+          <span class="dg-email dg-superadmin" onclick="fillDemo('superadmin@gmail.com','superadmin123')">superadmin@gmail.com</span>
+          <span class="dg-pass">superadmin123</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">Click an email to auto-fill the form</div>
+      </div>
+    </div>
+
+    <div class="register-row">Don't have an account? <a href="Register.html">Create one</a></div>
+  </div>
+
+</div>
+
+<!-- External JavaScript files -->
+<script src="js/global.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script>
+function toggleDemo() {
+  var btn  = document.getElementById('demoToggleBtn');
+  var cred = document.getElementById('demoCredentials');
+  var isOpen = cred.classList.contains('open');
+  cred.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+var _origFillDemo = typeof fillDemo === 'function' ? fillDemo : null;
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.dg-email').forEach(function(el) {
+    el.addEventListener('click', function() {
+      setTimeout(function() {
+        document.getElementById('demoCredentials').classList.remove('open');
+        document.getElementById('demoToggleBtn').classList.remove('open');
+      }, 200);
+    });
+  });
+});
+</script>
+</body>
+</html>
