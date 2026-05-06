@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Reports — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .page-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+    .report-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .report-modal-overlay.active { display: flex; }
+    .report-modal-box { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg); width: 100%; max-width: 600px; overflow-y: auto; max-height: 85vh; animation: modalSlideIn 0.3s ease; }
+    @keyframes modalSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: none; } }
+    
+    .report-modal-header { padding: 20px 24px; border-bottom: 1.5px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .report-modal-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); }
+    .report-modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .report-modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--muted); flex-shrink: 0; transition: all 0.15s; }
+    .report-modal-close:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+    
+    .report-modal-body { padding: 24px; }
+    .report-img { width: 100%; border-radius: 10px; border: 1.5px solid var(--border); margin-bottom: 20px; background: var(--surface2); display: flex; align-items: center; justify-content: center; min-height: 200px; }
+    .report-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .report-img.no-image { color: var(--muted); font-size: 14px; }
+    
+    .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .detail-item { background: var(--surface2); padding: 12px; border-radius: 9px; border: 1px solid var(--border); }
+    .detail-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .detail-value { font-size: 14px; font-weight: 600; color: var(--text); }
+    .detail-value.badge { display: inline-block; }
+    .detail-full { grid-column: 1 / -1; }
+    
+    .report-modal-footer { padding: 14px 24px; border-top: 1.5px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; background: var(--surface2); }
+    .modal-btn { padding: 8px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid; transition: all 0.15s; font-family: 'Source Sans 3', sans-serif; }
+    .modal-btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .modal-btn-primary:hover { background: var(--primary-dim); }
+    .modal-btn-secondary { background: var(--surface); color: var(--text2); border-color: var(--border); }
+    .modal-btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Sortable table headers */
+    th.th-sortable { cursor: pointer; user-select: none; white-space: nowrap; transition: color 0.15s ease; }
+    th.th-sortable:hover { color: var(--primary); }
+    th.th-sortable.sort-active { color: var(--primary); font-weight: 700; }
+
+    /* Barangay filter dropdown */
+    .barangay-filter-wrap { display: flex; align-items: center; gap: 8px; }
+    .barangay-filter-wrap label { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+    .barangay-filter-select {
+      padding: 8px 32px 8px 12px; border-radius: 9px; border: 1.5px solid var(--border);
+      background: var(--surface); font-size: 13px; font-weight: 500; color: var(--text);
+      cursor: pointer; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      transition: border-color 0.15s;
+    }
+    .barangay-filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88,129,87,0.15); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div><span class="logo-text">ZamboCollect</span></a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-driver-applications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Management</a>
+      <a href="admin-analytics.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar"><i class="fa-solid fa-gear"></i></div><div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div></div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users & Accounts</a></li>
+          <li><a href="admin-driver-applications.html"><i class="fa-solid fa-truck"></i> Driver Management</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">All Reports</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <nav class="breadcrumb" aria-label="breadcrumb">
+            <li class="breadcrumb-item"><a href="admin-dashboard.html">City Dashboard</a></li>
+            <li class="breadcrumb-sep">›</li>
+            <li class="breadcrumb-item active">All Reports</li>
+          </nav>
+          <h1>All Reports</h1>
+          <p>City-wide view of all submitted trash reports — Zamboanga City.</p>
+        </div>
+        <div class="header-actions">
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-file"></i> Export PDF</a>
+          <a href="#" class="topbar-btn export"><i class="fa-solid fa-chart-bar"></i> Export CSV</a>
+        </div>
+      </div>
+
+      <!-- Summary chips -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-blue"><span class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></span><div class="stat-num blue" data-stat="total">0</div><div class="stat-label">Total Active</div></div>
+        <div class="stat-card stat-yellow"><span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span><div class="stat-num yellow" data-stat="pending">0</div><div class="stat-label">Pending</div></div>
+        <div class="stat-card stat-sage"><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span><div class="stat-num sage" data-stat="approved">0</div><div class="stat-label">Approved</div></div>
+        <div class="stat-card stat-green"><span class="stat-icon"><i class="fa-solid fa-champagne-glasses"></i></span><div class="stat-num green" data-stat="collected">0</div><div class="stat-label">Collected</div></div>
+        <div class="stat-card stat-red"><span class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></span><div class="stat-num red" data-stat="rejected">0</div><div class="stat-label">Rejected</div></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-row">
+          <a href="#" class="filter-chip active">All</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-hourglass-half"></i> Pending</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-circle-check"></i> Approved</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-champagne-glasses"></i> Collected</a>
+          <a href="#" class="filter-chip"><i class="fa-solid fa-circle-xmark"></i> Rejected</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="barangay-filter-wrap">
+            <label for="barangayFilter"><i class="fa-solid fa-location-dot"></i></label>
+            <select id="barangayFilter" class="barangay-filter-select">
+              <option value="all">All Barangays</option>
+            </select>
+          </div>
+          <div class="search-wrap">
+            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="text" placeholder="Search ID, location, citizen…" />
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="th-sortable" data-col="id">Report ID</th>
+              <th class="th-sortable" data-col="barangay">Barangay</th>
+              <th>Location</th>
+              <th class="th-sortable" data-col="type">Type</th>
+              <th class="th-sortable" data-col="priority">Priority</th>
+              <th>Citizen</th>
+              <th class="th-sortable" data-col="date">Date</th>
+              <th class="th-sortable" data-col="status">Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="reportsTableBody">
+            <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted);"><i class="fa-solid fa-spinner" style="animation:spin 1s linear infinite;"></i> Loading reports…</td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info" id="pageInfo">Loading…</div>
+          <div class="page-btns" id="pageBtns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/reports.js"></script>
+<script>
+var allReports = [];
+var currentPage = 1;
+var ROWS_PER_PAGE = 8;
+var activeFilter = 'all';
+var searchQuery = '';
+var barangayFilter = 'all';
+var sortCol = 'date';
+var sortDir = 'desc';
+
+// Get badge class and icon for waste type
+function getWasteTypeHTML(wasteType) {
+  var icons = {
+    'Household': 'fa-house',
+    'Commercial': 'fa-store',
+    'Illegal Dump': 'fa-triangle-exclamation',
+    'Construction': 'fa-helmet-safety',
+    'Hazardous': 'fa-radiation'
+  };
+  var icon = icons[wasteType] || 'fa-trash-can';
+  return '<span style="font-size:12px;"><i class="fa-solid ' + icon + '"></i> ' + (wasteType || 'Unknown') + '</span>';
+}
+
+// Get priority badge
+function getPriorityBadge(urgency) {
+  var badgeClass = 'badge-sage';
+  if (urgency === 'Urgent') badgeClass = 'badge-yellow';
+  if (urgency === 'Critical') badgeClass = 'badge-red';
+  return '<span class="badge ' + badgeClass + '">' + (urgency || 'Normal') + '</span>';
+}
+
+// Get status badge
+function getStatusBadge(status) {
+  var badgeClass = 'badge-sage';
+  if (status === 'pending')   badgeClass = 'badge-yellow';
+  if (status === 'approved')  badgeClass = 'badge-blue';
+  if (status === 'collected') badgeClass = 'badge-green';
+  if (status === 'rejected')  badgeClass = 'badge-red';
+  var displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
+  return '<span class="badge ' + badgeClass + '">' + displayStatus + '</span>';
+}
+
+// Format date for display
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  var date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+}
+
+// Filter reports by active filter, barangay, and search
+function getFilteredReports() {
+  var filtered = allReports.slice();
+  
+  // Apply status filter
+  if (activeFilter !== 'all') {
+    filtered = filtered.filter(function(r) { return r.status === activeFilter; });
+  }
+  
+  // Apply barangay filter
+  if (barangayFilter !== 'all') {
+    filtered = filtered.filter(function(r) {
+      return (r.barangay || '').toLowerCase() === barangayFilter.toLowerCase();
+    });
+  }
+  
+  // Apply search filter
+  if (searchQuery) {
+    var q = searchQuery.toLowerCase();
+    filtered = filtered.filter(function(r) {
+      return r.id.toLowerCase().indexOf(q) !== -1 ||
+             r.location.toLowerCase().indexOf(q) !== -1 ||
+             r.citizen.toLowerCase().indexOf(q) !== -1 ||
+             r.barangay.toLowerCase().indexOf(q) !== -1;
+    });
+  }
+  
+  return filtered;
+}
+
+// Populate barangay dropdown from reports data
+function populateBarangayDropdown() {
+  var set = {};
+  allReports.forEach(function(r) {
+    if (r.barangay && r.barangay !== '-') set[r.barangay] = true;
+  });
+  var barangays = Object.keys(set).sort();
+  var sel = document.getElementById('barangayFilter');
+  if (!sel) return;
+  var current = barangayFilter;
+  sel.innerHTML = '<option value="all">All Barangays</option>' +
+    barangays.map(function(b) {
+      return '<option value="' + b + '"' + (current === b ? ' selected' : '') + '>' + b + '</option>';
+    }).join('');
+}
+
+// Render table rows
+function renderTable() {
+  var filtered = getFilteredReports();
+  
+  // Apply sorting
+  filtered.sort(function(a, b) {
+    var aVal = '', bVal = '';
+    
+    switch(sortCol) {
+      case 'id':
+        aVal = a.id || '';
+        bVal = b.id || '';
+        break;
+      case 'barangay':
+        aVal = a.barangay || '';
+        bVal = b.barangay || '';
+        break;
+      case 'type':
+        aVal = a.wasteType || '';
+        bVal = b.wasteType || '';
+        break;
+      case 'priority':
+        aVal = a.urgency || '';
+        bVal = b.urgency || '';
+        break;
+      case 'date':
+        aVal = a.timestamp || '';
+        bVal = b.timestamp || '';
+        break;
+      case 'status':
+        aVal = a.status || '';
+        bVal = b.status || '';
+        break;
+      default:
+        return 0;
+    }
+    
+    // Compare values (handle numeric and string)
+    var aNum = parseFloat(aVal);
+    var bNum = parseFloat(bVal);
+    var cmp = 0;
+    
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      cmp = aNum - bNum;
+    } else {
+      aVal = String(aVal).toLowerCase();
+      bVal = String(bVal).toLowerCase();
+      cmp = aVal.localeCompare(bVal);
+    }
+    
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+  
+  var total = filtered.length;
+  var totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  
+  var start = (currentPage - 1) * ROWS_PER_PAGE;
+  var rows = filtered.slice(start, start + ROWS_PER_PAGE);
+  
+  var tbody = document.getElementById('reportsTableBody');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted);"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;"></i>No reports found</td></tr>';
+  } else {
+    var html = '';
+    rows.forEach(function(r) {
+      var dateDisplay = formatDate(r.timestamp);
+      html += '<tr>'
+        + '<td class="col-id">#' + r.id + '</td>'
+        + '<td>' + (r.barangay || '-') + '</td>'
+        + '<td>' + (r.location || '-') + '</td>'
+        + '<td>' + getWasteTypeHTML(r.wasteType) + '</td>'
+        + '<td>' + getPriorityBadge(r.urgency) + '</td>'
+        + '<td>' + (r.citizen || '-') + '</td>'
+        + '<td>' + dateDisplay + '</td>'
+        + '<td>' + getStatusBadge(r.status) + '</td>'
+        + '<td><a href="#" class="action-btn" data-id="' + r.id + '">View</a></td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+  
+  // Update sort indicators
+  document.querySelectorAll('th.th-sortable').forEach(function(th) {
+    var col = th.getAttribute('data-col');
+    if (col === sortCol) {
+      th.classList.add('sort-active');
+      th.textContent = th.textContent.replace(/\s*[↑↓↕]\s*$/, '') + ' ' + (sortDir === 'asc' ? '↑' : '↓');
+    } else {
+      th.classList.remove('sort-active');
+      th.textContent = th.textContent.replace(/\s*[↑↓↕]\s*$/, '') + ' ↕';
+    }
+  });
+  
+  renderPagination(total, totalPages);
+  updateStats();
+}
+
+// Render pagination
+function renderPagination(total, totalPages) {
+  var start = (currentPage - 1) * ROWS_PER_PAGE + 1;
+  var end = Math.min(currentPage * ROWS_PER_PAGE, total);
+  
+  document.getElementById('pageInfo').textContent = 
+    total === 0 ? 'No results found' : 'Showing ' + start + '–' + end + ' of ' + total + ' report' + (total !== 1 ? 's' : '');
+  
+  var html = '';
+  html += '<div class="page-btn' + (currentPage <= 1 ? ' disabled' : '') + '" id="pgPrev">‹</div>';
+  
+  for (var i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      html += '<div class="page-btn' + (i === currentPage ? ' active' : '') + '" data-page="' + i + '">' + i + '</div>';
+    } else if (i === currentPage - 2 || i === currentPage + 2) {
+      html += '<div class="page-btn" style="width:auto;padding:0 8px;">…</div>';
+    }
+  }
+  
+  html += '<div class="page-btn' + (currentPage >= totalPages ? ' disabled' : '') + '" id="pgNext">›</div>';
+  
+  var container = document.getElementById('pageBtns');
+  container.innerHTML = html;
+  
+  container.querySelectorAll('[data-page]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentPage = parseInt(this.dataset.page, 10);
+      renderTable();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  
+  var prevBtn = container.querySelector('#pgPrev');
+  var nextBtn = container.querySelector('#pgNext');
+  if (prevBtn && !prevBtn.classList.contains('disabled')) {
+    prevBtn.addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  }
+  if (nextBtn && !nextBtn.classList.contains('disabled')) {
+    nextBtn.addEventListener('click', function() {
+      var filtered = getFilteredReports();
+      var totalPages = Math.ceil(filtered.length / ROWS_PER_PAGE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  }
+}
+
+// Update summary stats
+function updateStats() {
+  if (!REPORTS_DB) return;
+  var counts = REPORTS_DB.getCounts();
+  
+  document.querySelectorAll('[data-stat]').forEach(function(el) {
+    var stat = el.dataset.stat;
+    el.textContent = counts[stat] || 0;
+  });
+}
+
+// Open report modal
+function openReportModal(reportId) {
+  if (!REPORTS_DB) return;
+  var report = REPORTS_DB.getById(reportId);
+  if (!report) return;
+  
+  // Set title and subtitle
+  document.getElementById('modalReportId').textContent = 'Report #' + report.id;
+  document.getElementById('modalBarangay').textContent = report.barangay || '-';
+  
+  // Set image
+  var imgContainer = document.getElementById('reportImageContainer');
+  if (report.photo) {
+    imgContainer.innerHTML = '<img src="' + report.photo + '" alt="Report image">';
+  } else {
+    imgContainer.innerHTML = '<div class="no-image"><i class="fa-solid fa-image" style="margin-right:8px;"></i>No image uploaded</div>';
+  }
+  
+  // Set details
+  document.getElementById('modalLocation').textContent = report.location || '-';
+  document.getElementById('modalWasteType').textContent = report.wasteType || '-';
+  document.getElementById('modalPriority').innerHTML = getPriorityBadge(report.urgency);
+  document.getElementById('modalStatus').innerHTML = getStatusBadge(report.status);
+  document.getElementById('modalCitizen').textContent = report.citizen || '-';
+  document.getElementById('modalContact').textContent = report.contact || '-';
+  document.getElementById('modalDate').textContent = formatDate(report.timestamp);
+  document.getElementById('modalDescription').textContent = report.description || '-';
+  
+  // Show/hide additional fields based on status
+  if (report.status === 'approved' || report.status === 'collected') {
+    document.getElementById('approvedDateItem').style.display = '';
+    document.getElementById('modalApprovedDate').textContent = report.approvedDate || '-';
+    document.getElementById('officerInfoRow').style.display = '';
+    document.getElementById('modalApprovedBy').textContent = report.approvedBy || '-';
+  } else if (report.status === 'rejected') {
+    document.getElementById('approvedDateItem').style.display = '';
+    document.getElementById('modalApprovedDate').textContent = report.rejectedDate || '-';
+    document.getElementById('officerInfoRow').style.display = '';
+    document.getElementById('modalApprovedBy').textContent = (report.rejectedBy || '-') + ' (Rejected)';
+  } else {
+    document.getElementById('approvedDateItem').style.display = 'none';
+    document.getElementById('officerInfoRow').style.display = 'none';
+  }
+  
+  if (report.status === 'collected') {
+    document.getElementById('driverInfoRow').style.display = '';
+    document.getElementById('modalAssignedDriver').textContent = report.assignedDriver || '-';
+  } else if (report.status === 'approved') {
+    document.getElementById('driverInfoRow').style.display = '';
+    document.getElementById('modalAssignedDriver').textContent = report.assignedDriver || 'Pending assignment';
+  } else {
+    document.getElementById('driverInfoRow').style.display = 'none';
+  }
+  
+  // Show modal
+  document.getElementById('reportModal').classList.add('active');
+}
+
+// Close report modal
+function closeReportModal() {
+  document.getElementById('reportModal').classList.remove('active');
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  if (!REPORTS_DB) return;
+  
+  allReports = REPORTS_DB.getAll();
+  
+  // Update summary stats (find and update stat elements)
+  updateStats();
+  
+  // Sortable header click handlers
+  document.querySelectorAll('th.th-sortable').forEach(function(th) {
+    th.addEventListener('click', function() {
+      var col = this.getAttribute('data-col');
+      if (sortCol === col) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = col;
+        sortDir = 'asc';
+      }
+      currentPage = 1;
+      renderTable();
+    });
+  });
+  
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+      this.classList.add('active');
+      
+      if (this.textContent.includes('Pending')) activeFilter = 'pending';
+      else if (this.textContent.includes('Approved')) activeFilter = 'approved';
+      else if (this.textContent.includes('Collected')) activeFilter = 'collected';
+      else if (this.textContent.includes('Rejected')) activeFilter = 'rejected';
+      else activeFilter = 'all';
+      
+      currentPage = 1;
+      renderTable();
+    });
+  });
+  
+  // Search input
+  var searchInput = document.querySelector('.search-wrap input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      searchQuery = this.value.trim();
+      currentPage = 1;
+      renderTable();
+    });
+  }
+  
+  populateBarangayDropdown();
+  renderTable();
+  
+  // Barangay filter handler
+  var barangaySelect = document.getElementById('barangayFilter');
+  if (barangaySelect) {
+    barangaySelect.addEventListener('change', function() {
+      barangayFilter = this.value;
+      currentPage = 1;
+      renderTable();
+    });
+  }
+  
+  // Modal close handlers
+  document.getElementById('reportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReportModal();
+  });
+  document.getElementById('modalCloseBtn').addEventListener('click', closeReportModal);
+  document.getElementById('modalCloseFooterBtn').addEventListener('click', closeReportModal);
+  
+  // View button handlers
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('action-btn') && e.target.dataset.id) {
+      e.preventDefault();
+      openReportModal(e.target.dataset.id);
+    }
+  });
+  
+  // ESC key to close modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('reportModal').classList.contains('active')) {
+      closeReportModal();
+    }
+  });
+});
+</script>
+
+<!-- Report Details Modal -->
+<div class="report-modal-overlay" id="reportModal">
+  <div class="report-modal-box">
+    <div class="report-modal-header">
+      <div>
+        <div class="report-modal-title" id="modalReportId">Report #RPT-000</div>
+        <div class="report-modal-subtitle" id="modalBarangay">Barangay Name</div>
+      </div>
+      <button class="report-modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="report-modal-body">
+      <div class="report-img" id="reportImageContainer">
+        <div class="no-image"><i class="fa-solid fa-image" style="margin-right:8px;"></i>No image uploaded</div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Location</div>
+          <div class="detail-value" id="modalLocation">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Waste Type</div>
+          <div class="detail-value" id="modalWasteType">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Priority</div>
+          <div class="detail-value badge" id="modalPriority">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Status</div>
+          <div class="detail-value badge" id="modalStatus">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Citizen Name</div>
+          <div class="detail-value" id="modalCitizen">-</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Contact</div>
+          <div class="detail-value" id="modalContact">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-item">
+          <div class="detail-label">Submitted Date</div>
+          <div class="detail-value" id="modalDate">-</div>
+        </div>
+        <div class="detail-item" id="approvedDateItem" style="display: none;">
+          <div class="detail-label">Approved Date</div>
+          <div class="detail-value" id="modalApprovedDate">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row detail-full">
+        <div class="detail-item">
+          <div class="detail-label">Description</div>
+          <div class="detail-value" id="modalDescription" style="white-space: pre-wrap; line-height: 1.5;">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row detail-full" id="officerInfoRow" style="display: none;">
+        <div class="detail-item">
+          <div class="detail-label">Approved By</div>
+          <div class="detail-value" id="modalApprovedBy">-</div>
+        </div>
+      </div>
+      
+      <div class="detail-row detail-full" id="driverInfoRow" style="display: none;">
+        <div class="detail-item">
+          <div class="detail-label">Assigned Driver</div>
+          <div class="detail-value" id="modalAssignedDriver">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="report-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="modalCloseFooterBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+<script src="js/shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Driver Applications (Admin)</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .tab-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .tab-label {
+      padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border);
+      background: var(--surface); color: var(--text2); transition: all 0.15s;
+      user-select: none;
+    }
+    .tab-label:hover { border-color: var(--primary); color: var(--primary); }
+    .tab-label.tab-active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .search-bar-wrap { position: relative; display: flex; align-items: center; margin-bottom: 22px; }
+    .search-bar-wrap input {
+      padding: 9px 14px 9px 36px; border-radius: 9px; font-size: 13px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      width: 100%; max-width: 320px; outline: none;
+      transition: border-color 0.15s; color: var(--text);
+    }
+    .search-bar-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .search-bar-wrap .s-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
+
+    .app-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .app-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .app-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; flex-shrink: 0;
+    }
+    .app-avatar.active-drv  { background: linear-gradient(135deg,#16a34a,#4ade80); }
+    .app-avatar.rejected-drv { background: linear-gradient(135deg,#9ca3af,#d1d5db); }
+    .app-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .app-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .app-details-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 10px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .det-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .det-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .app-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn-view-app {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-view-app:hover { border-color: var(--primary); color: var(--primary); }
+
+    .btn-do-approve {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #16a34a; color: #fff; border: none;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-do-approve:hover { opacity: 0.88; }
+
+    .btn-do-reject {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #fff0f0; color: #dc2626;
+      border: 1.5px solid #dc2626; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-do-reject:hover { opacity: 0.80; }
+
+    .btn-do-demote {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #fff7ed; color: #c2410c;
+      border: 1.5px solid #fb923c; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-do-demote:hover { opacity: 0.80; }
+
+    .section-heading {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted); margin: 20px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 8px; border-bottom: 1.5px solid var(--border);
+    }
+
+    .app-drawer {
+      display: none; background: var(--surface2); border: 1.5px solid var(--border);
+      border-top: none; border-radius: 0 0 14px 14px;
+      margin-top: -14px; margin-bottom: 14px;
+      padding: 0 20px 20px; overflow: hidden;
+    }
+    .app-drawer.drawer-open { display: block; }
+
+    .drawer-inner { padding-top: 16px; border-top: 1.5px dashed var(--border); }
+    .drawer-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .drawer-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 8px; margin-bottom: 16px;
+    }
+    .drawer-info-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; }
+    .drawer-info-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .drawer-info-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .doc-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 10px; margin-bottom: 16px; }
+    .doc-box {
+      border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface);
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .doc-box-label {
+      padding: 7px 10px; font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.4px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-box-img {
+      aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+      background: var(--surface3); overflow: hidden;
+    }
+    .doc-box-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .doc-box-img .no-photo { color: var(--muted); font-size: 11px; text-align: center; padding: 8px; }
+    .doc-box-img .no-photo i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+    .notes-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 14px; font-size: 13px;
+      color: var(--text); font-style: italic; line-height: 1.6; margin-bottom: 14px;
+    }
+    .drawer-actions {
+      display: flex; gap: 8px; padding-top: 12px;
+      border-top: 1.5px solid var(--border);
+    }
+    .drawer-close {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--muted); cursor: pointer; transition: all 0.15s;
+    }
+    .drawer-close:hover { border-color: var(--text); color: var(--text); }
+
+    .card-approved { border-color: rgba(22,163,74,0.3); background: linear-gradient(135deg,#f0fdf4,var(--surface)); }
+    .card-rejected { opacity: 0.72; }
+    .badge-demoted { background: #f1f5f9; color: #64748b; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+    .badge-green  { background:#dcfce7; color:#16a34a; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .badge-yellow { background:#fef3c7; color:#d97706; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .badge-red    { background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align:left; padding:10px 12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); border-bottom:2px solid var(--border); }
+    td { padding:11px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+
+    @media (max-width:600px) {
+      .app-details-grid { grid-template-columns: 1fr 1fr; }
+      .drawer-info-grid  { grid-template-columns: 1fr 1fr; }
+      .doc-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── Modal layer ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.48);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1200; padding: 16px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: var(--surface); border-radius: 18px;
+      padding: 28px 30px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.28); position: relative;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .modal-sub   { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.55; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    /* ── Modal form elements ── */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; }
+    .form-group select, .form-group textarea {
+      width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; color: var(--text);
+      font-size: 13px; font-family: inherit; outline: none;
+      transition: border-color 0.15s; box-sizing: border-box;
+    }
+    .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group select { cursor: pointer; }
+
+    /* ── Generic modal buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s; font-family: inherit;
+    }
+    .btn-sm   { padding: 7px 14px; font-size: 12px; }
+    .btn-green { background: #16a34a; color: #fff; }
+    .btn-green:hover { background: #15803d; }
+    .btn-red   { background: #dc2626; color: #fff; }
+    .btn-red:hover   { background: #b91c1c; }
+    .btn-outline { background: var(--surface); border: 1.5px solid var(--border); color: var(--text2); }
+    .btn-outline:hover { border-color: var(--text2); color: var(--text); }
+
+    /* ── View modal scrollable layout ── */
+    .modal-view { max-width: 640px; max-height: 88vh; display: flex; flex-direction: column; }
+    .modal-view .modal-scroll { overflow-y: auto; flex: 1; padding-right: 4px; }
+    .modal-view .modal-footer {
+      flex-shrink: 0; padding-top: 14px;
+      border-top: 1.5px solid var(--border); margin-top: 14px;
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"          class="nav-item"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"         class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"           class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"               class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-driver-applications.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Management <span class="nav-badge badge-yellow" id="sidebar-count-applications">5</span></a>
+      <a href="admin-analytics.html"           class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-gear"></i></div>
+        <div><div class="user-name">Admin User</div><div class="user-role">City Administrator — Zamboanga City</div></div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users &amp; Accounts</a></li>
+          <li><a href="admin-driver-applications.html"><i class="fa-solid fa-truck"></i> Driver Management</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title" id="topbar-title">Driver Applications</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header-row">
+        <div>
+          <nav class="breadcrumb" aria-label="breadcrumb">
+            <ol style="list-style:none;padding:0;margin:0;display:flex;align-items:center;gap:0;">
+              <li class="breadcrumb-item"><a href="admin-dashboard.html">City Dashboard</a></li>
+              <li class="breadcrumb-sep">›</li>
+              <li class="breadcrumb-item active" id="breadcrumb-current">Driver Applications</li>
+            </ol>
+          </nav>
+          <h1>Driver Applications</h1>
+          <p>Review and approve driver applications city-wide. Approved drivers are automatically assigned to their requested barangay.</p>
+        </div>
+      </div>
+
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1d4ed8;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <i class="fa-solid fa-shield-halved" style="flex-shrink:0;"></i>
+        <span><strong>Admin privilege:</strong> Only city administrators can approve or reject driver applications. When approved, the driver is automatically assigned to their requested barangay and gains Driver Portal access. Officers can still suspend drivers through the Complaints feature.</span>
+      </div>
+
+      <!-- Profile change requests -->
+      <div id="profile-req-section" style="display:none; margin-bottom:22px;"></div>
+
+      <!-- Tab labels -->
+      <div style="display:flex;gap:10px;margin-bottom:18px;border-bottom:2px solid var(--border);padding-bottom:0;">
+        <button id="tab-btn-applications" onclick="setTab('Applications')"
+          style="padding:10px 18px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:2px solid #2563eb;color:#2563eb;margin-bottom:-2px;">
+          <i class="fa-solid fa-file-pen"></i> Applications
+          <span id="sidebar-badge-apps" style="background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:700;margin-left:4px;"></span>
+        </button>
+        <button id="tab-btn-profiles" onclick="setTab('Profiles')"
+          style="padding:10px 18px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;">
+          <i class="fa-solid fa-user-tie"></i> Driver Profiles
+          <span id="sidebar-badge-profiles" style="background:var(--surface2);color:var(--muted);padding:2px 7px;border-radius:20px;font-size:11px;font-weight:700;margin-left:4px;"></span>
+        </button>
+      </div>
+
+      <!-- Barangay filter + Search row -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;"><i class="fa-solid fa-location-dot"></i> Barangay</label>
+          <select id="barangay-filter" onchange="setBarangayFilter(this.value)"
+            style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text);cursor:pointer;outline:none;transition:border-color 0.15s;font-family:inherit;">
+            <option value="All">All Barangays</option>
+          </select>
+        </div>
+        <div class="search-bar-wrap" style="margin-bottom:0;flex:1;min-width:180px;">
+          <span class="s-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" id="driver-search" placeholder="Search by name or license number…" oninput="filterDrivers()" style="max-width:none;width:100%;">
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="tab-bar" id="filter-bar"></div>
+
+
+      <!-- Table -->
+      <div class="card">
+        <div class="table-wrap">
+          <table id="drivers-table">
+            <thead id="drivers-table-head"></thead>
+            <tbody id="drivers-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- View Application / Driver Details Modal -->
+<div class="modal-overlay hidden" id="modal-viewDriver">
+  <div class="modal modal-view">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-shrink:0;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-eye" style="color:#2563eb;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Application Details</div>
+    </div>
+    <div id="view-driver-content" class="modal-scroll">
+      <!-- populated by viewDriverDetails() -->
+    </div>
+    <div id="view-driver-actions" class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-viewDriver').classList.add('hidden')" style="flex:1;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promote to Driver Confirmation Modal -->
+<div class="modal-overlay hidden" id="modal-promoteDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-arrow-up" style="color:#16a34a;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Promote to Driver</div>
+    </div>
+    <div class="modal-sub">Are you sure you want to promote <strong id="promote-driver-name">this applicant</strong> to a Driver account? They will be granted access to the Driver Portal and assigned to <strong id="promote-driver-barangay">their requested barangay</strong>.</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin:12px 0;display:flex;align-items:flex-start;gap:8px;">
+      <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;"></i>
+      <span>Once promoted, the applicant's account will be upgraded to <strong>Driver</strong> role and they will be notified to begin onboarding.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-promoteDriver').classList.add('hidden')" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-green btn-sm" id="promote-driver-confirm-btn" style="flex:1;"><i class="fa-solid fa-arrow-up"></i> Yes, Promote →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Driver Application Modal -->
+<div class="modal-overlay hidden" id="modal-rejectDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fff0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-xmark" style="color:#dc2626;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Reject Application</div>
+    </div>
+    <div class="modal-sub">Rejecting <strong id="reject-driver-name">this applicant</strong>'s driver application. Select a reason — they will be notified and may reapply once resolved.</div>
+    <div class="form-group">
+      <label>Rejection Reason <span style="color:#dc2626;">*</span></label>
+      <select id="reject-driver-reason">
+        <option value="">— Select reason —</option>
+        <option>Expired or invalid driver's license</option>
+        <option>Insufficient driving experience (minimum 1 year required)</option>
+        <option>Non-professional license — professional license required for this route</option>
+        <option>KYC verification incomplete or still pending</option>
+        <option>Incomplete application documents</option>
+        <option>Does not meet physical or medical requirements</option>
+        <option>Background check concern</option>
+        <option>No available routes in the requested barangay</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Additional Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea id="reject-driver-notes" placeholder="Provide specific guidance so the applicant knows what to fix before reapplying…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeRejectDriverModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-red btn-sm" id="reject-driver-confirm-btn" style="flex:1;">✗ Reject &amp; Notify →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend Driver Modal -->
+<div class="modal-overlay hidden" id="modal-suspendDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-ban" style="color:#d97706;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Suspend Driver</div>
+    </div>
+    <div class="modal-sub">You are suspending <strong id="suspend-driver-name">this driver</strong>. Their access will be blocked until you restore it. Please select a reason.</div>
+    <div class="form-group">
+      <label>Reason for Suspension <span style="color:#dc2626;">*</span></label>
+      <select id="suspend-driver-reason">
+        <option value="">— Select a reason —</option>
+        <option>Absent without notice (AWOL)</option>
+        <option>Violation of collection protocols</option>
+        <option>Misconduct or inappropriate behavior</option>
+        <option>Vehicle non-compliance</option>
+        <option>Route abandonment</option>
+        <option>Substance-related incident</option>
+        <option>Under investigation</option>
+        <option>Repeated tardiness</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Additional Details <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea id="suspend-driver-notes" placeholder="Provide specifics so the driver understands the suspension…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeSuspendDriverModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-sm" style="flex:1;background:#d97706;color:#fff;" onclick="confirmSuspendDriver()"><i class="fa-solid fa-ban"></i> Suspend Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Unsuspend / Restore Driver Modal -->
+<div class="modal-overlay hidden" id="modal-unsuspendDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Restore Driver Account</div>
+    </div>
+    <div class="modal-sub">Are you sure you want to restore <strong id="unsuspend-driver-name">this driver</strong>'s account? They will regain full access to the Driver Portal immediately.</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin:12px 0;display:flex;align-items:flex-start;gap:8px;">
+      <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;"></i>
+      <span>The driver will be notified that their suspension has been lifted and their routes restored.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeUnsuspendDriverModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-green btn-sm" onclick="confirmUnsuspendDriver()" style="flex:1;"><i class="fa-solid fa-circle-check"></i> Yes, Restore Access →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Demote to Citizen Modal -->
+<div class="modal-overlay hidden" id="modal-demoteDriver">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-user-minus" style="color:#c2410c;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Demote to Citizen</div>
+    </div>
+    <div class="modal-sub">You are about to demote <strong id="demote-driver-name">this driver</strong> back to a Citizen account. They will immediately lose access to the Driver Portal and all route assignments.</div>
+    <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:12px;color:#9a3412;margin:12px 0;display:flex;align-items:flex-start;gap:8px;">
+      <i class="fa-solid fa-triangle-exclamation" style="flex-shrink:0;margin-top:1px;color:#f97316;"></i>
+      <span>This action cannot be undone from this page. To promote them again, they must submit a new Driver Application.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeDemoteDriverModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-sm" style="flex:1;background:#c2410c;color:#fff;" onclick="confirmDemoteDriver()"><i class="fa-solid fa-user-minus"></i> Yes, Demote →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Profile Change Modal -->
+<div class="modal-overlay hidden" id="modal-rejectProfile">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fff0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-xmark" style="color:#dc2626;font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Reject Profile Change</div>
+    </div>
+    <div class="modal-sub">Rejecting <strong id="reject-profile-name">this driver</strong>'s profile update request. They will be notified and may submit a new request.</div>
+    <div class="form-group">
+      <label>Reason <span style="color:#dc2626;">*</span></label>
+      <select id="reject-profile-reason">
+        <option value="">— Select reason —</option>
+        <option>Information could not be verified</option>
+        <option>Invalid or incorrect phone number format</option>
+        <option>Email address already in use</option>
+        <option>Name change requires supporting documents</option>
+        <option>Contact your administrator for this change</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea id="reject-profile-notes" placeholder="Provide guidance for the driver…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeRejectProfileModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="confirmRejectProfile()" style="flex:1;">✗ Reject Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="drv-toast" style="position:fixed;bottom:24px;right:24px;z-index:9999;background:#1a2e1a;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);transform:translateY(10px);opacity:0;pointer-events:none;transition:all 0.3s ease;"></div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/global.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/driver-applications.js"></script>
+<script>
+  /* Tab button styling */
+  function updateTabButtons() {
+    var appBtn  = document.getElementById('tab-btn-applications');
+    var profBtn = document.getElementById('tab-btn-profiles');
+    var counts  = getCounts();
+    if (appBtn) {
+      var isApp = currentTab === 'Applications';
+      appBtn.style.borderBottomColor = isApp ? '#2563eb' : 'transparent';
+      appBtn.style.color = isApp ? '#2563eb' : 'var(--muted)';
+      var appBadge = document.getElementById('sidebar-badge-apps');
+      if (appBadge) {
+        var pending = counts.Pending;
+        appBadge.textContent = pending > 0 ? pending : '';
+        appBadge.style.display = pending > 0 ? '' : 'none';
+      }
+    }
+    if (profBtn) {
+      var isProf = currentTab === 'Profiles';
+      profBtn.style.borderBottomColor = isProf ? '#2563eb' : 'transparent';
+      profBtn.style.color = isProf ? '#2563eb' : 'var(--muted)';
+      var profBadge = document.getElementById('sidebar-badge-profiles');
+      if (profBadge) profBadge.textContent = counts.AllDrivers;
+    }
+    var titleEl = document.getElementById('topbar-title');
+    if (titleEl) titleEl.textContent = currentTab === 'Applications' ? 'Driver Applications' : 'Driver Profiles';
+    var bcEl = document.getElementById('breadcrumb-current');
+    if (bcEl) bcEl.textContent = currentTab === 'Applications' ? 'Driver Applications' : 'Driver Profiles';
+  }
+
+  /* Wrap setTab to update tab buttons */
+  (function() {
+    var _orig = window.setTab;
+    window.setTab = function(tab) {
+      _orig(tab);
+      updateTabButtons();
+      renderProfileRequests();
+    };
+  })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateTabButtons();
+    renderProfileRequests();
+  });
+
+  /* Close modals when clicking overlay */
+  document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+  });
+
+  /* Escape key closes any open modal */
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    ['modal-viewDriver','modal-promoteDriver','modal-rejectDriver',
+     'modal-suspendDriver','modal-unsuspendDriver','modal-demoteDriver','modal-rejectProfile'
+    ].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
+    });
+  });
+
+  function closeRejectDriverModal() {
+    document.getElementById('modal-rejectDriver').classList.add('hidden');
+    document.getElementById('reject-driver-reason').value = '';
+    document.getElementById('reject-driver-notes').value = '';
+  }
+</script>
+
+<script>
+/* Profile Change Request Review */
+var _pendingProfileRejectId = null;
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderProfileRequests() {
+  var section = document.getElementById('profile-req-section');
+  if (!section) return;
+  if (typeof currentTab !== 'undefined' && currentTab !== 'Profiles') {
+    section.style.display = 'none';
+    return;
+  }
+  var pending = (typeof ZC_DB !== 'undefined' && ZC_DB.getPendingDriverProfileRequests) ? ZC_DB.getPendingDriverProfileRequests() : [];
+  if (pending.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  var rows = pending.map(function(req) {
+    var changes = req.changes || {};
+    var changeList = Object.keys(changes).map(function(key) {
+      var labels = { firstName:'First Name', middleName:'Middle Name', lastName:'Last Name', phone:'Phone', email:'Email', emergencyContact:'Emergency Contact', emergencyNumber:'Emergency No.' };
+      return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;margin:2px;">' +
+        '<strong>' + esc(labels[key] || key) + ':</strong> ' +
+        '<span style="color:var(--muted);text-decoration:line-through;">' + esc(changes[key].old || '—') + '</span>' +
+        ' → <span style="color:#16a34a;font-weight:600;">' + esc(changes[key].new || '—') + '</span>' +
+      '</span>';
+    }).join('');
+    var submitted = new Date(req.submittedAt).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+    return '<div style="background:var(--surface);border:1.5px solid #fde68a;border-radius:12px;padding:16px 18px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">' +
+        '<div style="width:38px;height:38px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:#d97706;"><i class="fa-solid fa-user-pen"></i></div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:700;color:var(--text);">' + esc(req.driverName) + '</div>' +
+          '<div style="font-size:12px;color:var(--muted);">Profile change request · Submitted ' + esc(submitted) + '</div>' +
+        '</div>' +
+        '<span style="background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0;">Pending Review</span>' +
+      '</div>' +
+      '<div style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:4px;">' + changeList + '</div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<button class="btn-do-approve" onclick="approveProfileRequest(\'' + esc(req.id) + '\')"><i class="fa-solid fa-check"></i> Approve</button>' +
+        '<button class="btn-do-reject" onclick="openRejectProfileModal(\'' + esc(req.id) + '\',\'' + esc(req.driverName) + '\')"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  section.innerHTML =
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1.5px solid #fde68a;">' +
+      '<i class="fa-solid fa-user-pen" style="color:#d97706;"></i> Pending Profile Changes (' + pending.length + ')' +
+    '</div>' + rows;
+}
+
+function approveProfileRequest(reqId) {
+  if (typeof ZC_DB === 'undefined' || !ZC_DB.approveDriverProfileRequest) return;
+  var result = ZC_DB.approveDriverProfileRequest(reqId, 'Admin');
+  if (result.ok) { renderProfileRequests(); showDriverToast('✓ Profile update approved and applied.'); }
+}
+
+function openRejectProfileModal(reqId, name) {
+  _pendingProfileRejectId = reqId;
+  document.getElementById('reject-profile-name').textContent = name;
+  document.getElementById('reject-profile-reason').value = '';
+  document.getElementById('reject-profile-notes').value = '';
+  document.getElementById('modal-rejectProfile').classList.remove('hidden');
+}
+
+function closeRejectProfileModal() {
+  document.getElementById('modal-rejectProfile').classList.add('hidden');
+  _pendingProfileRejectId = null;
+}
+
+function confirmRejectProfile() {
+  var reason = document.getElementById('reject-profile-reason').value;
+  if (!reason) { document.getElementById('reject-profile-reason').style.borderColor = '#dc2626'; return; }
+  document.getElementById('reject-profile-reason').style.borderColor = '';
+  var notes = document.getElementById('reject-profile-notes').value.trim();
+  var full = notes ? reason + ' — ' + notes : reason;
+  if (typeof ZC_DB !== 'undefined' && ZC_DB.rejectDriverProfileRequest) {
+    ZC_DB.rejectDriverProfileRequest(_pendingProfileRejectId, 'Admin', full);
+  }
+  closeRejectProfileModal();
+  renderProfileRequests();
+  showDriverToast('Profile change request rejected.');
+}
+
+document.getElementById('modal-rejectProfile').addEventListener('click', function(e) {
+  if (e.target === this) closeRejectProfileModal();
+});
+document.getElementById('modal-viewDriver').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
+document.getElementById('modal-promoteDriver').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
+document.getElementById('modal-rejectDriver').addEventListener('click', function(e) {
+  if (e.target === this) closeRejectDriverModal();
+});
+document.getElementById('modal-suspendDriver').addEventListener('click', function(e) {
+  if (e.target === this) closeSuspendDriverModal();
+});
+document.getElementById('modal-unsuspendDriver').addEventListener('click', function(e) {
+  if (e.target === this) closeUnsuspendDriverModal();
+});
+document.getElementById('modal-demoteDriver').addEventListener('click', function(e) {
+  if (e.target === this) closeDemoteDriverModal();
+});
+
+setInterval(renderProfileRequests, 5000);
+</script>
+</body>
+</html>
