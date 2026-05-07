@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaints Review — ZamboCollect Officer Portal</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ── Stats ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .stat-mini {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 15px 18px; text-align: center; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .stat-mini:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    .stat-mini.stat-active { box-shadow: 0 0 0 2px var(--primary); }
+    .stat-mini-num   { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-mini-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 5px; letter-spacing: 0.3px; text-transform: uppercase; }
+
+    /* ── Toolbar ── */
+    .toolbar-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filter-chip {
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .filter-chip:hover { border-color: var(--text); color: var(--text); }
+    .filter-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(88,129,87,0.3); }
+    .filter-chip.fc-yellow.active { background: #d97706; border-color: #d97706; box-shadow: 0 4px 10px rgba(217,119,6,0.3); }
+    .filter-chip.fc-green.active  { background: #16a34a; border-color: #16a34a; box-shadow: 0 4px 10px rgba(22,163,74,0.3); }
+    .filter-chip.fc-red.active    { background: #dc2626; border-color: #dc2626; box-shadow: 0 4px 10px rgba(220,38,38,0.3); }
+    .filter-chip.fc-gray.active   { background: #6b7280; border-color: #6b7280; box-shadow: 0 4px 10px rgba(107,114,128,0.25); }
+    .chip-count {
+      background: rgba(0,0,0,0.12); border-radius: 100px;
+      padding: 1px 7px; font-size: 10px; font-weight: 800; min-width: 18px; text-align: center;
+    }
+    .filter-chip.active .chip-count { background: rgba(255,255,255,0.25); }
+
+    .toolbar-sep { flex: 1; }
+    .sort-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; display: flex; align-items: center; gap: 5px; }
+    .sort-select {
+      padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit;
+    }
+    .sort-select:focus { outline: none; border-color: var(--primary); }
+
+    /* ── Cards ── */
+    .complaint-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; margin-bottom: 14px;
+      box-shadow: var(--shadow-sm); overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .complaint-card.card-pending  { border-left: 3px solid #dc2626; }
+    .complaint-card.card-verified { border-left: 3px solid #16a34a; }
+    .complaint-card.card-dismissed{ border-left: 3px solid #9ca3af; opacity: 0.82; }
+    .complaint-card.card-flagged  { border-left: 3px solid #f97316; }
+    .complaint-card.card-pending:hover  { box-shadow: 0 4px 14px rgba(220,38,38,0.1); }
+    .complaint-card.card-verified:hover { box-shadow: 0 4px 14px rgba(22,163,74,0.1); }
+    .complaint-card.card-dismissed:hover{ opacity: 1; }
+
+    .complaint-card-body { padding: 18px 20px; }
+
+    /* Card header row */
+    .c-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .c-id-badge {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 8px;
+    }
+    .c-report-ref {
+      font-size: 10px; color: var(--muted); font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .c-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    /* Location + meta */
+    .c-loc  { font-size: 15px; font-weight: 700; color: var(--text); margin: 0 0 4px; }
+    .c-meta { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .c-meta-dot { opacity: 0.4; }
+
+    /* Driver accused box */
+    .c-driver-box {
+      background: #fff7ed; border: 1.5px solid #fed7aa;
+      border-radius: 10px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .c-driver-icon {
+      width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+      background: #ffedd5; color: #ea580c;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .c-driver-name { font-size: 13px; font-weight: 700; color: #9a3412; }
+    .c-driver-sub  { font-size: 11px; color: #c2410c; margin-top: 1px; }
+
+    /* Description */
+    .c-desc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; font-size: 13px;
+      color: var(--text); line-height: 1.6; margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    /* Photo toggle */
+    .photo-toggle-btn {
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 9px; font-size: 12px; font-weight: 700;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit; text-align: left;
+      transition: all 0.2s; margin-bottom: 12px;
+    }
+    .photo-toggle-btn:hover { background: var(--surface3); border-color: var(--primary); color: var(--primary); }
+    .photo-toggle-btn.open  { border-color: var(--primary); color: var(--primary); background: rgba(88,129,87,0.05); }
+    .photo-toggle-btn .pt-arrow { margin-left: auto; transition: transform 0.22s; font-size: 10px; }
+    .photo-toggle-btn.open .pt-arrow { transform: rotate(180deg); }
+    .photo-collapsible { overflow: hidden; }
+
+    /* Photo compare */
+    .photo-compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;
+    }
+    .photo-box {
+      border-radius: 11px; overflow: hidden; border: 1.5px solid var(--border);
+      transition: all 0.2s;
+    }
+    .photo-box:hover { border-color: #dc2626; box-shadow: 0 4px 10px rgba(220,38,38,0.1); }
+    .photo-box-label {
+      background: var(--surface2); padding: 7px 12px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .photo-box-img {
+      aspect-ratio: 4/3; background: var(--surface3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-box-img img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; transition: transform 0.2s; }
+    .photo-box:hover .photo-box-img img { transform: scale(1.04); }
+    .photo-box-img .no-photo { color: var(--muted); font-size: 12px; text-align: center; padding: 8px; }
+    .photo-box-img .no-photo i { font-size: 1.5rem; display: block; margin-bottom: 4px; opacity: 0.4; }
+
+    /* Action buttons */
+    .c-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .btn-verify {
+      flex: 1; min-width: 160px; padding: 10px 16px; border-radius: 9px; font-size: 13px; font-weight: 700;
+      background: #dc2626; color: #fff; border: none; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .btn-verify:hover { background: #b91c1c; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(220,38,38,0.3); }
+    .btn-verify:active { transform: translateY(0); }
+    .btn-flag {
+      flex: 0 0 auto; padding: 10px 16px; border-radius: 9px; font-size: 13px; font-weight: 700;
+      border: 1.5px solid #f97316; background: #fff7ed; color: #ea580c;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-flag:hover { background: #ffedd5; border-color: #ea580c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249,115,22,0.2); }
+    .btn-flag:active { transform: translateY(0); }
+    .btn-dismiss {
+      flex: 0 0 auto; padding: 10px 16px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-dismiss:hover { border-color: var(--text); color: var(--text); background: var(--surface3); transform: translateY(-2px); }
+    .btn-dismiss:active { transform: translateY(0); }
+
+    /* Review timeline strip */
+    .c-review-timeline {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 12px; margin-top: 12px;
+    }
+    .c-review-timeline.rt-verified  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .c-review-timeline.rt-dismissed { background: #f9fafb; border: 1px solid var(--border); }
+    .c-review-timeline.rt-flagged   { background: #fff7ed; border: 1px solid #fed7aa; }
+    .rt-icon {
+      width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .rt-verified .rt-icon  { background: #dcfce7; color: #16a34a; }
+    .rt-dismissed .rt-icon { background: #f3f4f6; color: #6b7280; }
+    .rt-flagged .rt-icon   { background: #ffedd5; color: #ea580c; }
+    .rt-body { flex: 1; min-width: 0; }
+    .rt-title { font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .rt-verified .rt-title  { color: #15803d; }
+    .rt-dismissed .rt-title { color: #374151; }
+    .rt-flagged .rt-title   { color: #9a3412; }
+    .rt-detail { color: var(--muted); line-height: 1.5; }
+
+    /* Driver suspend section */
+    .driver-suspend-section {
+      background: linear-gradient(135deg, #fff7ed, #ffedd5);
+      border: 1.5px solid #fed7aa; border-radius: 11px;
+      padding: 14px 16px; margin-top: 12px;
+      box-shadow: 0 2px 8px rgba(249,115,22,0.08);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .ds-info { flex: 1; min-width: 0; }
+    .ds-title { font-size: 13px; font-weight: 700; color: #9a3412; margin-bottom: 3px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .ds-sub   { font-size: 11px; color: #c2410c; }
+    .suspended-badge { background:#fee2e2; color:#dc2626; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+    .btn-reactivate {
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      background: var(--primary); color: #fff; border: none; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .btn-reactivate:hover { background: #3f6b3f; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(88,129,87,0.3); }
+
+    /* Status badges */
+    .badge-pending   { background:#fef3c7; color:#b45309; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; }
+    .badge-verified  { background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; }
+    .badge-dismissed { background:#f3f4f6; color:#6b7280; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; }
+    .badge-flagged   { background:#fff7ed; color:#ea580c; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--surface); border-radius: 16px; padding: 24px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    .modal-icon-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    }
+    .modal-icon {
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin: 0; }
+    .modal-sub   { font-size: 13px; color: var(--muted); margin: 0 0 18px; line-height: 1.6; }
+    .modal-consequence {
+      background: #fff0f0; border: 1px solid #fecaca; border-left: 3px solid #dc2626;
+      border-radius: 8px; padding: 11px 14px; margin-bottom: 18px; font-size: 12px;
+      color: #991b1b; line-height: 1.6;
+    }
+    .modal-consequence ul { margin: 6px 0 0 16px; padding: 0; }
+    .modal-consequence li { margin-bottom: 3px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
+    .modal-input, .modal-select {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: inherit; font-size: 13px;
+      box-sizing: border-box; transition: all 0.2s;
+    }
+    .modal-input:focus, .modal-select:focus { outline: none; border-color: #dc2626; background: var(--surface3); box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .btn-modal-cancel {
+      flex: 0 0 38%; padding: 10px 0; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); font-family: inherit; transition: all 0.2s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--text); background: var(--surface3); }
+    .btn-modal-red {
+      flex: 1; padding: 10px 0; border-radius: 9px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; background: #dc2626; color: #fff;
+      font-family: inherit; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-modal-red:hover { background: #b91c1c; box-shadow: 0 6px 16px rgba(220,38,38,0.3); }
+    .btn-modal-green {
+      flex: 1; padding: 10px 0; border-radius: 9px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; background: var(--primary); color: #fff;
+      font-family: inherit; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-modal-green:hover { background: #3f6b3f; box-shadow: 0 6px 16px rgba(88,129,87,0.3); }
+    .btn-modal-orange {
+      flex: 1; padding: 10px 0; border-radius: 9px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; background: #ea580c; color: #fff;
+      font-family: inherit; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-modal-orange:hover { background: #c2410c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+
+    /* Reactivate options */
+    .reactivate-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .reactivate-option {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reactivate-option:hover { border-color: var(--primary); background: rgba(88,129,87,0.03); }
+    .reactivate-option.selected { border-color: var(--primary); background: rgba(88,129,87,0.07); }
+    .reactivate-option input { accent-color: var(--primary); }
+    .reactivate-option-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .reactivate-option-sub   { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 60px 24px; color: var(--muted);
+      border: 2px dashed var(--border); border-radius: 14px;
+    }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 14px; opacity: 0.25; }
+    .empty-state p { font-size: 15px; font-weight: 700; margin: 0 0 6px; color: var(--text); }
+    .empty-state span { font-size: 13px; }
+
+    /* Lightbox */
+    #complaint-lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92); z-index: 9999;
+      align-items: center; justify-content: center;
+    }
+    #complaint-lightbox.open { display: flex; }
+    #complaint-lightbox img {
+      max-width: 92vw; max-height: 88vh; object-fit: contain;
+      border-radius: 12px; animation: fadeIn 0.25s ease;
+    }
+    #clb-close {
+      position: absolute; top: 18px; right: 18px;
+      background: rgba(255,255,255,0.15); border: none;
+      color: #fff; font-size: 20px; width: 42px; height: 42px;
+      border-radius: 50%; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; z-index: 10000;
+      transition: all 0.2s;
+    }
+    #clb-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.1); }
+
+    /* Pagination */
+    .pagination-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .pg-btn {
+      min-width: 36px; height: 36px; padding: 0 10px;
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .pg-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .pg-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(88,129,87,0.3); }
+    .pg-btn:disabled { opacity: 0.35; cursor: default; }
+    .pg-info { font-size: 12px; color: var(--muted); padding: 0 4px; }
+
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .c-actions { flex-direction: column; }
+      .c-actions button { width: 100%; }
+      .photo-compare { grid-template-columns: 1fr; }
+      .complaint-card-body { padding: 16px; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html" aria-label="ZamboCollect home">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-indicator" id="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review</a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports</a>
+        <a href="officer-complaints.html" class="nav-item active" aria-current="page">
+          <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Complaints
+          <span class="nav-badge" id="sidebar-pending-count" style="display:none;background:#dc2626;"></span>
+        </a>
+        <a href="officer-density-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="officer-manage-users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Users &amp; Accounts</a>
+        <a href="officer-analytics.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile</a>
+        <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div>
+          <div class="user-name" id="sidebar-user-name">Officer</div>
+          <div class="user-role" id="sidebar-user-role">Officer</div>
+        </div>
+      </a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content" id="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Complaints Review</span>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="officer-dashboard.html">Officer Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">Complaints Review</li>
+        </nav>
+        <h1 class="page-title">Complaints Review</h1>
+        <p class="page-subtitle" id="page-subtitle">Review citizen complaints against drivers for your barangay</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-mini" id="scard-all" onclick="setFilter('all')" title="Show all complaints">
+          <div class="stat-mini-num" id="stat-total">—</div>
+          <div class="stat-mini-label">Total</div>
+        </div>
+        <div class="stat-mini" id="scard-pending" onclick="setFilter('pending')" title="Show pending only">
+          <div class="stat-mini-num" style="color:#d97706;" id="stat-pending">—</div>
+          <div class="stat-mini-label">Pending</div>
+        </div>
+        <div class="stat-mini" id="scard-approved" onclick="setFilter('approved')" title="Show verified only">
+          <div class="stat-mini-num" style="color:#16a34a;" id="stat-verified">—</div>
+          <div class="stat-mini-label">Verified</div>
+        </div>
+        <div class="stat-mini" id="scard-rejected" onclick="setFilter('rejected')" title="Show dismissed only">
+          <div class="stat-mini-num" style="color:#6b7280;" id="stat-dismissed">—</div>
+          <div class="stat-mini-label">Dismissed</div>
+        </div>
+      </div>
+
+      <!-- Toolbar: filters + sort -->
+      <div class="toolbar-row">
+        <button class="filter-chip active"    id="filter-all"      onclick="setFilter('all')">All <span class="chip-count" id="cnt-all">0</span></button>
+        <button class="filter-chip fc-yellow" id="filter-pending"  onclick="setFilter('pending')"><i class="fa-solid fa-hourglass-half" style="font-size:10px;"></i> Pending <span class="chip-count" id="cnt-pending">0</span></button>
+        <button class="filter-chip fc-green"  id="filter-approved" onclick="setFilter('approved')"><i class="fa-solid fa-circle-check" style="font-size:10px;"></i> Verified <span class="chip-count" id="cnt-approved">0</span></button>
+        <button class="filter-chip fc-gray"   id="filter-rejected" onclick="setFilter('rejected')"><i class="fa-solid fa-circle-xmark" style="font-size:10px;"></i> Dismissed <span class="chip-count" id="cnt-rejected">0</span></button>
+        <div class="toolbar-sep"></div>
+        <span class="sort-label"><i class="fa-solid fa-arrow-up-wide-short"></i> Sort:</span>
+        <select class="sort-select" id="sort-select" onchange="setSort(this.value)">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="pending-first">Pending First</option>
+        </select>
+      </div>
+
+      <!-- List -->
+      <div id="complaints-list"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ── Verify & Suspend modal ── -->
+<div class="modal-overlay hidden" id="verify-modal">
+  <div class="modal-box">
+    <div class="modal-icon-row">
+      <div class="modal-icon" style="background:#fee2e2;color:#dc2626;"><i class="fa-solid fa-ban"></i></div>
+      <div>
+        <div class="modal-title">Verify Complaint &amp; Suspend Driver</div>
+      </div>
+    </div>
+    <p class="modal-sub" id="verify-modal-sub">Confirm that this complaint is valid and take action against the driver.</p>
+    <div class="modal-consequence">
+      <strong>This will immediately:</strong>
+      <ul>
+        <li>Mark the complaint as <strong>Verified</strong></li>
+        <li>Suspend <strong id="verify-driver-name">the driver</strong>'s account</li>
+        <li>Notify the driver of their suspension</li>
+        <li>Send a confirmation to the reporting citizen</li>
+      </ul>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeVerifyModal()">Cancel</button>
+      <button class="btn-modal-red" onclick="confirmVerify()"><i class="fa-solid fa-ban"></i> Suspend Driver</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Dismiss modal ── -->
+<div class="modal-overlay hidden" id="reject-modal">
+  <div class="modal-box">
+    <div class="modal-icon-row">
+      <div class="modal-icon" style="background:#f3f4f6;color:#6b7280;"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div>
+        <div class="modal-title">Dismiss Complaint</div>
+      </div>
+    </div>
+    <p class="modal-sub">Select a reason for dismissing this complaint. The citizen will be notified.</p>
+    <div class="modal-field">
+      <label class="modal-label" for="reject-reason-select">Reason <span style="font-weight:400;text-transform:none;">(required)</span></label>
+      <select class="modal-select" id="reject-reason-select">
+        <option value="">— Select a reason —</option>
+        <option>Photo evidence does not match the reported location</option>
+        <option>Waste was already collected before the complaint was filed</option>
+        <option>Complaint is a duplicate of an existing case</option>
+        <option>Report location is outside barangay jurisdiction</option>
+        <option>Insufficient evidence to support the claim</option>
+        <option>Complaint submitted in error by citizen</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="modal-field" id="reject-notes-field">
+      <label class="modal-label" for="reject-notes">Additional Notes <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+      <input type="text" class="modal-input" id="reject-notes" placeholder="Add details for the citizen…" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeRejectModal()">Cancel</button>
+      <button class="btn-modal-red" style="background:#6b7280;" onclick="confirmReject()"><i class="fa-solid fa-circle-xmark"></i> Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Flag Account modal ── -->
+<div class="modal-overlay hidden" id="flag-modal">
+  <div class="modal-box">
+    <div class="modal-icon-row">
+      <div class="modal-icon" style="background:#fff7ed;color:#ea580c;"><i class="fa-solid fa-flag"></i></div>
+      <div>
+        <div class="modal-title">Flag Driver Account</div>
+      </div>
+    </div>
+    <p class="modal-sub" id="flag-modal-sub">Add a warning flag to the driver's profile. The driver will be notified. This does <strong>not</strong> suspend the account.</p>
+    <div class="modal-field">
+      <label class="modal-label" for="flag-reason">Reason <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+      <input type="text" class="modal-input" id="flag-reason" placeholder="e.g. Complaint confirmed — waste not actually collected" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeFlagModal()">Cancel</button>
+      <button class="btn-modal-orange" onclick="confirmFlag()"><i class="fa-solid fa-flag"></i> Flag Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reactivate driver modal ── -->
+<div class="modal-overlay hidden" id="reactivate-modal">
+  <div class="modal-box">
+    <div class="modal-icon-row">
+      <div class="modal-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <div class="modal-title">Reactivate Driver Account</div>
+      </div>
+    </div>
+    <p class="modal-sub" id="reactivate-modal-sub">Choose how to restore this driver's account access.</p>
+    <div class="reactivate-options">
+      <label class="reactivate-option selected" id="opt-immediate-wrap">
+        <input type="radio" name="reactivate-type" value="immediate" checked onchange="toggleReactivateType()" />
+        <div>
+          <div class="reactivate-option-label">Reactivate Immediately</div>
+          <div class="reactivate-option-sub">Driver's account is restored right now.</div>
+        </div>
+      </label>
+      <label class="reactivate-option" id="opt-date-wrap">
+        <input type="radio" name="reactivate-type" value="scheduled" onchange="toggleReactivateType()" />
+        <div>
+          <div class="reactivate-option-label">Set Reactivation Date</div>
+          <div class="reactivate-option-sub">Account is automatically restored on the chosen date.</div>
+        </div>
+      </label>
+    </div>
+    <div class="modal-field" id="date-field" style="display:none;">
+      <label class="modal-label" for="reactivate-date">Reactivation Date</label>
+      <input type="date" class="modal-input" id="reactivate-date" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeReactivateModal()">Cancel</button>
+      <button class="btn-modal-green" onclick="confirmReactivate()"><i class="fa-solid fa-circle-check"></i> Reactivate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo lightbox -->
+<div id="complaint-lightbox" onclick="closeLightbox()">
+  <button id="clb-close" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></button>
+  <img id="clb-img" src="" alt="Full photo" onclick="event.stopPropagation()" />
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/complaints.js"></script>
+<script>
+  var _officerSession  = null;
+  var _officerBarangay = '';
+  var _officerName     = '';
+  var _officerId       = '';
+  var _currentFilter   = 'all';
+  var _currentSort     = 'newest';
+  var _currentPage     = 1;
+  var PAGE_SIZE        = 6;
+
+  // Pending-action state
+  var _pendingVerifyId        = null;
+  var _pendingVerifyDriverName = '';
+  var _pendingRejectId        = null;
+  var _pendingDriverId        = null;
+  var _reactivateComplaintId  = null;
+  var _pendingFlagComplaintId = null;
+  var _pendingFlagDriverId    = null;
+  var _pendingFlagDriverName  = null;
+
+  // ── Session ───────────────────────────────────────────────
+  (function () {
+    try { _officerSession = JSON.parse(sessionStorage.getItem('zc_session')); } catch (e) {}
+    if (!_officerSession) return;
+    _officerBarangay = _officerSession.barangay || '';
+    _officerName     = ((_officerSession.firstName || '') + ' ' + (_officerSession.lastName || '')).trim() || 'Officer';
+    _officerId       = _officerSession.id || '';
+    var sn = document.getElementById('sidebar-user-name');
+    var sr = document.getElementById('sidebar-user-role');
+    var ri = document.getElementById('role-indicator');
+    var ps = document.getElementById('page-subtitle');
+    if (sn) sn.textContent = _officerName;
+    if (sr) sr.textContent = 'Officer' + (_officerBarangay ? ' · ' + _officerBarangay : '');
+    if (ri) ri.innerHTML   = '<i class="fa-solid fa-landmark"></i> Officer Portal' + (_officerBarangay ? ' — ' + _officerBarangay : '');
+    if (ps) ps.textContent = 'Citizen complaints against drivers in ' + (_officerBarangay || 'your barangay');
+  }());
+
+  // ── Helpers ──────────────────────────────────────────────
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  function photoHtml(src, label, icon) {
+    var img = (src && (src.startsWith('data:') || src.startsWith('http') || src.startsWith('/')))
+      ? '<div class="photo-box-img"><img src="' + esc(src) + '" alt="' + esc(label) + '" onclick="openLightbox(this.src)" onerror="this.parentNode.innerHTML=\'<div class=no-photo><i class=\\\'fa-solid fa-image\\\'></i><span>Not available</span></div>\'"></div>'
+      : '<div class="photo-box-img"><div class="no-photo"><i class="fa-solid ' + icon + '"></i><span>No photo</span></div></div>';
+    return '<div class="photo-box"><div class="photo-box-label"><i class="fa-solid ' + icon + '"></i> ' + esc(label) + '</div>' + img + '</div>';
+  }
+
+  function countPhotos(c) {
+    var n = 0;
+    if (c.originalReportPhoto && (c.originalReportPhoto.startsWith('data:') || c.originalReportPhoto.startsWith('http'))) n++;
+    if (c.complaintPhoto      && (c.complaintPhoto.startsWith('data:')      || c.complaintPhoto.startsWith('http')))      n++;
+    return n;
+  }
+
+  // ── Sort ─────────────────────────────────────────────────
+  function setSort(s) {
+    _currentSort = s;
+    _currentPage = 1;
+    render();
+  }
+
+  function sortComplaints(arr) {
+    var out = arr.slice();
+    if (_currentSort === 'newest') {
+      out.sort(function(a,b){ return new Date(b.submittedAt||b.timestamp||0) - new Date(a.submittedAt||a.timestamp||0); });
+    } else if (_currentSort === 'oldest') {
+      out.sort(function(a,b){ return new Date(a.submittedAt||a.timestamp||0) - new Date(b.submittedAt||b.timestamp||0); });
+    } else if (_currentSort === 'pending-first') {
+      var order = { pending:0, approved:1, rejected:2 };
+      out.sort(function(a,b){
+        var oa = order[a.status] != null ? order[a.status] : 3;
+        var ob = order[b.status] != null ? order[b.status] : 3;
+        if (oa !== ob) return oa - ob;
+        return new Date(b.submittedAt||0) - new Date(a.submittedAt||0);
+      });
+    }
+    return out;
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  function render() {
+    var all = _officerBarangay
+      ? COMPLAINTS_DB.getByBarangay(_officerBarangay)
+      : COMPLAINTS_DB.getAll();
+
+    var counts = { total: all.length, pending: 0, approved: 0, rejected: 0 };
+    all.forEach(function(c) {
+      if (c.status === 'pending')  counts.pending++;
+      if (c.status === 'approved') counts.approved++;
+      if (c.status === 'rejected') counts.rejected++;
+    });
+
+    // Stat cards
+    document.getElementById('stat-total').textContent     = counts.total;
+    document.getElementById('stat-pending').textContent   = counts.pending;
+    document.getElementById('stat-verified').textContent  = counts.approved;
+    document.getElementById('stat-dismissed').textContent = counts.rejected;
+
+    // Chip counts
+    document.getElementById('cnt-all').textContent      = counts.total;
+    document.getElementById('cnt-pending').textContent  = counts.pending;
+    document.getElementById('cnt-approved').textContent = counts.approved;
+    document.getElementById('cnt-rejected').textContent = counts.rejected;
+
+    // Sidebar badge
+    var pb = document.getElementById('sidebar-pending-count');
+    if (pb) {
+      pb.textContent     = counts.pending;
+      pb.style.display   = counts.pending > 0 ? '' : 'none';
+    }
+
+    // Stat card active state
+    ['all','pending','approved','rejected'].forEach(function(k) {
+      var card = document.getElementById('scard-' + (k === 'all' ? 'all' : k));
+      if (card) card.classList.toggle('stat-active', k === _currentFilter);
+    });
+
+    var filtered = all.filter(function(c) {
+      if (_currentFilter === 'all') return true;
+      return c.status === _currentFilter;
+    });
+    var sorted = sortComplaints(filtered);
+
+    var list = document.getElementById('complaints-list');
+    if (sorted.length === 0) {
+      var msgs = {
+        all:      ['No Complaints Yet', 'No complaints have been submitted for your barangay.'],
+        pending:  ['All Caught Up', 'There are no pending complaints awaiting your review.'],
+        approved: ['No Verified Complaints', 'You have not verified any complaints yet.'],
+        rejected: ['No Dismissed Complaints', 'No complaints have been dismissed.']
+      };
+      var m = msgs[_currentFilter] || msgs.all;
+      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>' + m[0] + '</p><span>' + m[1] + '</span></div>';
+      return;
+    }
+
+    var totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+    if (_currentPage > totalPages) _currentPage = totalPages;
+    var pageItems = sorted.slice((_currentPage - 1) * PAGE_SIZE, _currentPage * PAGE_SIZE);
+
+    list.innerHTML = pageItems.map(buildCard).join('') + buildPagination(sorted.length, totalPages);
+
+    pageItems.forEach(function(c) {
+      if (c.status === 'approved' && c.actionType !== 'flagged') renderDriverSection(c);
+    });
+  }
+
+  function buildPagination(total, totalPages) {
+    if (totalPages <= 1) return '';
+    var html = '<div class="pagination-row">';
+    html += '<button class="pg-btn" onclick="goToPage(' + (_currentPage-1) + ')" ' + (_currentPage<=1 ? 'disabled' : '') + '><i class="fa-solid fa-chevron-left"></i></button>';
+    var start = Math.max(1, _currentPage - 2);
+    var end   = Math.min(totalPages, start + 4);
+    if (end - start < 4) start = Math.max(1, end - 4);
+    for (var p = start; p <= end; p++) {
+      html += '<button class="pg-btn' + (p === _currentPage ? ' active' : '') + '" onclick="goToPage(' + p + ')">' + p + '</button>';
+    }
+    html += '<button class="pg-btn" onclick="goToPage(' + (_currentPage+1) + ')" ' + (_currentPage>=totalPages ? 'disabled' : '') + '><i class="fa-solid fa-chevron-right"></i></button>';
+    html += '<span class="pg-info">' + total + ' total</span>';
+    html += '</div>';
+    return html;
+  }
+
+  function goToPage(p) {
+    _currentPage = p;
+    render();
+    document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function buildCard(c) {
+    // Card class
+    var isFlagged = (c.status === 'approved' && c.actionType === 'flagged');
+    var cardCls = c.status === 'pending' ? 'card-pending'
+      : isFlagged                        ? 'card-flagged'
+      : c.status === 'approved'          ? 'card-verified'
+      :                                    'card-dismissed';
+
+    // Status badge
+    var statusBadge = c.status === 'pending'
+      ? '<span class="badge-pending"><i class="fa-solid fa-hourglass-half" style="font-size:9px;"></i> Pending</span>'
+      : isFlagged
+      ? '<span class="badge-flagged"><i class="fa-solid fa-flag" style="font-size:9px;"></i> Flagged</span>'
+      : c.status === 'approved'
+      ? '<span class="badge-verified"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Verified</span>'
+      : '<span class="badge-dismissed"><i class="fa-solid fa-circle-xmark" style="font-size:9px;"></i> Dismissed</span>';
+
+    // Photo toggle button
+    var nPhotos = countPhotos(c);
+    var photoLabel = nPhotos === 0 ? 'No Photos Attached'
+      : nPhotos === 1 ? '1 Photo Available'
+      : '2 Comparison Photos';
+    var photoToggle = '<button class="photo-toggle-btn" id="ptbtn-' + esc(c.id) + '" onclick="togglePhotos(\'' + esc(c.id) + '\')" ' + (nPhotos === 0 ? 'disabled style="opacity:0.5;cursor:default;"' : '') + '>'
+      + '<i class="fa-solid fa-' + (nPhotos > 0 ? 'images' : 'image') + '"></i> ' + esc(photoLabel)
+      + (nPhotos > 0 ? '<i class="fa-solid fa-chevron-down pt-arrow"></i>' : '')
+      + '</button>';
+
+    // Photo panel
+    var photoPanel = '<div class="photo-collapsible" id="photos-' + esc(c.id) + '" style="display:none;">'
+      + '<div class="photo-compare" style="margin-top:8px;">'
+      + photoHtml(c.originalReportPhoto, 'Original Report Photo', 'file-image')
+      + photoHtml(c.complaintPhoto,      'Complaint Photo (Now)',  'camera')
+      + '</div></div>';
+
+    // Description
+    var descHtml = c.description
+      ? '<div class="c-desc"><i class="fa-solid fa-quote-left" style="color:var(--muted);margin-right:6px;font-size:10px;"></i>' + esc(c.description) + '</div>'
+      : '';
+
+    // Actions / review section
+    var actionHtml = '';
+    if (c.status === 'pending') {
+      actionHtml = '<div class="c-actions">'
+        + '<button class="btn-verify" onclick="openVerifyModal(\'' + esc(c.id) + '\',\'' + esc(c.driverName) + '\')" title="Verify the complaint and suspend this driver">'
+        + '<i class="fa-solid fa-ban"></i> Verify &amp; Suspend Driver</button>'
+        + '<button class="btn-flag" onclick="openFlagModal(\'' + esc(c.id) + '\',\'' + esc(c.driverId) + '\',\'' + esc(c.driverName) + '\')" title="Flag account without suspending">'
+        + '<i class="fa-solid fa-flag"></i> Flag Only</button>'
+        + '<button class="btn-dismiss" onclick="openRejectModal(\'' + esc(c.id) + '\')" title="Dismiss — complaint is not valid">'
+        + '<i class="fa-solid fa-circle-xmark"></i> Dismiss</button>'
+        + '</div>';
+    } else if (isFlagged) {
+      actionHtml = '<div class="c-review-timeline rt-flagged">'
+        + '<div class="rt-icon"><i class="fa-solid fa-flag"></i></div>'
+        + '<div class="rt-body"><div class="rt-title">Account Flagged (No Suspension)</div>'
+        + '<div class="rt-detail">By ' + esc(c.officerName || '—') + ' &nbsp;·&nbsp; ' + fmtDate(c.reviewedAt)
+        + (c.reviewNotes ? ' &nbsp;·&nbsp; ' + esc(c.reviewNotes) : '') + '</div></div>'
+        + '</div>';
+    } else if (c.status === 'approved') {
+      actionHtml = '<div id="driver-section-' + esc(c.id) + '"></div>'
+        + '<div class="c-review-timeline rt-verified">'
+        + '<div class="rt-icon"><i class="fa-solid fa-circle-check"></i></div>'
+        + '<div class="rt-body"><div class="rt-title">Complaint Verified</div>'
+        + '<div class="rt-detail">Reviewed by ' + esc(c.officerName || '—') + ' &nbsp;·&nbsp; ' + fmtDate(c.reviewedAt) + '</div></div>'
+        + '</div>';
+    } else {
+      actionHtml = '<div class="c-review-timeline rt-dismissed">'
+        + '<div class="rt-icon"><i class="fa-solid fa-circle-xmark"></i></div>'
+        + '<div class="rt-body"><div class="rt-title">Complaint Dismissed</div>'
+        + '<div class="rt-detail">By ' + esc(c.officerName || '—') + ' &nbsp;·&nbsp; ' + fmtDate(c.reviewedAt)
+        + (c.reviewNotes ? ' &nbsp;·&nbsp; ' + esc(c.reviewNotes) : '') + '</div></div>'
+        + '</div>';
+    }
+
+    return '<div class="complaint-card ' + cardCls + '" id="card-' + esc(c.id) + '">'
+      + '<div class="complaint-card-body">'
+      + '<div class="c-header">'
+      + '<span class="c-id-badge">' + esc(c.id) + '</span>'
+      + '<span class="c-report-ref"><i class="fa-solid fa-link" style="font-size:9px;opacity:0.5;"></i> Report #' + esc(c.reportId) + '</span>'
+      + '<span class="c-date">' + esc(c.dateStr || fmtDate(c.submittedAt)) + '</span>'
+      + '</div>'
+      + '<div class="c-loc">' + esc(c.location || '—') + '</div>'
+      + '<div class="c-meta">'
+      + '<i class="fa-solid fa-user" style="font-size:10px;"></i>' + esc(c.citizenName)
+      + '<span class="c-meta-dot">·</span>'
+      + '<i class="fa-solid fa-location-dot" style="font-size:10px;"></i>' + esc(c.barangay)
+      + '<span style="margin-left:auto;">' + statusBadge + '</span>'
+      + '</div>'
+      + '<div class="c-driver-box">'
+      + '<div class="c-driver-icon"><i class="fa-solid fa-truck"></i></div>'
+      + '<div><div class="c-driver-name">' + esc(c.driverName) + '</div>'
+      + '<div class="c-driver-sub">Reportedly marked this report as collected without collecting</div></div>'
+      + '</div>'
+      + photoToggle
+      + photoPanel
+      + descHtml
+      + actionHtml
+      + '</div>'
+      + '</div>';
+  }
+
+  function renderDriverSection(c) {
+    var el = document.getElementById('driver-section-' + c.id);
+    if (!el) return;
+    var users = [];
+    try { users = JSON.parse(localStorage.getItem('zc_users')) || []; } catch(e) {}
+    var driver = null;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].id === c.driverId) { driver = users[i]; break; }
+    }
+    if (!driver) return;
+    if (driver.suspended) {
+      var reactivateStr = driver.suspendedUntil
+        ? 'Reactivation scheduled: ' + new Date(driver.suspendedUntil).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})
+        : 'No reactivation date set — manual reactivation required';
+      el.innerHTML = '<div class="driver-suspend-section">'
+        + '<div class="ds-info">'
+        + '<div class="ds-title"><i class="fa-solid fa-ban" style="color:#ea580c;"></i>' + esc(driver.firstName + ' ' + driver.lastName) + '<span class="suspended-badge">SUSPENDED</span></div>'
+        + '<div class="ds-sub">' + esc(reactivateStr) + '</div>'
+        + '</div>'
+        + '<button class="btn-reactivate" onclick="openReactivateModal(\'' + esc(c.driverId) + '\',\'' + esc(driver.firstName + ' ' + driver.lastName) + '\',\'' + esc(c.id) + '\')">'
+        + '<i class="fa-solid fa-circle-check"></i> Reactivate</button>'
+        + '</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:12px;color:#16a34a;padding:4px 0;display:flex;align-items:center;gap:6px;">'
+        + '<i class="fa-solid fa-circle-check"></i> Driver account has been reactivated.</div>';
+    }
+  }
+
+  // ── Filter ───────────────────────────────────────────────
+  function setFilter(f) {
+    _currentFilter = f;
+    _currentPage   = 1;
+    ['all','pending','approved','rejected'].forEach(function(x) {
+      document.getElementById('filter-' + x).classList.toggle('active', x === f);
+    });
+    render();
+  }
+
+  // ── Verify modal ─────────────────────────────────────────
+  function openVerifyModal(id, driverName) {
+    _pendingVerifyId         = id;
+    _pendingVerifyDriverName = driverName;
+    document.getElementById('verify-driver-name').textContent = driverName || 'the driver';
+    document.getElementById('verify-modal-sub').textContent =
+      'You are about to verify the complaint against ' + (driverName || 'this driver') + '. This action cannot be undone.';
+    document.getElementById('verify-modal').classList.remove('hidden');
+  }
+  function closeVerifyModal() {
+    _pendingVerifyId = null;
+    document.getElementById('verify-modal').classList.add('hidden');
+  }
+  function confirmVerify() {
+    if (!_pendingVerifyId) return;
+    COMPLAINTS_DB.approve(_pendingVerifyId, _officerName, _officerId, _officerBarangay);
+    closeVerifyModal();
+    render();
+  }
+
+  // ── Dismiss modal ─────────────────────────────────────────
+  function openRejectModal(id) {
+    _pendingRejectId = id;
+    document.getElementById('reject-reason-select').value = '';
+    document.getElementById('reject-notes').value = '';
+    document.getElementById('reject-modal').classList.remove('hidden');
+  }
+  function closeRejectModal() {
+    _pendingRejectId = null;
+    document.getElementById('reject-modal').classList.add('hidden');
+  }
+  function confirmReject() {
+    if (!_pendingRejectId) return;
+    var reason = document.getElementById('reject-reason-select').value;
+    if (!reason) {
+      document.getElementById('reject-reason-select').style.borderColor = '#dc2626';
+      return;
+    }
+    document.getElementById('reject-reason-select').style.borderColor = '';
+    var notes  = document.getElementById('reject-notes').value.trim();
+    var full   = notes ? reason + ' — ' + notes : reason;
+    COMPLAINTS_DB.reject(_pendingRejectId, _officerName, _officerId, _officerBarangay, full);
+    closeRejectModal();
+    render();
+  }
+
+  // ── Reactivate modal ──────────────────────────────────────
+  function openReactivateModal(driverId, driverName, complaintId) {
+    _pendingDriverId       = driverId;
+    _reactivateComplaintId = complaintId;
+    document.getElementById('reactivate-modal-sub').textContent =
+      'Choose how to restore ' + driverName + '\'s account access.';
+    document.querySelector('input[name="reactivate-type"][value="immediate"]').checked = true;
+    document.getElementById('opt-immediate-wrap').classList.add('selected');
+    document.getElementById('opt-date-wrap').classList.remove('selected');
+    document.getElementById('date-field').style.display = 'none';
+    document.getElementById('reactivate-date').value   = '';
+    document.getElementById('reactivate-modal').classList.remove('hidden');
+  }
+  function closeReactivateModal() {
+    _pendingDriverId = null;
+    document.getElementById('reactivate-modal').classList.add('hidden');
+  }
+  function toggleReactivateType() {
+    var isScheduled = document.querySelector('input[name="reactivate-type"]:checked').value === 'scheduled';
+    document.getElementById('date-field').style.display = isScheduled ? '' : 'none';
+    document.getElementById('opt-immediate-wrap').classList.toggle('selected', !isScheduled);
+    document.getElementById('opt-date-wrap').classList.toggle('selected',  isScheduled);
+  }
+  function confirmReactivate() {
+    if (!_pendingDriverId) return;
+    var type  = document.querySelector('input[name="reactivate-type"]:checked').value;
+    var until = null;
+    if (type === 'scheduled') {
+      until = document.getElementById('reactivate-date').value;
+      if (!until) { document.getElementById('reactivate-date').style.borderColor = '#dc2626'; return; }
+      document.getElementById('reactivate-date').style.borderColor = '';
+      until = new Date(until).toISOString();
+    }
+    ZC_DB.reactivateDriver(_pendingDriverId, _officerName, _officerId, until);
+    closeReactivateModal();
+    render();
+  }
+
+  // ── Flag modal ────────────────────────────────────────────
+  function openFlagModal(complaintId, driverId, driverName) {
+    _pendingFlagComplaintId = complaintId;
+    _pendingFlagDriverId    = driverId;
+    _pendingFlagDriverName  = driverName;
+    document.getElementById('flag-reason').value = '';
+    document.getElementById('flag-modal-sub').innerHTML =
+      'Add a warning flag to <strong>' + esc(driverName) + '</strong>\'s profile. The driver will be notified. This does <strong>not</strong> suspend the account.';
+    document.getElementById('flag-modal').classList.remove('hidden');
+  }
+  function closeFlagModal() {
+    _pendingFlagComplaintId = null;
+    document.getElementById('flag-modal').classList.add('hidden');
+  }
+  function confirmFlag() {
+    if (!_pendingFlagComplaintId) return;
+    var reason = document.getElementById('flag-reason').value.trim();
+    COMPLAINTS_DB.flagAccount(_pendingFlagComplaintId, _officerName, _officerId, _officerBarangay,
+      reason || 'Complaint confirmed — warning issued without suspension');
+    closeFlagModal();
+    render();
+  }
+
+  // ── Photo toggle ──────────────────────────────────────────
+  function togglePhotos(id) {
+    var panel = document.getElementById('photos-' + id);
+    var btn   = document.getElementById('ptbtn-' + id);
+    if (!panel) return;
+    var open = panel.style.display !== 'none';
+    panel.style.display = open ? 'none' : '';
+    if (btn) btn.classList.toggle('open', !open);
+  }
+
+  // ── Lightbox ──────────────────────────────────────────────
+  function openLightbox(src) {
+    document.getElementById('clb-img').src = src;
+    document.getElementById('complaint-lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('complaint-lightbox').classList.remove('open');
+    document.getElementById('clb-img').src = '';
+    document.body.style.overflow = '';
+  }
+
+  // Backdrop clicks close modals
+  ['verify-modal','reject-modal','flag-modal','reactivate-modal'].forEach(function(id) {
+    document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+  });
+
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+
+  // ── Boot ──────────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Density Map</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .map-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 20px;
+    }
+    .map-toolbar {
+      display: flex; align-items: center; gap: 8px; padding: 11px 16px;
+      border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap;
+    }
+    .map-toolbar-label { font-size: 12px; font-weight: 700; color: var(--text2); margin-right: 4px; }
+    .map-filter-btn {
+      padding: 5px 11px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface); color: var(--text2);
+      cursor: pointer; transition: all 0.15s; appearance: none; font-family: inherit;
+    }
+    .map-filter-btn.active, .map-filter-btn:hover {
+      background: var(--primary-glow); border-color: var(--primary-tint); color: var(--primary);
+    }
+    #density-map { width: 100%; height: 440px; display: block; }
+
+    .legend-row {
+      display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 16px;
+      border-top: 1px solid var(--border); background: var(--surface2); font-size: 11px; font-weight: 600;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .density-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-indicator" id="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review <span class="nav-badge badge-yellow">5</span></a>
+        <a href="officer-pending-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-density-map.html"     class="nav-item active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="officer-manage-users.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Users &amp; Accounts</a>
+        <a href="officer-analytics.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile
+        </a>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div><div class="user-name" id="sidebar-user-name">Officer</div><div class="user-role" id="sidebar-user-role">Officer</div></div>
+      </a>
+      <a class="logout-btn" href="#" onclick="try{sessionStorage.removeItem('zc_session');}catch(e){} window.location.href='Login.html'; return false;"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Density Map</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page active" role="main">
+      <div class="page-header">
+        <h1 id="page-heading">Density Map</h1>
+        <p id="page-subheading">Real-time waste report hotspots and collection status for Zamboanga City.</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="density-stats">
+        <div class="stat-card" style="border-color:rgba(220,38,38,0.2);">
+          <div class="stat-icon"><i class="fa-solid fa-fire" style="color:var(--red);"></i></div>
+          <div class="stat-num" style="color:var(--red);">8</div>
+          <div class="stat-label">Pending Reports</div>
+        </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="stat-num" style="color:var(--yellow);">3</div>
+          <div class="stat-label">Urgent Priority</div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fa-solid fa-truck"></i></div>
+          <div class="stat-num" style="color:var(--blue);">2</div>
+          <div class="stat-label">Approved Today</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-num" style="color:var(--green);">1</div>
+          <div class="stat-label">Collected Today</div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="map-card">
+        <div class="map-toolbar">
+          <span class="map-toolbar-label">Layer:</span>
+          <button class="map-filter-btn active" data-layer="heatmap"><i class="fa-solid fa-fire"></i> Heatmap</button>
+          <button class="map-filter-btn" data-layer="pins"><i class="fa-solid fa-location-dot"></i> Report Pins</button>
+          <button class="map-filter-btn" data-layer="collected"><i class="fa-solid fa-circle-check"></i> Collected</button>
+          <button class="map-filter-btn" data-layer="incidents"><i class="fa-solid fa-layer-group"></i> Incident Clusters</button>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button class="map-filter-btn" id="zoom-in-btn">⊕ In</button>
+            <button class="map-filter-btn" id="zoom-out-btn">⊖ Out</button>
+          </div>
+        </div>
+        <div id="density-map"></div>
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-dot" style="background:#c0392b;"></span>Critical</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#c08a10;"></span>Urgent</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#2563eb;"></span>Approved</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#588157;"></span>Collected</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#7c3aed;"></span>Incident Cluster</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/incidents.js"></script>
+<script>
+  var dMap, heatLayer, pinMarkers = [], collectedMarkers = [], incidentMarkers = [];
+
+  /* Report locations in Rio Hondo area — used as fallback if localStorage empty */
+  var REPORTS = [
+    { lat:6.9167, lng:122.0833, priority:'critical', loc:'Waterfront Road',     status:'pending'   },
+    { lat:6.9175, lng:122.0845, priority:'urgent',   loc:'Purok 2, Bagonsilang',status:'pending'   },
+    { lat:6.9155, lng:122.0820, priority:'critical', loc:'Near Rio Hondo Mosque',status:'pending'   },
+    { lat:6.9180, lng:122.0858, priority:'urgent',   loc:'Market Gate',          status:'approved'  },
+    { lat:6.9148, lng:122.0840, priority:'normal',   loc:'Purok 4, Rizal St.',   status:'pending'   },
+    { lat:6.9192, lng:122.0830, priority:'urgent',   loc:'School Alley',         status:'approved'  },
+    { lat:6.9160, lng:122.0860, priority:'normal',   loc:'Purok 6, Del Pilar',   status:'pending'   },
+    { lat:6.9140, lng:122.0815, priority:'critical', loc:'Riverside Embankment', status:'collected' },
+  ];
+
+  var PRIORITY_COLOR  = { critical:'#c0392b', urgent:'#c08a10', normal:'#2563eb', ok:'#588157' };
+  var STATUS_OVERRIDE = { collected:'#588157', approved:'#2563eb' };
+
+  function _clearIncidentMarkers() {
+    incidentMarkers.forEach(function(m){ m.setMap(null); });
+    incidentMarkers = [];
+  }
+
+  function _buildIncidentLayer(map) {
+    _clearIncidentMarkers();
+    if (typeof INCIDENTS_DB === 'undefined') return;
+    INCIDENTS_DB.rebuildFromReports();
+    var incidents = INCIDENTS_DB.getAll();
+    var URG_COLOR = { critical:'#dc2626', high:'#ea580c', medium:'#d97706', low:'#7c3aed', undefined:'#7c3aed' };
+
+    incidents.forEach(function(inc) {
+      if (!inc.lat || !inc.lng) return;
+      var color = inc.status === 'collected' ? '#588157'
+                : inc.status === 'approved'  ? '#2563eb'
+                : URG_COLOR[inc.priority]    || '#7c3aed';
+      var label = String(inc.reportCount || 1);
+
+      var m = new google.maps.Marker({
+        position: { lat: inc.lat, lng: inc.lng }, map: map,
+        title: inc.id + ': ' + inc.location,
+        label: { text: label, color: '#fff', fontSize: '11px', fontWeight: '700' },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 14 + Math.min(inc.reportCount * 2, 10),
+          fillColor: color, fillOpacity: 0.92,
+          strokeColor: '#fff', strokeWeight: 2
+        }
+      });
+      var stLabel = { pending:'Pending', approved:'Approved', collected:'Collected', rejected:'Rejected' }[inc.status] || 'Unknown';
+      var iw = new google.maps.InfoWindow({
+        content: '<div style="font-family:sans-serif;padding:4px 6px;min-width:170px;font-size:13px;">'
+          + '<strong style="color:' + color + ';">' + inc.id + '</strong><br>'
+          + '<span>' + inc.location + '</span><br>'
+          + '<span style="font-weight:600;color:' + color + ';text-transform:capitalize;">' + stLabel + ' &middot; ' + (inc.reportCount || 1) + ' report' + (inc.reportCount > 1 ? 's' : '') + '</span>'
+          + '</div>'
+      });
+      m.addListener('click', function(){ iw.open(map, m); });
+      incidentMarkers.push(m);
+    });
+  }
+
+  function initDensityMap() {
+    var rioHondo = { lat: 6.9162, lng: 122.0838 };
+    dMap = new google.maps.Map(document.getElementById('density-map'), {
+      center: rioHondo, zoom: 15,
+      mapTypeControl: false, streetViewControl: false, fullscreenControl: true,
+    });
+
+    /* Heatmap layer */
+    var heatData = REPORTS.map(function(r) {
+      var w = r.priority === 'critical' ? 10 : r.priority === 'urgent' ? 6 : 3;
+      return { location: new google.maps.LatLng(r.lat, r.lng), weight: w };
+    });
+    heatLayer = new google.maps.visualization.HeatmapLayer({
+      data: heatData, map: dMap, radius: 35, opacity: 0.75,
+      gradient: ['rgba(0,0,0,0)','rgba(255,255,0,0.6)','rgba(255,140,0,0.8)','rgba(192,57,43,1)']
+    });
+
+    /* Pin markers */
+    REPORTS.forEach(function(r) {
+      var color = STATUS_OVERRIDE[r.status] || PRIORITY_COLOR[r.priority] || '#588157';
+      var m = new google.maps.Marker({
+        position: { lat: r.lat, lng: r.lng }, map: null, title: r.loc,
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
+      });
+      var iw = new google.maps.InfoWindow({
+        content: '<div style="font-family:sans-serif;padding:3px 4px;min-width:150px;font-size:13px;">'
+          + '<strong>' + r.loc + '</strong><br>'
+          + '<span style="color:' + color + ';font-weight:600;text-transform:capitalize;">' + r.priority + ' · ' + r.status + '</span></div>'
+      });
+      m.addListener('click', function() { iw.open(dMap, m); });
+      if (r.status === 'collected') { collectedMarkers.push(m); } else { pinMarkers.push(m); }
+    });
+
+    /* Filter buttons */
+    document.querySelectorAll('.map-filter-btn[data-layer]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.map-filter-btn[data-layer]').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        var layer = this.dataset.layer;
+        heatLayer.setMap(null);
+        pinMarkers.forEach(function(m) { m.setMap(null); });
+        collectedMarkers.forEach(function(m) { m.setMap(null); });
+        _clearIncidentMarkers();
+        if (layer === 'heatmap') { heatLayer.setMap(dMap); pinMarkers.forEach(function(m) { m.setMap(dMap); }); }
+        else if (layer === 'pins') { pinMarkers.forEach(function(m) { m.setMap(dMap); }); }
+        else if (layer === 'collected') { collectedMarkers.forEach(function(m) { m.setMap(dMap); }); }
+        else if (layer === 'incidents') { _buildIncidentLayer(dMap); }
+      });
+    });
+
+    document.getElementById('zoom-in-btn').addEventListener('click',  function() { dMap.setZoom(Math.min(dMap.getZoom()+1, 20)); });
+    document.getElementById('zoom-out-btn').addEventListener('click', function() { dMap.setZoom(Math.max(dMap.getZoom()-1, 3));  });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU&libraries=visualization&callback=initDensityMap" async defer></script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(sessionStorage.getItem('zc_session'));
+    if (!u) return;
+    var fullName = [u.firstName, u.middleName, u.lastName].filter(Boolean).join(' ') || u.name || 'Officer';
+    var nameEl    = document.getElementById('sidebar-user-name');
+    var roleEl    = document.getElementById('sidebar-user-role');
+    var indEl     = document.getElementById('role-indicator');
+    var headEl    = document.getElementById('page-heading');
+    var subEl     = document.getElementById('page-subheading');
+    if (nameEl) nameEl.textContent = fullName;
+    if (roleEl) roleEl.textContent = 'Officer' + (u.barangay ? ' · ' + u.barangay : '');
+    if (indEl)  indEl.innerHTML = '<i class="fa-solid fa-landmark"></i> Officer Portal' + (u.barangay ? ' — ' + u.barangay : '');
+    if (headEl) headEl.textContent = 'Density Map' + (u.barangay ? ' — ' + u.barangay : '');
+    if (subEl && u.barangay) subEl.textContent = 'Real-time waste report hotspots and collection status for Barangay ' + u.barangay + ', Zamboanga City.';
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

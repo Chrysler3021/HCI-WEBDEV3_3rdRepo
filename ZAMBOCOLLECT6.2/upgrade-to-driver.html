@@ -1,0 +1,1036 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply as Driver — ZamboCollect</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .upgrade-hero {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+      border-radius: 16px; padding: 28px 28px 24px;
+      margin-bottom: 20px; color: #fff; position: relative; overflow: hidden;
+    }
+    .upgrade-hero::before { content:''; position:absolute; top:-30px; right:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .upgrade-hero::after  { content:''; position:absolute; bottom:-20px; right:80px; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,0.04); }
+    .upgrade-hero h2 { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; margin-bottom:6px; }
+    .upgrade-hero p  { font-size:13px; opacity:0.85; line-height:1.6; max-width:480px; }
+    .hero-badges { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+    .hero-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 10px; font-size:11px; font-weight:600; }
+
+    .wizard-card { background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:22px; box-shadow:var(--shadow-sm); margin-bottom:16px; }
+    .wizard-card-title { font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; margin-bottom:16px; color:var(--text); display:flex; align-items:center; gap:8px; }
+
+    /* Step indicator */
+    .wizard-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:20px; }
+    .wizard-step { display:flex; gap:10px; padding:12px 14px; border:1.5px solid var(--border); border-radius:12px; background:var(--surface2); align-items:center; transition:border-color 0.2s,transform 0.2s; }
+    .wizard-step.active { border-color:#2563eb; background:rgba(59,130,246,0.08); transform:translateY(-1px); }
+    .wizard-step.done   { border-color:#16a34a; background:rgba(22,163,74,0.06); }
+    .wizard-step .step-number { width:34px; height:34px; border-radius:50%; background:#2563eb; color:#fff; display:grid; place-items:center; font-weight:700; font-size:13px; flex-shrink:0; }
+    .wizard-step.done .step-number { background:#16a34a; }
+    .wizard-step .step-title { font-size:12px; font-weight:700; color:var(--text); }
+    .wizard-step .step-desc  { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .wizard-panel { display:none; }
+    .wizard-panel.active { display:block; }
+
+    .form-group { margin-bottom:16px; }
+    .form-group label { font-size:13px; font-weight:600; color:var(--text); display:block; margin-bottom:6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%; padding:10px 14px; border:1.5px solid var(--border);
+      border-radius:10px; background:var(--surface2); font-family:'Source Sans 3',sans-serif;
+      font-size:13px; color:var(--text); outline:none; transition:border-color 0.2s;
+      -webkit-appearance:none;
+    }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.08); }
+    .two-col   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+    .notice-blue { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 14px; font-size:12px; color:#1d4ed8; line-height:1.6; display:flex; align-items:flex-start; gap:8px; margin-bottom:16px; }
+    .notice-blue i { margin-top:2px; flex-shrink:0; }
+
+    /* Camera / capture zone */
+    .capture-zone { position:relative; border:1.5px dashed #93c5fd; border-radius:14px; padding:24px 18px; text-align:center; background:rgba(59,130,246,0.04); margin-bottom:16px; }
+    .capture-zone input[type=file] { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+    .capture-icon { width:54px; height:54px; margin:0 auto 10px; border-radius:50%; display:grid; place-items:center; background:#2563eb; color:#fff; font-size:20px; }
+    .capture-zone h4 { font-size:15px; margin-bottom:6px; font-weight:700; }
+    .capture-zone p  { font-size:13px; color:var(--muted); line-height:1.7; max-width:400px; margin:0 auto 12px; }
+    .cam-btn { margin:0 auto; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:10px; padding:10px 18px; font-size:13px; cursor:pointer; }
+    .cam-btn.blue { background:#2563eb; color:#fff; }
+    .cam-tip { display:inline-flex; align-items:center; gap:8px; color:#2563eb; font-size:12px; margin-top:12px; }
+
+    /* Document grid */
+    .doc-capture-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    .doc-capture-item { border:1.5px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface2); }
+    .doc-capture-header { padding:10px 12px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+    .doc-capture-header i { color:#2563eb; font-size:13px; flex-shrink:0; }
+    .doc-capture-header .doc-name { font-size:12px; font-weight:700; color:var(--text); flex:1; }
+    .doc-capture-header .doc-req  { font-size:10px; font-weight:700; color:#dc2626; }
+    .doc-capture-body { padding:14px; text-align:center; }
+    .doc-preview { width:100%; aspect-ratio:4/3; border-radius:8px; object-fit:cover; display:none; margin-bottom:8px; border:1px solid var(--border); }
+    .doc-placeholder { aspect-ratio:4/3; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--muted); font-size:12px; border-radius:8px; background:var(--surface3); margin-bottom:8px; gap:6px; }
+    .doc-placeholder i { font-size:1.6rem; }
+    .doc-take-btn {
+      width:100%; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700;
+      border:none; background:#2563eb; color:#fff; cursor:pointer; display:flex;
+      align-items:center; justify-content:center; gap:6px; position:relative; overflow:hidden;
+    }
+    .doc-take-btn input[type=file] { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+    .doc-retake-btn {
+      width:100%; padding:7px 12px; border-radius:8px; font-size:12px; font-weight:600;
+      border:1.5px solid var(--border); background:var(--surface); color:var(--muted);
+      cursor:pointer; display:none; align-items:center; justify-content:center; gap:6px;
+      margin-top:6px; position:relative; overflow:hidden;
+    }
+    .doc-retake-btn input[type=file] { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+    .doc-status { font-size:11px; margin-top:4px; font-weight:600; }
+    .doc-status.captured { color:#16a34a; }
+    .doc-status.missing  { color:#dc2626; }
+
+    /* Step actions */
+    .step-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+    .btn { border:1.5px solid transparent; border-radius:10px; padding:11px 16px; font-size:13px; cursor:pointer; font-family:'Source Sans 3',sans-serif; }
+    .btn-primary  { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .btn-success  { background:#16a34a; color:#fff; border-color:#16a34a; }
+    .btn-back     { background:#fff; color:var(--text); border-color:var(--border); }
+    .btn:hover    { opacity:0.92; }
+
+    .btn-submit-upgrade {
+      width:100%; padding:13px; background:#16a34a; color:#fff;
+      border:none; border-radius:11px; font-family:'Source Sans 3',sans-serif;
+      font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-submit-upgrade:hover { background:#15803d; transform:translateY(-1px); box-shadow:0 6px 20px rgba(22,163,74,0.3); }
+    .btn-cancel-link { display:block; text-align:center; margin-top:10px; font-size:13px; color:var(--muted); text-decoration:none; }
+    .btn-cancel-link:hover { color:var(--text); }
+
+    .docs-progress { display:flex; align-items:center; gap:10px; padding:10px 14px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; font-size:13px; color:#166534; margin-bottom:16px; }
+    .docs-progress i { font-size:16px; flex-shrink:0; }
+
+    @media (max-width:640px) {
+      .wizard-steps    { grid-template-columns:1fr 1fr; }
+      .two-col         { grid-template-columns:1fr; }
+      .three-col       { grid-template-columns:1fr; }
+      .doc-capture-grid{ grid-template-columns:1fr; }
+    }
+
+    /* ── Success panel ── */
+    .success-panel { display:none; }
+    @keyframes sc-ring { from { stroke-dashoffset:283; } to { stroke-dashoffset:0; } }
+    @keyframes sc-check { 0%{stroke-dashoffset:80;opacity:0} 40%{opacity:1} 100%{stroke-dashoffset:0;opacity:1} }
+    @keyframes sc-pop { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+    @keyframes sc-fade-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes sc-pulse-badge { 0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,0.3)} 50%{box-shadow:0 0 0 10px rgba(22,163,74,0)} }
+
+    .sc-ring   { stroke-dasharray:283; animation:sc-ring  0.7s cubic-bezier(.4,0,.2,1) 0.15s forwards; stroke-dashoffset:283; }
+    .sc-check  { stroke-dasharray:80;  animation:sc-check 0.45s ease-out 0.75s forwards; stroke-dashoffset:80; opacity:0; }
+    .sc-icon-wrap { animation:sc-pop 0.5s cubic-bezier(.34,1.56,.64,1) 0.1s both; }
+    .sc-content { animation:sc-fade-up 0.5s ease 0.6s both; }
+
+    .sc-hero {
+      background:linear-gradient(135deg,#065f46 0%,#059669 50%,#34d399 100%);
+      border-radius:16px 16px 0 0; padding:36px 28px 32px; text-align:center;
+      position:relative; overflow:hidden;
+    }
+    .sc-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .sc-hero::after  { content:''; position:absolute; bottom:-30px; left:-20px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.04); }
+    .sc-hero h2 { color:#fff; font-family:'Outfit',sans-serif; font-size:26px; font-weight:800; margin:18px 0 8px; }
+    .sc-hero p  { color:rgba(255,255,255,0.85); font-size:14px; line-height:1.7; max-width:360px; margin:0 auto; }
+
+    .sc-body { background:var(--surface); border:1.5px solid var(--border); border-top:none; border-radius:0 0 16px 16px; padding:28px; }
+
+    .sc-summary {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;
+    }
+    .sc-summary-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+    .sc-summary-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .sc-summary-value { font-size:14px; font-weight:700; color:var(--text); }
+
+    .sc-next { margin-bottom:24px; }
+    .sc-next-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .sc-step { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--border); }
+    .sc-step:last-child { border-bottom:none; }
+    .sc-step-num { width:26px; height:26px; border-radius:50%; background:#059669; color:#fff; display:grid; place-items:center; font-size:12px; font-weight:800; flex-shrink:0; margin-top:1px; }
+    .sc-step-text { font-size:13px; color:var(--text); line-height:1.5; }
+    .sc-step-text strong { display:block; font-weight:700; margin-bottom:1px; }
+    .sc-step-text span   { color:var(--muted); font-size:12px; }
+
+    .sc-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .sc-btn-primary { flex:1; padding:12px 16px; background:#059669; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+    .sc-btn-secondary { flex:1; padding:12px 16px; background:var(--surface2); color:var(--text); border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+    .sc-btn-primary:hover   { background:#047857; }
+    .sc-btn-secondary:hover { border-color:var(--text); }
+
+    /* ── Pending panel ── */
+    .pending-panel { display:none; }
+    @keyframes pend-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+    .pend-icon-ring { animation:pend-pulse 2s ease-in-out infinite; }
+
+    .pend-card { background:var(--surface); border:1.5px solid #fde68a; border-radius:16px; overflow:hidden; }
+    .pend-header { background:linear-gradient(135deg,#78350f,#b45309,#f59e0b); padding:36px 28px; text-align:center; position:relative; overflow:hidden; }
+    .pend-header::before { content:''; position:absolute; top:-30px; right:-30px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.07); }
+    .pend-header h2 { color:#fff; font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; margin:16px 0 8px; }
+    .pend-header p  { color:rgba(255,255,255,0.85); font-size:13px; line-height:1.6; max-width:340px; margin:0 auto; }
+    .pend-body  { padding:28px; }
+    .pend-detail { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:22px; }
+    .pend-detail-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+    .pend-detail-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .pend-detail-value { font-size:14px; font-weight:700; color:var(--text); }
+    .pend-info { background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:13px 16px; font-size:13px; color:#92400e; display:flex; align-items:flex-start; gap:10px; margin-bottom:22px; line-height:1.6; }
+    .pend-info i { flex-shrink:0; margin-top:2px; }
+    .pend-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .pend-btn-notif { flex:1; padding:12px 16px; background:#f59e0b; color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+    .pend-btn-dash  { flex:1; padding:12px 16px; background:var(--surface2); color:var(--text); border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+    .pend-btn-notif:hover { background:#d97706; }
+    .pend-btn-dash:hover  { border-color:var(--text); }
+
+    @media (max-width:560px) {
+      .sc-summary, .pend-detail { grid-template-columns:1fr; }
+      .sc-actions, .pend-actions { flex-direction:column; }
+      .sc-btn-primary, .sc-btn-secondary, .pend-btn-notif, .pend-btn-dash { flex:none; width:100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div style="padding:10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px;padding:4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html"     class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="my-profile.html" class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div><div class="user-name" id="sidebar-name">Loading…</div><div class="user-role">Citizen</div></div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <div class="topbar-title">Apply for Driver Account</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1 id="page-main-title">Apply for Driver Account</h1>
+        <p>Join the waste collection team and serve your community directly.</p>
+      </div>
+
+      <!-- ── PENDING STATE (shown if application already submitted) ── -->
+      <div class="pending-panel" id="pending-panel">
+        <div class="pend-card">
+          <div class="pend-header">
+            <div class="pend-icon-ring" style="display:inline-block;">
+              <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.2);border:3px solid rgba(255,255,255,0.5);display:grid;place-items:center;margin:0 auto;">
+                <i class="fa-solid fa-hourglass-half" style="font-size:32px;color:#fff;"></i>
+              </div>
+            </div>
+            <h2>Application Under Review</h2>
+            <p>Your driver application has been submitted and is awaiting review by the city administrator. You'll be notified of the decision.</p>
+          </div>
+          <div class="pend-body">
+            <div class="pend-detail">
+              <div class="pend-detail-item">
+                <div class="pend-detail-label">Applicant</div>
+                <div class="pend-detail-value" id="pend-name">—</div>
+              </div>
+              <div class="pend-detail-item">
+                <div class="pend-detail-label">Requested Barangay</div>
+                <div class="pend-detail-value" id="pend-barangay">—</div>
+              </div>
+              <div class="pend-detail-item">
+                <div class="pend-detail-label">Date Submitted</div>
+                <div class="pend-detail-value" id="pend-date">—</div>
+              </div>
+              <div class="pend-detail-item">
+                <div class="pend-detail-label">Status</div>
+                <div class="pend-detail-value" style="color:#d97706;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Pending Review</div>
+              </div>
+            </div>
+            <div class="pend-info">
+              <i class="fa-solid fa-bell"></i>
+              <span>Once the administrator reviews your documents and makes a decision, you will receive a <strong>notification</strong>. Check your notifications page anytime for updates. If approved, your account will be upgraded to Driver and you'll be assigned to your requested barangay.</span>
+            </div>
+            <div class="pend-actions">
+              <a href="notifications.html" class="pend-btn-notif"><i class="fa-solid fa-bell"></i> Check Notifications</a>
+              <a href="citizen-dashboard.html" class="pend-btn-dash"><i class="fa-solid fa-house"></i> Go to Dashboard</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WIZARD SECTION (hidden once submitted) ── -->
+      <div id="wizard-section">
+      <div class="upgrade-hero">
+        <h2><i class="fa-solid fa-truck" style="margin-right:8px;"></i>Become a Collection Driver</h2>
+        <p>As a verified citizen, you're eligible to apply as a ZamboCollect collection driver. Prepare to take photos of all required documents — all document capture is done with your camera.</p>
+        <div class="hero-badges">
+          <span class="hero-badge"><i class="fa-solid fa-check"></i> Citizen Verified</span>
+          <span class="hero-badge"><i class="fa-solid fa-camera"></i> Photo Capture Required</span>
+          <span class="hero-badge"><i class="fa-solid fa-map-location-dot"></i> Barangay Assignment</span>
+          <span class="hero-badge"><i class="fa-solid fa-shield-halved"></i> Admin Reviewed</span>
+        </div>
+      </div>
+
+      <div class="wizard-card">
+        <div class="wizard-card-title"><i class="fa-solid fa-file-pen" style="color:#2563eb;"></i> Driver Application — Step <span id="current-step-label">1</span> of 4</div>
+
+        <!-- Step indicators -->
+        <div class="wizard-steps">
+          <div class="wizard-step active" id="step-indicator-1">
+            <div class="step-number">1</div>
+            <div><div class="step-title">Scan License</div><div class="step-desc">Capture driver's license</div></div>
+          </div>
+          <div class="wizard-step" id="step-indicator-2">
+            <div class="step-number">2</div>
+            <div><div class="step-title">Review Info</div><div class="step-desc">Confirm your details</div></div>
+          </div>
+          <div class="wizard-step" id="step-indicator-3">
+            <div class="step-number">3</div>
+            <div><div class="step-title">Documents</div><div class="step-desc">Capture 7 requirements</div></div>
+          </div>
+          <div class="wizard-step" id="step-indicator-4">
+            <div class="step-number">4</div>
+            <div><div class="step-title">Submit</div><div class="step-desc">Barangay &amp; notes</div></div>
+          </div>
+        </div>
+
+        <!-- ── STEP 1: License Scan ── -->
+        <div class="wizard-panel active" data-panel="1">
+          <div class="notice-blue">
+            <i class="fa-solid fa-camera"></i>
+            Take a clear photo of your Professional Driver's License. Hold it flat in good lighting. This also auto-fills your license details.
+          </div>
+          <div class="capture-zone" id="license-capture-zone">
+            <input id="license-file" type="file" accept="image/*" capture="environment" />
+            <div class="capture-icon"><i class="fa-solid fa-id-card"></i></div>
+            <h4>Take Photo of Driver's License</h4>
+            <p>Tap to open your camera and capture your Professional Driver's License clearly. Ensure all details are visible.</p>
+            <button type="button" class="cam-btn blue" onclick="document.getElementById('license-file').click()"><i class="fa-solid fa-camera"></i> Open Camera</button>
+            <div class="cam-tip"><i class="fa-solid fa-lightbulb"></i> This will auto-fill your license number, type and expiry.</div>
+          </div>
+          <div id="license-preview-wrap" style="display:none;margin-bottom:16px;">
+            <img id="license-preview-img" src="" alt="License preview" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1.5px solid #bbf7d0;"/>
+            <div style="font-size:12px;color:#16a34a;font-weight:700;margin-top:6px;text-align:center;"><i class="fa-solid fa-check-circle"></i> License photo captured — retake if unclear</div>
+            <button type="button" onclick="document.getElementById('license-file').click()" style="margin-top:8px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);"><i class="fa-solid fa-rotate"></i> Retake Photo</button>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Detected License Number</label>
+              <input id="detected-license" type="text" placeholder="e.g. N01-23-456789" readonly />
+            </div>
+            <div class="form-group">
+              <label>Scan Status</label>
+              <input id="scan-status" type="text" value="Waiting for license scan…" readonly style="background:var(--surface3);" />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Detected License Type</label>
+              <input id="detected-type" type="text" placeholder="Professional / Non-Professional" readonly />
+            </div>
+            <div class="form-group">
+              <label>Detected Expiry</label>
+              <input id="detected-expiry" type="text" placeholder="e.g. Dec 2027" readonly />
+            </div>
+          </div>
+          <div class="step-actions">
+            <button type="button" class="btn btn-back" onclick="goToStep(1)">↺ Reset</button>
+            <button type="button" class="btn btn-primary" onclick="goToStep(2)">Continue to Review →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Review Info ── -->
+        <div class="wizard-panel" data-panel="2">
+          <div class="notice-blue">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Personal details were <strong>auto-detected from your license scan</strong>. Your contact number is pulled from your registration. All fields are read-only — go back to step 1 to rescan if any detail is wrong.
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);">Detected from License Scan</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#15803d;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;"><i class="fa-solid fa-camera"></i> Auto-detected</span>
+          </div>
+          <div class="three-col">
+            <div class="form-group">
+              <label>First Name</label>
+              <input id="first-name" type="text" readonly placeholder="Scan license to detect…" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+            </div>
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input id="middle-name" type="text" readonly placeholder="Detected from scan…" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input id="last-name" type="text" readonly placeholder="Scan license to detect…" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Driver's License Number</label>
+              <input id="license-number" type="text" readonly placeholder="Detected from scan…" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+            </div>
+            <div class="two-col" style="gap:10px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>License Type</label>
+                <input id="license-type" type="text" readonly placeholder="e.g. Professional" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Expiry</label>
+                <input id="license-expiry" type="text" readonly placeholder="e.g. Dec 2027" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin:14px 0 10px;">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);">From Registration</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;background:#eff6ff;color:#1d4ed8;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;"><i class="fa-solid fa-user-check"></i> From your account</span>
+          </div>
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input id="contact-number" type="tel" readonly placeholder="Pulled from registration…" style="background:var(--surface3);color:var(--text);font-style:italic;" />
+          </div>
+
+          <div class="step-actions">
+            <button type="button" class="btn btn-back" onclick="goToStep(1)">← Back</button>
+            <button type="button" class="btn btn-primary" onclick="goToStep(3)">Continue to Documents →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Required Documents ── -->
+        <div class="wizard-panel" data-panel="3">
+          <div class="notice-blue">
+            <i class="fa-solid fa-camera"></i>
+            Take a photo of each required document using your camera. You may proceed to the next step even if some photos are missing — but incomplete submissions may be rejected by the admin during review.
+          </div>
+          <div id="docs-progress-bar" class="docs-progress">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="docs-progress-text">0 of 7 documents captured</span>
+          </div>
+          <div class="doc-capture-grid">
+
+            <!-- Resume or Biodata -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-file-lines"></i>
+                <span class="doc-name">Resume or Biodata</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-resumeBiodata" src="" alt="Resume / Biodata" />
+                <div class="doc-placeholder" id="ph-resumeBiodata"><i class="fa-solid fa-file-lines"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('resumeBiodata')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-resumeBiodata" onchange="handleDocCapture('resumeBiodata',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-resumeBiodata" onclick="triggerCapture('resumeBiodata')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-resumeBiodata" onchange="handleDocCapture('resumeBiodata',this)" />
+                </button>
+                <div class="doc-status missing" id="status-resumeBiodata">Not captured</div>
+              </div>
+            </div>
+
+            <!-- NBI Clearance -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span class="doc-name">NBI Clearance</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-nbiClearance" src="" alt="NBI Clearance" />
+                <div class="doc-placeholder" id="ph-nbiClearance"><i class="fa-solid fa-shield-halved"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('nbiClearance')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-nbiClearance" onchange="handleDocCapture('nbiClearance',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-nbiClearance" onclick="triggerCapture('nbiClearance')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-nbiClearance" onchange="handleDocCapture('nbiClearance',this)" />
+                </button>
+                <div class="doc-status missing" id="status-nbiClearance">Not captured</div>
+              </div>
+            </div>
+
+            <!-- Police Clearance -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-building-shield"></i>
+                <span class="doc-name">Police Clearance</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-policeClearance" src="" alt="Police Clearance" />
+                <div class="doc-placeholder" id="ph-policeClearance"><i class="fa-solid fa-building-shield"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('policeClearance')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-policeClearance" onchange="handleDocCapture('policeClearance',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-policeClearance" onclick="triggerCapture('policeClearance')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-policeClearance" onchange="handleDocCapture('policeClearance',this)" />
+                </button>
+                <div class="doc-status missing" id="status-policeClearance">Not captured</div>
+              </div>
+            </div>
+
+            <!-- Barangay Clearance -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-house"></i>
+                <span class="doc-name">Barangay Clearance</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-barangayClearance" src="" alt="Barangay Clearance" />
+                <div class="doc-placeholder" id="ph-barangayClearance"><i class="fa-solid fa-house"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('barangayClearance')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-barangayClearance" onchange="handleDocCapture('barangayClearance',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-barangayClearance" onclick="triggerCapture('barangayClearance')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-barangayClearance" onchange="handleDocCapture('barangayClearance',this)" />
+                </button>
+                <div class="doc-status missing" id="status-barangayClearance">Not captured</div>
+              </div>
+            </div>
+
+            <!-- Medical Certificate -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-notes-medical"></i>
+                <span class="doc-name">Medical Certificate</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-medicalCertificate" src="" alt="Medical Certificate" />
+                <div class="doc-placeholder" id="ph-medicalCertificate"><i class="fa-solid fa-notes-medical"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('medicalCertificate')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-medicalCertificate" onchange="handleDocCapture('medicalCertificate',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-medicalCertificate" onclick="triggerCapture('medicalCertificate')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-medicalCertificate" onchange="handleDocCapture('medicalCertificate',this)" />
+                </button>
+                <div class="doc-status missing" id="status-medicalCertificate">Not captured</div>
+              </div>
+            </div>
+
+            <!-- Drug Test Result -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-flask-vial"></i>
+                <span class="doc-name">Drug Test Result</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-drugTestResult" src="" alt="Drug Test Result" />
+                <div class="doc-placeholder" id="ph-drugTestResult"><i class="fa-solid fa-flask-vial"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('drugTestResult')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-drugTestResult" onchange="handleDocCapture('drugTestResult',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-drugTestResult" onclick="triggerCapture('drugTestResult')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-drugTestResult" onchange="handleDocCapture('drugTestResult',this)" />
+                </button>
+                <div class="doc-status missing" id="status-drugTestResult">Not captured</div>
+              </div>
+            </div>
+
+            <!-- PSA Birth Certificate -->
+            <div class="doc-capture-item">
+              <div class="doc-capture-header">
+                <i class="fa-solid fa-certificate"></i>
+                <span class="doc-name">PSA Birth Certificate</span>
+                <span class="doc-req">Required</span>
+              </div>
+              <div class="doc-capture-body">
+                <img class="doc-preview" id="prev-psaBirthCertificate" src="" alt="PSA Birth Certificate" />
+                <div class="doc-placeholder" id="ph-psaBirthCertificate"><i class="fa-solid fa-certificate"></i><span>No photo yet</span></div>
+                <button class="doc-take-btn" onclick="triggerCapture('psaBirthCertificate')">
+                  <i class="fa-solid fa-camera"></i> Take Photo
+                  <input type="file" accept="image/*" capture="environment" id="inp-psaBirthCertificate" onchange="handleDocCapture('psaBirthCertificate',this)" />
+                </button>
+                <button class="doc-retake-btn" id="retake-psaBirthCertificate" onclick="triggerCapture('psaBirthCertificate')">
+                  <i class="fa-solid fa-rotate"></i> Retake
+                  <input type="file" accept="image/*" capture="environment" id="retake-inp-psaBirthCertificate" onchange="handleDocCapture('psaBirthCertificate',this)" />
+                </button>
+                <div class="doc-status missing" id="status-psaBirthCertificate">Not captured</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="step-actions">
+            <button type="button" class="btn btn-back" onclick="goToStep(2)">← Back</button>
+            <button type="button" class="btn btn-primary" id="btn-to-step4" onclick="validateDocsAndProceed()">Continue to Submit →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 4: Barangay & Submit ── -->
+        <div class="wizard-panel" data-panel="4">
+          <div class="notice-blue">
+            <i class="fa-solid fa-map-location-dot"></i>
+            Select the barangay where you want to be assigned. When the admin approves your application, you will automatically be assigned as a driver for that barangay.
+          </div>
+          <div class="form-group">
+            <label>Barangay Assignment Request <span style="color:#dc2626;">*</span></label>
+            <select id="preferred-barangay">
+              <option value="">— Select barangay —</option>
+              <option>Barangay Rio Hondo</option>
+              <option>Barangay Canelar</option>
+              <option>Barangay Guiwan</option>
+              <option>Barangay Talon-talon</option>
+              <option>Barangay Tetuan</option>
+              <option>Barangay Tumaga</option>
+              <option>Barangay Pasonanca</option>
+              <option>Barangay Sta. Cruz</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Years of Driving Experience <span style="color:#dc2626;">*</span></label>
+            <select id="experience">
+              <option value="">— Select —</option>
+              <option>Less than 1 year</option>
+              <option>1–3 years</option>
+              <option>3–5 years</option>
+              <option>5+ years</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Additional Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+            <textarea id="driver-notes" placeholder="Add a short message for the admin reviewing your application…"></textarea>
+          </div>
+          <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;font-size:12px;color:#166534;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;">
+            <i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px;"></i>
+            <span>Your application and all 8 document photos will be reviewed by a city administrator. If approved, you will automatically become a driver for the barangay you selected.</span>
+          </div>
+          <button id="submit-driver-app" class="btn-submit-upgrade" type="button">
+            <i class="fa-solid fa-paper-plane"></i> Submit Driver Application
+          </button>
+          <a href="my-profile.html" class="btn-cancel-link">← Cancel, go back to profile</a>
+          <div class="step-actions" style="margin-top:8px;">
+            <button type="button" class="btn btn-back" onclick="goToStep(3)">← Back to Documents</button>
+          </div>
+        </div>
+
+      </div><!-- /wizard-card -->
+      </div><!-- /wizard-section -->
+
+      <!-- ── SUCCESS PANEL (shown after submission) ── -->
+      <div class="success-panel" id="success-panel">
+        <div class="sc-hero">
+          <div class="sc-icon-wrap" style="display:inline-block;">
+            <svg width="90" height="90" viewBox="0 0 100 100" style="display:block;">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="4"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" class="sc-ring" transform="rotate(-90 50 50)"/>
+              <polyline points="27,52 43,68 73,32" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" class="sc-check"/>
+            </svg>
+          </div>
+          <h2>Application Submitted!</h2>
+          <p>Your driver application and documents have been received. A city administrator will review everything shortly.</p>
+        </div>
+        <div class="sc-body sc-content">
+          <div class="sc-summary">
+            <div class="sc-summary-item">
+              <div class="sc-summary-label">Applicant</div>
+              <div class="sc-summary-value" id="sc-name">—</div>
+            </div>
+            <div class="sc-summary-item">
+              <div class="sc-summary-label">Requested Barangay</div>
+              <div class="sc-summary-value" id="sc-barangay">—</div>
+            </div>
+            <div class="sc-summary-item">
+              <div class="sc-summary-label">Date Submitted</div>
+              <div class="sc-summary-value" id="sc-date">—</div>
+            </div>
+            <div class="sc-summary-item">
+              <div class="sc-summary-label">Documents</div>
+              <div class="sc-summary-value" id="sc-docs">—</div>
+            </div>
+          </div>
+
+          <div class="sc-next">
+            <div class="sc-next-title"><i class="fa-solid fa-list-check" style="color:#059669;"></i> What Happens Next</div>
+            <div class="sc-step">
+              <div class="sc-step-num">1</div>
+              <div class="sc-step-text">
+                <strong>Admin Review</strong>
+                <span>A city administrator will review your application and all submitted document photos. This usually takes 1–3 business days.</span>
+              </div>
+            </div>
+            <div class="sc-step">
+              <div class="sc-step-num">2</div>
+              <div class="sc-step-text">
+                <strong>You'll Get Notified</strong>
+                <span>Once a decision is made, you'll receive a notification here in ZamboCollect. Check your <a href="notifications.html" style="color:#059669;font-weight:700;">Notifications</a> page anytime for updates.</span>
+              </div>
+            </div>
+            <div class="sc-step">
+              <div class="sc-step-num">3</div>
+              <div class="sc-step-text">
+                <strong>If Approved — Instant Access</strong>
+                <span>Your account will be upgraded to Driver and automatically assigned to your requested barangay. You'll gain full access to the Driver Portal.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sc-actions">
+            <a href="notifications.html" class="sc-btn-primary"><i class="fa-solid fa-bell"></i> View Notifications</a>
+            <a href="citizen-dashboard.html" class="sc-btn-secondary"><i class="fa-solid fa-house"></i> Go to Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<script>
+(function () {
+  try {
+    var u = JSON.parse(sessionStorage.getItem('zc_session'));
+    if (!u) return;
+    var nameEl = document.getElementById('sidebar-name');
+    if (nameEl) nameEl.textContent = u.name || 'Citizen';
+    var sec = document.getElementById('role-back-section');
+    if (!sec) return;
+    var lnk = document.getElementById('role-back-link');
+    var ico = document.getElementById('role-back-icon');
+    var txt = document.getElementById('role-back-text');
+    if (u.role === 'officer') {
+      sec.style.display = '';
+      lnk.href = 'officer-dashboard.html';
+      ico.className = 'fa-solid fa-landmark';
+      txt.textContent = 'Officer View';
+    } else if (u.role === 'driver') {
+      sec.style.display = '';
+      lnk.href = 'dashboard-driver.html';
+      ico.className = 'fa-solid fa-truck';
+      txt.textContent = 'Driver View';
+    }
+  } catch (e) {}
+})();
+</script>
+
+<script>
+/* ── Wizard navigation ── */
+var DOCS_KEYS = ['resumeBiodata','nbiClearance','policeClearance','barangayClearance','medicalCertificate','drugTestResult','psaBirthCertificate'];
+var capturedDocs = {};
+var licensePhotoDataUrl = null;
+
+function goToStep(step) {
+  for (var i = 1; i <= 4; i++) {
+    var ind = document.getElementById('step-indicator-' + i);
+    var pan = document.querySelector('[data-panel="' + i + '"]');
+    ind.classList.remove('active','done');
+    pan.classList.remove('active');
+    if (i < step) ind.classList.add('done');
+    else if (i === step) { ind.classList.add('active'); pan.classList.add('active'); }
+  }
+  document.getElementById('current-step-label').textContent = step;
+  window.scrollTo(0, 0);
+}
+
+/* ── License scan (Step 1) ── */
+function setAutoFill(v) {
+  document.getElementById('first-name').value    = v.firstName  || '';
+  document.getElementById('middle-name').value   = v.middleName || '';
+  document.getElementById('last-name').value     = v.lastName   || '';
+  document.getElementById('contact-number').value= v.contact    || '';
+  document.getElementById('license-number').value= v.licenseNumber || '';
+  document.getElementById('license-type').value  = v.licenseType   || '';
+  document.getElementById('license-expiry').value= v.licenseExpiry || '';
+  document.getElementById('detected-license').value = v.licenseNumber || '';
+  document.getElementById('detected-type').value    = v.licenseType   || '';
+  document.getElementById('detected-expiry').value  = v.licenseExpiry || '';
+  document.getElementById('scan-status').value       = v.status || 'Waiting for license scan…';
+}
+
+function loadProfile() {
+  var session = JSON.parse(sessionStorage.getItem('zc_session') || '{}');
+  var names = (session.name || '').split(' ');
+  var contact = session.contact || session.mobile || session.phone || session.contactNumber || '';
+  setAutoFill({
+    firstName:  names[0] || '',
+    middleName: session.middleName || '',
+    lastName:   names.length > 1 ? names.slice(1).join(' ') : '',
+    contact:    contact,
+    status:     'Waiting for license scan…'
+  });
+  // Contact is from registration — always use the session value regardless of scan
+  document.getElementById('contact-number').value = contact;
+}
+
+function randomLicenseNumber() {
+  var prefix = Math.random() > 0.4 ? 'N' : 'D';
+  var p1 = Math.floor(10 + Math.random() * 89);
+  var p2 = Math.floor(20 + Math.random() * 79);
+  var p3 = Math.floor(100000 + Math.random() * 899999);
+  return prefix + p1 + '-' + p2 + '-' + p3;
+}
+
+function randomExpiry() {
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = new Date().getFullYear() + Math.floor(2 + Math.random() * 4);
+  return months[Math.floor(Math.random() * months.length)] + ' ' + year;
+}
+
+function applyLicenseScan(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    licensePhotoDataUrl = e.target.result;
+    var prevWrap = document.getElementById('license-preview-wrap');
+    var prevImg  = document.getElementById('license-preview-img');
+    prevWrap.style.display = '';
+    prevImg.src = licensePhotoDataUrl;
+  };
+  reader.readAsDataURL(file);
+
+  var detectedLicense = randomLicenseNumber();
+  var detectedType    = Math.random() > 0.5 ? 'Professional' : 'Non-Professional';
+  var detectedExpiry  = randomExpiry();
+  // Keep contact from registration — do not overwrite from scan
+  var registrationContact = document.getElementById('contact-number').value;
+  setAutoFill({
+    firstName:     document.getElementById('first-name').value,
+    middleName:    document.getElementById('middle-name').value,
+    lastName:      document.getElementById('last-name').value,
+    contact:       registrationContact,
+    licenseNumber: detectedLicense,
+    licenseType:   detectedType,
+    licenseExpiry: detectedExpiry,
+    status:        'License scanned successfully! Details auto-detected.'
+  });
+}
+
+/* ── Document captures (Step 3) ── */
+function triggerCapture(key) {
+  var inp = document.getElementById('inp-' + key);
+  if (inp) inp.click();
+}
+
+function handleDocCapture(key, input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    capturedDocs[key] = e.target.result;
+    var prev = document.getElementById('prev-' + key);
+    var ph   = document.getElementById('ph-'   + key);
+    var st   = document.getElementById('status-' + key);
+    var rb   = document.getElementById('retake-' + key);
+    if (prev)  { prev.src = e.target.result; prev.style.display = 'block'; }
+    if (ph)    ph.style.display = 'none';
+    if (st)    { st.textContent = '✓ Captured'; st.className = 'doc-status captured'; }
+    if (rb)    rb.style.display = 'flex';
+    updateDocsProgress();
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateDocsProgress() {
+  var count = DOCS_KEYS.filter(function(k) { return !!capturedDocs[k]; }).length;
+  var el = document.getElementById('docs-progress-text');
+  if (el) el.textContent = count + ' of 7 documents captured';
+  var bar = document.getElementById('docs-progress-bar');
+  if (bar) bar.style.background = count === 7 ? '#dcfce7' : '#f0fdf4';
+}
+
+function validateDocsAndProceed() {
+  goToStep(4);
+}
+
+/* ── Submit application ── */
+function submitApplication() {
+  var barangay   = document.getElementById('preferred-barangay').value;
+  var experience = document.getElementById('experience').value;
+  if (!barangay)   { document.getElementById('preferred-barangay').style.borderColor = '#dc2626'; return; }
+  if (!experience) { document.getElementById('experience').style.borderColor = '#dc2626'; return; }
+  document.getElementById('preferred-barangay').style.borderColor = '';
+  document.getElementById('experience').style.borderColor = '';
+
+  var _sess = {};
+  try { _sess = JSON.parse(sessionStorage.getItem('zc_session') || '{}'); } catch(e) {}
+
+  var fullName    = (document.getElementById('first-name').value + ' ' + document.getElementById('last-name').value).trim();
+  var appliedDate = new Date().toLocaleDateString('en-US', { month:'short', day:'2-digit', year:'numeric' });
+  var docsCount   = DOCS_KEYS.filter(function(k) { return !!capturedDocs[k]; }).length + (licensePhotoDataUrl ? 1 : 0);
+
+  var application = {
+    applicantName:     fullName,
+    email:             (_sess.email || '').toLowerCase(),
+    contact:           document.getElementById('contact-number').value,
+    licenseNumber:     document.getElementById('license-number').value,
+    licenseType:       document.getElementById('license-type').value,
+    licenseExpiry:     document.getElementById('license-expiry').value,
+    experience:        experience,
+    preferredBarangay: barangay,
+    notes:             document.getElementById('driver-notes').value,
+    appliedDate:       appliedDate,
+    status:            'Pending',
+    documents: {
+      driversLicense:      licensePhotoDataUrl,
+      resumeBiodata:       capturedDocs.resumeBiodata       || null,
+      nbiClearance:        capturedDocs.nbiClearance        || null,
+      policeClearance:     capturedDocs.policeClearance     || null,
+      barangayClearance:   capturedDocs.barangayClearance   || null,
+      medicalCertificate:  capturedDocs.medicalCertificate  || null,
+      drugTestResult:      capturedDocs.drugTestResult      || null,
+      psaBirthCertificate: capturedDocs.psaBirthCertificate || null
+    }
+  };
+
+  var applications = JSON.parse(localStorage.getItem('zc_driver_applications') || '[]');
+  applications.push(application);
+  localStorage.setItem('zc_driver_applications', JSON.stringify(applications));
+
+  // Save pending status so we can show the pending screen on return visits
+  localStorage.setItem('zc_my_driver_app', JSON.stringify({
+    status:   'pending',
+    email:    (_sess.email || '').toLowerCase(),
+    name:     fullName,
+    barangay: barangay,
+    date:     appliedDate
+  }));
+
+  // Show polished success panel
+  document.getElementById('wizard-section').style.display = 'none';
+  document.getElementById('page-main-title').textContent = 'Application Submitted';
+  var sc = document.getElementById('success-panel');
+  sc.style.display = 'block';
+  document.getElementById('sc-name').textContent    = fullName;
+  document.getElementById('sc-barangay').textContent = barangay;
+  document.getElementById('sc-date').textContent     = appliedDate;
+  document.getElementById('sc-docs').textContent     = docsCount + ' of 8 submitted';
+  window.scrollTo(0, 0);
+}
+
+/* ── Check pending / approved status on load ── */
+function checkApplicationStatus() {
+  var session = JSON.parse(sessionStorage.getItem('zc_session') || '{}');
+
+  // If user is already a driver (admin approved), redirect them
+  if (session.role === 'driver') {
+    window.location.href = 'dashboard-driver.html';
+    return true;
+  }
+
+  // Also check zc_users in case role was updated without re-login
+  if (session.email) {
+    try {
+      var users = JSON.parse(localStorage.getItem('zc_users') || '[]');
+      var me = users.find(function(u) { return u.email && u.email.toLowerCase() === session.email.toLowerCase(); });
+      if (me && me.role === 'driver') {
+        window.location.href = 'dashboard-driver.html';
+        return true;
+      }
+    } catch(e) {}
+  }
+
+  var myApp = null;
+  try { myApp = JSON.parse(localStorage.getItem('zc_my_driver_app')); } catch(e) {}
+
+  // Guard: only treat this as the current user's app if the email matches
+  if (myApp && myApp.status === 'pending') {
+    var currentEmail = (session.email || '').toLowerCase();
+    var storedEmail  = (myApp.email   || '').toLowerCase();
+    // If both emails are present and they differ, this belongs to a different user
+    if (currentEmail && storedEmail && currentEmail !== storedEmail) {
+      myApp = null;
+    }
+  }
+
+  if (myApp && myApp.status === 'pending') {
+    // Cross-check the actual applications list so a rejected/approved
+    // app doesn't keep showing the pending panel forever
+    var apps = [];
+    try { apps = JSON.parse(localStorage.getItem('zc_driver_applications') || '[]'); } catch(e) {}
+    var pendingName = (myApp.name || '').toLowerCase();
+    var actualApp = apps.find(function(a) {
+      return (a.applicantName || '').toLowerCase() === pendingName;
+    });
+
+    if (actualApp) {
+      if (actualApp.status === 'Approved') {
+        localStorage.removeItem('zc_my_driver_app');
+        window.location.href = 'dashboard-driver.html';
+        return true;
+      }
+      if (actualApp.status === 'Rejected') {
+        // Rejected — clear stale flag and let them reapply
+        localStorage.removeItem('zc_my_driver_app');
+        return false;
+      }
+    } else if (apps.length > 0) {
+      // We have applications in storage but none match this user — stale flag, clear it
+      localStorage.removeItem('zc_my_driver_app');
+      return false;
+    }
+
+    // Application is genuinely still pending — show the pending panel
+    document.getElementById('wizard-section').style.display  = 'none';
+    document.getElementById('pending-panel').style.display   = 'block';
+    document.getElementById('page-main-title').textContent   = 'Application Pending';
+    document.getElementById('pend-name').textContent         = myApp.name     || '—';
+    document.getElementById('pend-barangay').textContent     = myApp.barangay || '—';
+    document.getElementById('pend-date').textContent         = myApp.date     || '—';
+    return true;
+  }
+
+  return false;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (checkApplicationStatus()) return;
+
+  loadProfile();
+  goToStep(1);
+
+  document.getElementById('license-file').addEventListener('change', function() {
+    applyLicenseScan(this.files[0]);
+  });
+
+  document.getElementById('submit-driver-app').addEventListener('click', submitApplication);
+  updateDocsProgress();
+});
+</script>
+</body>
+</html>

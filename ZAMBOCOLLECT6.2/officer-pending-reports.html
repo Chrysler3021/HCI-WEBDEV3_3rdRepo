@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZamboCollect — Pending Reports</title>
+  <link rel="stylesheet" href="css/officer.css">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+
+    /* ── Report cards ── */
+    .report-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; margin-bottom: 12px;
+      box-shadow: var(--shadow-sm); overflow: visible;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .report-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-color: var(--primary);
+    }
+    .report-card-body { padding: 16px 20px; }
+
+    .report-top {
+      display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px;
+    }
+    .report-icon {
+      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .report-card:hover .report-icon { transform: scale(1.08); }
+    .report-icon.household  { background: #dcfce7; color: #16a34a; }
+    .report-icon.commercial { background: #fef3c7; color: #d97706; }
+    .report-icon.illegal    { background: #fee2e2; color: var(--red); }
+    .report-icon.construction { background: #dbeafe; color: #2563eb; }
+    .report-icon.hazardous  { background: #fce7f3; color: #be185d; }
+
+    /* Pending cards highlight */
+    .report-card:not(.card-approved):not(.card-rejected):not(.card-cancelled) {
+      border-left: 3px solid var(--primary);
+    }
+    .report-card:not(.card-approved):not(.card-rejected):not(.card-cancelled):hover {
+      border-left-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+    }
+    
+    /* Critical urgency highlight */
+    .report-card:has(.urg-critical) {
+      border-left-color: #dc2626 !important;
+    }
+    .report-card:has(.urg-critical):hover {
+      box-shadow: 0 4px 16px rgba(220, 38, 38, 0.15) !important;
+    }
+
+    .report-id   { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .report-loc  { font-size: 15px; font-weight: 700; color: var(--text); margin: 2px 0 4px; }
+    .report-meta { font-size: 12px; color: var(--muted); }
+
+    .report-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+    .report-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* View button (link to :target drawer) */
+    .btn-view-rpt {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); text-decoration: none; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .btn-view-rpt:hover { 
+      border-color: var(--primary); 
+      color: var(--primary); 
+      background: var(--surface3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .btn-view-rpt:active { transform: translateY(0); }
+    .btn-view-rpt:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    
+    .btn-approve-rpt {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: var(--green); color: #fff; border: none; text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .btn-approve-rpt:hover {
+      background: #15803d;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3);
+    }
+    .btn-approve-rpt:active { transform: translateY(0); }
+    .btn-approve-rpt:focus {
+      outline: 2px solid #15803d;
+      outline-offset: 2px;
+    }
+    
+    .btn-reject-rpt {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #fff0f0; color: var(--red);
+      border: 1.5px solid var(--red); text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .btn-reject-rpt:hover {
+      background: var(--red);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    }
+    .btn-reject-rpt:active { transform: translateY(0); }
+    .btn-reject-rpt:focus {
+      outline: 2px solid var(--red);
+      outline-offset: 2px;
+    }
+
+    /* ── CSS-only :target drawer ── */
+    .report-drawer {
+      display: none;
+      border-top: 1.5px dashed var(--border);
+      background: var(--surface2);
+      border-radius: 0 0 12px 12px;
+      padding: 18px 20px 20px;
+      animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .report-drawer.open { display: block; }
+
+    .drawer-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .drawer-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+      transition: all 0.2s;
+    }
+    .drawer-box:hover {
+      border-color: var(--primary);
+      background: var(--surface3);
+    }
+    .drawer-box-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .drawer-box-val   { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 3px; }
+
+    .drawer-photo-box {
+      background: var(--surface); border: 1.5px dashed var(--border);
+      border-radius: 10px; padding: 20px 16px;
+      text-align: center; margin-bottom: 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .drawer-photo-box:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.02);
+    }
+    .drawer-photo-box i { font-size: 2rem; color: var(--muted); }
+    .drawer-photo-box span { font-size: 12px; color: var(--muted); }
+
+    .drawer-map-box {
+      border-radius: 10px; margin-bottom: 14px;
+      overflow: hidden; height: 150px; border: 1.5px solid var(--border);
+    }
+    .drawer-map-box iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    .drawer-desc {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; font-size: 13px;
+      color: var(--text); line-height: 1.6; margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+    .drawer-desc:hover {
+      border-color: var(--primary);
+      background: var(--surface3);
+    }
+
+    .drawer-section-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .drawer-footer {
+      display: flex; gap: 8px; padding-top: 14px;
+      border-top: 1.5px solid var(--border);
+      align-items: center;
+    }
+    .drawer-close-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--muted); text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .drawer-close-link:hover { 
+      border-color: var(--text); 
+      color: var(--text);
+      background: var(--surface3);
+    }
+
+    /* already-actioned cards */
+    .card-approved  { 
+      border-color: rgba(22, 163, 74, 0.3);
+      background: linear-gradient(135deg, rgba(240, 253, 244, 0.8), var(--surface));
+    }
+    .card-approved:hover { border-color: rgba(22, 163, 74, 0.6); }
+    .card-collected { border-color: rgba(88,129,87,0.2); opacity: 0.85; }
+    .card-rejected  { 
+      border-color: rgba(220, 38, 38, 0.3);
+      opacity: 0.8;
+    }
+    .card-rejected:hover { border-color: rgba(220, 38, 38, 0.6); }
+    .card-cancelled { 
+      border-color: rgba(107,114,128,0.25);
+      opacity: 0.75;
+    }
+
+    /* urgency pills */
+    .urg-low      { background:#dcfce7; color:#16a34a; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-medium   { background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-high     { background:#ffedd5; color:#ea580c; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .urg-critical { background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; font-weight:700; box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2); }
+
+    @media (max-width: 768px) {
+      .drawer-grid { grid-template-columns: 1fr; }
+      .report-top  { flex-wrap: wrap; }
+      .report-actions { flex-direction: column; width: 100%; }
+      .report-actions button { width: 100%; }
+      .drawer-footer { flex-wrap: wrap; }
+      .drawer-footer button { flex: 1 !important; }
+    }
+
+    /* ── Incident View ── */
+    .view-toggle-bar {
+      display: flex; gap: 4px; background: var(--surface);
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 4px; margin-bottom: 22px;
+    }
+    .view-toggle-btn {
+      flex: 1; padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      border: none; background: transparent; color: var(--muted);
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .view-toggle-btn:hover { color: var(--text); background: var(--surface2); }
+    .view-toggle-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.25); }
+    .inc-panel { display: none; }
+    .inc-panel.active { display: block; }
+
+    /* Incident cards */
+    .incident-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; margin-bottom: 14px;
+      box-shadow: var(--shadow-sm); overflow: visible;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      border-left: 4px solid var(--primary);
+    }
+    .incident-card:hover { box-shadow: 0 4px 16px rgba(59,130,246,0.12); border-color: var(--primary); }
+    .incident-card.inc-critical { border-left-color: #dc2626; }
+    .incident-card.inc-critical:hover { box-shadow: 0 4px 16px rgba(220,38,38,0.15); }
+    .incident-card-body { padding: 16px 20px; }
+    .inc-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; }
+    .inc-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; background: #eff6ff; color: var(--primary);
+      transition: transform 0.2s;
+    }
+    .incident-card:hover .inc-icon { transform: scale(1.08); }
+    .inc-id { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .inc-loc { font-size: 15px; font-weight: 700; color: var(--text); margin: 2px 0 4px; }
+    .inc-meta { font-size: 12px; color: var(--muted); }
+    .inc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .inc-count-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #eff6ff; color: var(--primary);
+      border: 1px solid rgba(59,130,246,0.25);
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .inc-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* Incident drawer */
+    .inc-drawer {
+      display: none; border-top: 1.5px dashed var(--border);
+      background: var(--surface2); border-radius: 0 0 12px 12px;
+      padding: 18px 20px 20px;
+      animation: slideDown 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .inc-drawer.open { display: block; }
+    .linked-report-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 6px; font-size: 12px;
+      transition: border-color 0.15s;
+    }
+    .linked-report-row:hover { border-color: var(--primary); }
+    .linked-rpt-thumb {
+      width: 36px; height: 36px; border-radius: 6px; object-fit: cover;
+      flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .linked-rpt-thumb-ph {
+      width: 36px; height: 36px; border-radius: 6px; flex-shrink: 0;
+      background: var(--surface3); display: flex; align-items: center;
+      justify-content: center; color: var(--muted); font-size: 12px;
+      border: 1px solid var(--border);
+    }
+    .inc-timeline {
+      margin-top: 14px; padding: 12px 14px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    }
+    .inc-tl-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+    .inc-tl-row:last-child { margin-bottom: 0; }
+    .inc-tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; margin-top: 3px; }
+    .inc-tl-dot.dot-green { background: var(--green); }
+    .inc-tl-dot.dot-red { background: var(--red); }
+
+    @media (max-width: 560px) {
+      .drawer-grid { grid-template-columns: 1fr; }
+      .report-top  { flex-wrap: wrap; }
+    }
+
+    /* ── Photo lightbox ── */
+    #photo-lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    #photo-lightbox.open { display: flex; }
+    #photo-lightbox img {
+      max-width: 100%; max-height: 90vh;
+      border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      object-fit: contain; display: block;
+      animation: zoomIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    #lightbox-close {
+      position: fixed; top: 16px; right: 16px;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 18px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10000;
+    }
+    #lightbox-close:hover { 
+      background: rgba(255,255,255,0.28);
+      transform: scale(1.1);
+    }
+    #lightbox-close:active { transform: scale(0.95); }
+    .report-photo-thumb {
+      cursor: zoom-in; transition: opacity 0.2s;
+    }
+    .report-photo-thumb:hover { opacity: 0.9; }
+
+    /* ── Sort controls ── */
+    .sort-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .sort-label {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 5px; margin-right: 2px;
+    }
+    .sort-chip {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: all 0.15s;
+    }
+    .sort-chip:hover { border-color: var(--text); color: var(--text); }
+    .sort-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .sort-chip .sort-arrow { font-size: 9px; opacity: 0.7; }
+
+    /* ── Pagination ── */
+    .pagination-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .pg-btn {
+      min-width: 36px; height: 36px; padding: 0 10px;
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text); cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .pg-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .pg-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .pg-btn:disabled { opacity: 0.35; cursor: default; }
+    .pg-info { font-size: 12px; color: var(--muted); padding: 0 4px; }
+
+    /* ── Section headers ── */
+    .section-header {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      padding-bottom: 10px; border-bottom: 2px solid var(--border);
+      transition: all 0.2s;
+    }
+    .section-header i { font-size: 14px; }
+    .section-header.pending i { color: var(--yellow); }
+    .section-header.actioned i { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle" aria-label="Toggle navigation">
+
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" role="navigation">
+    <label class="sidebar-overlay" for="nav-toggle" aria-hidden="true"></label>
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-indicator"><i class="fa-solid fa-landmark"></i> Officer Portal — Rio Hondo</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Barangay</span>
+        <a href="officer-dashboard.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span> Dashboard</a>
+        <a href="officer-kyc-review.html"      class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> KYC Review <span class="nav-badge badge-yellow">5</span></a>
+        <a href="officer-pending-reports.html" class="nav-item active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-hourglass-half"></i></span> Pending Reports <span class="nav-badge">8</span></a>
+        <a href="officer-complaints.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Complaints
+          <span class="nav-badge" id="complaints-badge-pr" style="display:none;background:#dc2626;"></span>
+        </a>
+        <a href="officer-density-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Density Map</a>
+        <a href="officer-manage-users.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Users &amp; Accounts</a>
+        <a href="officer-analytics.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Personal</span>
+        <a href="officer-my-profile.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span> My Profile
+        </a>
+        <a href="citizen-dashboard.html" class="nav-item">
+          <span class="nav-icon"><i class="fa-solid fa-house-user"></i></span> Citizen View
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="user-info" href="#">
+        <div class="user-avatar"><i class="fa-solid fa-landmark"></i></div>
+        <div><div class="user-name" id="sidebar-user-name">Maria Santos</div><div class="user-role" id="sidebar-user-role">Officer · Rio Hondo</div></div>
+      </a>
+      <a class="logout-btn" href="index.html"><span class="nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content" id="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <label class="hamburger" for="nav-toggle"><span></span><span></span><span></span></label>
+        <span class="topbar-title">Pending Reports</span>
+      </div>
+      <div class="topbar-right">
+        <a href="officer-pending-reports.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span style="background:var(--red);color:#fff;border-radius:100px;padding:0 5px;font-size:10px;font-weight:700;">8</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page active" role="main">
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="officer-dashboard.html">Officer Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">Pending Reports</li>
+        </nav>
+        <h1>Pending Reports</h1>
+        <p id="reports-page-sub">Review citizen waste reports and approve or reject them for collection.</p>
+      </div>
+
+
+
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:13px;color:#166534;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <i class="fa-solid fa-rotate" style="flex-shrink:0;"></i>
+        <span id="auto-assign-notice"><strong>Auto-assignment active:</strong> When you approve a report, the system automatically assigns it to the nearest available driver. No manual dispatch needed.</span>
+      </div>
+
+      <!-- Stats row (dynamic) -->
+      <div class="stats-grid" style="margin-bottom:22px;">
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+          <div class="stat-num" style="color:var(--yellow);" id="stat-pending">—</div>
+          <div class="stat-label">Pending Review</div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-num" style="color:var(--blue);" id="stat-approved">—</div>
+          <div class="stat-label">Approved</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
+          <div class="stat-num" style="color:var(--green);" id="stat-total">—</div>
+          <div class="stat-label">Total Reports</div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(220,38,38,0.2);">
+          <div class="stat-icon"><i class="fa-solid fa-radiation" style="color:var(--red);"></i></div>
+          <div class="stat-num" style="color:var(--red);" id="stat-critical">—</div>
+          <div class="stat-label">Critical Urgency</div>
+        </div>
+      </div>
+
+      <!-- ── PENDING ── -->
+      <div class="section-header pending">
+        <i class="fa-solid fa-hourglass-half"></i> Awaiting Review
+      </div>
+
+      <!-- Sort controls -->
+      <div class="sort-row" id="pending-sort-row">
+        <span class="sort-label"><i class="fa-solid fa-arrow-up-wide-short"></i> Sort:</span>
+        <button class="sort-chip active" id="sort-urgency"    onclick="setSort('urgency')">   <i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> Urgency</button>
+        <button class="sort-chip"        id="sort-date-newest" onclick="setSort('date-newest')"><i class="fa-solid fa-clock-rotate-left"    style="font-size:10px;"></i> Newest First</button>
+        <button class="sort-chip"        id="sort-date-oldest" onclick="setSort('date-oldest')"><i class="fa-solid fa-clock"                style="font-size:10px;"></i> Oldest First</button>
+        <button class="sort-chip"        id="sort-waste-type"  onclick="setSort('waste-type')"> <i class="fa-solid fa-recycle"              style="font-size:10px;"></i> Waste Type</button>
+      </div>
+
+      <!-- Dynamic pending reports -->
+      <div id="pending-container"></div>
+
+      <!-- ── ACTIONED ── -->
+      <div class="section-header actioned" style="margin-top:32px;">
+        <i class="fa-solid fa-circle-check"></i> Approved &amp; Rejected
+      </div>
+      <div id="actioned-container"></div>
+
+
+
+    </div><!-- /page -->
+  </main>
+</div><!-- /app-shell -->
+
+<!-- ── Approve confirm modal ── -->
+<div class="modal-overlay hidden" id="modal-approve">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Approve Report</div>
+    </div>
+    <div class="modal-sub" id="approve-modal-sub">Are you sure you want to approve this report? The system will automatically assign the nearest available driver.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeApproveModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-sm" onclick="confirmApprove()" style="flex:1;background:var(--green);color:#fff;border:none;"><i class="fa-solid fa-check"></i> Yes, Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reject reason modal ── -->
+<div class="modal-overlay hidden" id="modal-reject">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:#fff0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-circle-xmark" style="color:var(--red);font-size:16px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Reject Report</div>
+    </div>
+    <div class="modal-sub">Select a reason for rejecting this report. The citizen will be notified.</div>
+    <div class="form-group">
+      <label>Reason <span style="color:var(--red);">*</span></label>
+      <select id="reject-reason">
+        <option value="">— Select reason —</option>
+        <option>Location description too vague</option>
+        <option>Duplicate report already filed</option>
+        <option>Not within barangay jurisdiction</option>
+        <option>Photo evidence unclear or missing</option>
+        <option>Report does not match waste type</option>
+        <option>Already scheduled for collection</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <textarea id="reject-notes" placeholder="Add details for the citizen…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeRejectModal()" style="flex:0 0 40%;">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="confirmReject()" style="flex:1;">✗ Reject Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Own Report Error Modal ── -->
+<div class="modal-overlay hidden" id="modal-own-report">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="width:42px;height:42px;border-radius:12px;background:#fee2e2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-ban" style="color:var(--red);font-size:18px;"></i>
+      </div>
+      <div class="modal-title" style="margin:0;">Cannot Review Own Report</div>
+    </div>
+    <div class="modal-sub" id="own-report-message" style="margin: 0 0 20px; padding: 12px 14px; background: #fff0f0; border-left: 3px solid var(--red); border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.6;">Officers cannot approve or reject their own reports to maintain impartiality and compliance. Please have another officer review this report.</div>
+    <div style="background: var(--surface2); border-radius: 10px; padding: 14px; margin-bottom: 16px; border-left: 3px solid var(--yellow);">
+      <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px;"><i class="fa-solid fa-lightbulb" style="margin-right: 5px;"></i> What you can do</div>
+      <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: var(--text); line-height: 1.8;">
+        <li>Notify another officer to review this report</li>
+        <li>Leave this report for team members to handle</li>
+        <li>Continue reviewing other pending reports</li>
+      </ul>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeOwnReportModal()" style="flex:1;">Understood</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Individual Report Modal ── -->
+<div class="modal-overlay hidden" id="modal-ind-report">
+  <div class="modal" style="max-width:400px;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-file-lines" style="color:var(--text);font-size:16px;"></i>
+        </div>
+        <div class="modal-title" style="margin:0;">Report <span id="ind-modal-id"></span></div>
+      </div>
+      <button onclick="closeIndReportModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div class="drawer-grid">
+      <div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val" id="ind-modal-date">—</div></div>
+      <div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val" id="ind-modal-cit">—</div></div>
+      <div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val" id="ind-modal-wt">—</div></div>
+      <div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val" id="ind-modal-urg">—</div></div>
+    </div>
+    <div class="drawer-section-lbl" style="margin-top:14px;"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>
+    <div class="drawer-desc" id="ind-modal-desc" style="white-space:pre-wrap;">"..."</div>
+    <div class="drawer-section-lbl" style="margin-top:14px;"><i class="fa-solid fa-camera"></i> Photo Evidence</div>
+    <div id="ind-modal-photo"></div>
+  </div>
+</div>
+
+<!-- ── Photo lightbox ── -->
+<div id="photo-lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()" title="Close"><i class="fa-solid fa-xmark"></i></button>
+  <img id="lightbox-img" src="" alt="Full photo" onclick="event.stopPropagation()" />
+</div>
+
+<script src="js/notifs.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/complaints.js"></script>
+<script>
+  // ── Officer session ───────────────────────────────────────
+  var _officerSession = null;
+  try { _officerSession = JSON.parse(sessionStorage.getItem('zc_session')); } catch(e) {}
+  var officerBarangay    = (_officerSession && _officerSession.barangay) ? _officerSession.barangay : '';
+  var officerFullName    = _officerSession ? ((_officerSession.firstName||'') + ' ' + (_officerSession.lastName||'')).trim() : '';
+  var officerDisplayName = officerFullName ? ('Officer ' + officerFullName) : 'Officer';
+
+  // Update sidebar identity and barangay-specific text
+  (function () {
+    var sn = document.getElementById('sidebar-user-name');
+    var sr = document.getElementById('sidebar-user-role');
+    var ri = document.querySelector('.role-indicator');
+    if (sn && officerFullName) sn.textContent = officerFullName;
+    if (sr) sr.textContent = 'Officer' + (officerBarangay ? ' · ' + officerBarangay : '');
+    if (ri) ri.innerHTML   = '<i class="fa-solid fa-landmark"></i> Officer Portal' + (officerBarangay ? ' — ' + officerBarangay : '');
+    // Complaints badge
+    if (typeof COMPLAINTS_DB !== 'undefined') {
+      var cpending = COMPLAINTS_DB.getPendingByBarangay(officerBarangay).length;
+      var cbadge   = document.getElementById('complaints-badge-pr');
+      if (cbadge && cpending > 0) { cbadge.textContent = cpending; cbadge.style.display = ''; }
+    }
+    if (officerBarangay) {
+      var ps = document.getElementById('reports-page-sub');
+      if (ps) ps.textContent = 'Review citizen waste reports and approve or reject them for collection — ' + officerBarangay + '.';
+      var an = document.getElementById('auto-assign-notice');
+      if (an) an.innerHTML = '<strong>Auto-assignment active:</strong> When you approve a report, the system automatically assigns it to the nearest available driver in ' + officerBarangay + '. No manual dispatch needed.';
+      var am = document.getElementById('approve-modal-sub');
+      if (am) am.textContent = 'Are you sure you want to approve this report? The system will automatically assign the nearest available driver in ' + officerBarangay + '.';
+    }
+  }());
+
+  var _pendingRejectId   = null;
+  var _pendingApproveId  = null;
+  var _openDrawerId      = null;
+  var _pendingSort       = 'urgency';
+  var _pendingPage       = 1;
+  var _actionedPage      = 1;
+  var PAGE_SIZE          = 5;
+
+  // ── Drawer ────────────────────────────────────────────────
+
+  // ── Lightbox ──────────────────────────────────────────────
+
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('photo-lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('photo-lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // ── Drawer ────────────────────────────────────────────────
+
+  function openDrawer(id) {
+    closeDrawer();
+    _openDrawerId = id;
+    var el = document.getElementById('drawer-' + id);
+    if (el) el.classList.add('open');
+  }
+
+  function closeDrawer() {
+    if (_openDrawerId) {
+      var el = document.getElementById('drawer-' + _openDrawerId);
+      if (el) el.classList.remove('open');
+    }
+    _openDrawerId = null;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+
+  function imgFallback(img) {
+    img.style.display = 'none';
+    img.parentNode.innerHTML = '<i class="fa-solid fa-image" style="font-size:2rem;color:var(--muted);"></i><span style="font-size:12px;color:var(--muted);">Photo not available</span>';
+    img.parentNode.style.cssText += ';padding:20px 16px;flex-direction:column;align-items:center;gap:6px;';
+  }
+
+  var WASTE_ICONS = {
+    household:    '<i class="fa-solid fa-house"></i>',
+    commercial:   '<i class="fa-solid fa-store"></i>',
+    construction: '<i class="fa-solid fa-helmet-safety"></i>',
+    hazardous:    '<i class="fa-solid fa-radiation"></i>',
+    other:        '<i class="fa-solid fa-box"></i>'
+  };
+  var WASTE_CHIPS = {
+    household:    '<span style="background:#dcfce7;color:#16a34a;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-house" style="font-size:9px;"></i> Household</span>',
+    commercial:   '<span style="background:#fef3c7;color:#d97706;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-store" style="font-size:9px;"></i> Commercial</span>',
+    construction: '<span style="background:#dbeafe;color:#2563eb;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-helmet-safety" style="font-size:9px;"></i> Construction</span>',
+    hazardous:    '<span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-radiation" style="font-size:9px;"></i> Hazardous</span>',
+    other:        '<span style="background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-box" style="font-size:9px;"></i> Other</span>'
+  };
+  var URG_CLASS = { low:'urg-low', medium:'urg-medium', high:'urg-high', critical:'urg-critical' };
+  var URG_ICON  = {
+    low:      '<i class="fa-solid fa-circle-check" style="font-size:9px;"></i>',
+    medium:   '<i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i>',
+    high:     '<i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i>',
+    critical: '<i class="fa-solid fa-skull-crossbones" style="font-size:9px;"></i>'
+  };
+
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+  function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Card builders ─────────────────────────────────────────
+
+  function buildPendingCard(r, idx) {
+    var wt = r.wasteType || 'other';
+    var urg = r.urgency || 'low';
+    var iconCls = (wt === 'hazardous') ? 'illegal' : wt;
+    return '<div class="report-card">' +
+      '<div class="report-card-body">' +
+        '<div class="report-top">' +
+          '<div class="report-icon ' + iconCls + '">' + (WASTE_ICONS[wt]||WASTE_ICONS.other) + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="report-id">#' + esc(r.id) + ' &nbsp;·&nbsp; ' + esc(r.dateStr) + '</div>' +
+            '<div class="report-loc">' + esc(r.location) + '</div>' +
+            '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;·&nbsp; ' + esc(r.barangay) + '</div>' +
+          '</div>' +
+          '<span class="badge badge-yellow">Pending</span>' +
+        '</div>' +
+        '<div class="report-chips">' +
+          (WASTE_CHIPS[wt]||WASTE_CHIPS.other) +
+          '<span class="' + (URG_CLASS[urg]||'urg-low') + '">' + (URG_ICON[urg]||'') + ' ' + cap(urg) + ' Urgency</span>' +
+        '</div>' +
+        '<div class="report-actions">' +
+          '<button class="btn-view-rpt" onclick="openDrawer(\'' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Report</button>' +
+          '<button class="btn-approve-rpt" onclick="openApproveModal(\'' + esc(r.id) + '\')"><i class="fa-solid fa-check"></i> Approve</button>' +
+          '<button class="btn-reject-rpt"  onclick="openRejectModal(\'' + esc(r.id) + '\')"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="report-drawer" id="drawer-' + esc(r.id) + '">' +
+        '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+        '<div class="drawer-grid">' +
+          '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Contact</div><div class="drawer-box-val">' + esc(r.contact||'—') + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg]||'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Barangay</div><div class="drawer-box-val">' + esc(r.barangay) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Status</div><div class="drawer-box-val"><span class="badge badge-yellow">Pending</span></div></div>' +
+        '</div>' +
+        '<div class="drawer-section-lbl" style="margin-top:4px;"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+        '<div class="drawer-desc">"' + esc(r.description || 'No description provided') + '"</div>' +
+        '<div class="drawer-section-lbl" style="margin-top:14px;"><i class="fa-solid fa-camera"></i> Photo Evidence</div>' +
+        (r.photo
+          ? '<div class="drawer-photo-box" style="padding:0;overflow:hidden;background:none;border:none;gap:0;"><img src="' + r.photo + '" alt="Report photo" class="report-photo-thumb" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;display:block;border:2px solid var(--border);" onclick="openLightbox(this.src)" onerror="imgFallback(this)" title="Click to enlarge"/></div>'
+          : '<div class="drawer-photo-box"><i class="fa-solid fa-image"></i><span>No photo submitted</span></div>') +
+        '<div class="drawer-footer">' +
+          '<button class="drawer-close-link" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+          '<button class="btn-reject-rpt"  onclick="openRejectModal(\'' + esc(r.id) + '\')" style="flex:1;justify-content:center;min-width:80px;"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+          '<button class="btn-approve-rpt" onclick="openApproveModal(\'' + esc(r.id) + '\')" style="flex:1.5;justify-content:center;min-width:140px;"><i class="fa-solid fa-check"></i> Approve</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function buildActionedCard(r) {
+    var wt  = r.wasteType || 'other';
+    var urg = r.urgency   || 'low';
+    var approved = r.status === 'approved';
+    var rejected = r.status === 'rejected';
+    var cancelled = r.status === 'cancelled';
+    
+    var badgeHtml = approved
+      ? '<span class="badge badge-blue">Approved</span>'
+      : rejected
+      ? '<span class="badge badge-red">Rejected</span>'
+      : '<span class="badge badge-gray">Cancelled</span>';
+    
+    var cardCls = approved ? ' card-approved' : rejected ? ' card-rejected' : ' card-cancelled';
+
+    var extraChip = approved
+      ? '<span style="background:#eff6ff;color:#2563eb;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-rotate" style="font-size:9px;"></i> ' + esc(r.assignedDriver||'Assigned') + '</span>'
+      : rejected
+      ? '<span style="background:#fff0f0;color:#c0392b;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-circle-xmark" style="font-size:9px;"></i> ' + esc(r.rejectionReason||'Rejected') + '</span>'
+      : '<span style="background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;"><i class="fa-solid fa-ban" style="font-size:9px;"></i> Cancelled</span>';
+
+    var footerInfo = approved
+      ? '<div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);padding:0 10px;"><i class="fa-solid fa-rotate"></i> Auto-assigned: ' + esc(r.assignedDriver||'—') + '</div>'
+      : rejected
+      ? '<div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--red);padding:0 10px;"><i class="fa-solid fa-circle-xmark"></i> ' + esc(r.rejectionReason||'—') + '</div>'
+      : '<div style="flex:1;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#6b7280;padding:0 10px;"><i class="fa-solid fa-ban"></i> Citizen Cancelled</div>';
+
+    return '<div class="report-card' + cardCls + '">' +
+      '<div class="report-card-body">' +
+        '<div class="report-top">' +
+          '<div class="report-icon ' + ((wt==='hazardous')?'illegal':wt) + '">' + (WASTE_ICONS[wt]||WASTE_ICONS.other) + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="report-id">#' + esc(r.id) + ' &nbsp;·&nbsp; ' + esc(r.dateStr) + '</div>' +
+            '<div class="report-loc">' + esc(r.location) + '</div>' +
+            '<div class="report-meta"><i class="fa-solid fa-user" style="font-size:10px;"></i> ' + esc(r.citizen) + ' &nbsp;·&nbsp; ' + esc(r.barangay) + '</div>' +
+          '</div>' +
+          badgeHtml +
+        '</div>' +
+        '<div class="report-chips">' +
+          (WASTE_CHIPS[wt]||WASTE_CHIPS.other) +
+          '<span class="' + (URG_CLASS[urg]||'urg-low') + '">' + (URG_ICON[urg]||'') + ' ' + cap(urg) + ' Urgency</span>' +
+          extraChip +
+        '</div>' +
+        '<div class="report-actions">' +
+          '<button class="btn-view-rpt" onclick="openDrawer(\'a' + esc(r.id) + '\')"><i class="fa-solid fa-eye"></i> View Report</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="report-drawer" id="drawer-a' + esc(r.id) + '">' +
+        '<div class="drawer-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+        '<div class="drawer-grid">' +
+          '<div class="drawer-box"><div class="drawer-box-label">Report ID</div><div class="drawer-box-val">#' + esc(r.id) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Submitted</div><div class="drawer-box-val">' + esc(r.dateStr) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Citizen</div><div class="drawer-box-val">' + esc(r.citizen) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Waste Type</div><div class="drawer-box-val">' + cap(wt) + '</div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Urgency</div><div class="drawer-box-val"><span class="' + (URG_CLASS[urg]||'urg-low') + '">' + cap(urg) + '</span></div></div>' +
+          '<div class="drawer-box"><div class="drawer-box-label">Status</div><div class="drawer-box-val">' + badgeHtml + '</div></div>' +
+          (approved
+            ? '<div class="drawer-box"><div class="drawer-box-label">Approved By</div><div class="drawer-box-val">' + esc(r.approvedBy||'Officer') + '</div></div>' +
+              '<div class="drawer-box"><div class="drawer-box-label">Approved On</div><div class="drawer-box-val">' + esc(r.approvedDate||'—') + '</div></div>'
+            : '<div class="drawer-box"><div class="drawer-box-label">Rejected By</div><div class="drawer-box-val">' + esc(r.rejectedBy||'Officer') + '</div></div>' +
+              '<div class="drawer-box"><div class="drawer-box-label">Reason</div><div class="drawer-box-val" style="color:var(--red);">' + esc(r.rejectionReason||'—') + '</div></div>') +
+        '</div>' +
+        '<div class="drawer-section-lbl"><i class="fa-solid fa-comment-dots"></i> Citizen Description</div>' +
+        '<div class="drawer-desc">"' + esc(r.description||'No description provided') + '"</div>' +
+        '<div class="drawer-section-lbl" style="margin-top:14px;"><i class="fa-solid fa-camera"></i> Photo Evidence</div>' +
+        (r.photo
+          ? '<div class="drawer-photo-box" style="padding:0;overflow:hidden;background:none;border:none;gap:0;"><img src="' + r.photo + '" alt="Report photo" class="report-photo-thumb" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;display:block;border:2px solid var(--border);" onclick="openLightbox(this.src)" onerror="imgFallback(this)" title="Click to enlarge"/></div>'
+          : '<div class="drawer-photo-box"><i class="fa-solid fa-image"></i><span>No photo submitted</span></div>') +
+        '<div class="drawer-footer">' +
+          '<button class="drawer-close-link" onclick="closeDrawer()"><i class="fa-solid fa-chevron-up"></i> Close</button>' +
+          footerInfo +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Sort ─────────────────────────────────────────────────
+
+  var _UG_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+
+  function setSort(s) {
+    _pendingSort = s;
+    _pendingPage = 1;
+    ['urgency','date-newest','date-oldest','waste-type'].forEach(function(k) {
+      var el = document.getElementById('sort-' + k);
+      if (el) el.classList.toggle('active', k === s);
+    });
+    renderReports();
+  }
+
+  function sortPending(arr) {
+    var sorted = arr.slice();
+    if (_pendingSort === 'urgency') {
+      sorted.sort(function(a, b) {
+        var ua = _UG_ORDER[a.urgency] != null ? _UG_ORDER[a.urgency] : 99;
+        var ub = _UG_ORDER[b.urgency] != null ? _UG_ORDER[b.urgency] : 99;
+        if (ua !== ub) return ua - ub;
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+    } else if (_pendingSort === 'date-newest') {
+      sorted.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
+    } else if (_pendingSort === 'date-oldest') {
+      sorted.sort(function(a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
+    } else if (_pendingSort === 'waste-type') {
+      sorted.sort(function(a, b) {
+        var wa = (a.wasteType || 'other').toLowerCase();
+        var wb = (b.wasteType || 'other').toLowerCase();
+        return wa < wb ? -1 : wa > wb ? 1 : 0;
+      });
+    }
+    return sorted;
+  }
+
+  // ── Pagination ───────────────────────────────────────────
+
+  function buildPagination(total, totalPages, section) {
+    if (totalPages <= 1) return '';
+    var cur = section === 'pending' ? _pendingPage : _actionedPage;
+    var html = '<div class="pagination-row">';
+    html += '<button class="pg-btn" onclick="goToPage(\'' + section + '\',' + (cur - 1) + ')" ' + (cur <= 1 ? 'disabled' : '') + '><i class="fa-solid fa-chevron-left"></i></button>';
+    var start = Math.max(1, cur - 2);
+    var end   = Math.min(totalPages, start + 4);
+    if (end - start < 4) start = Math.max(1, end - 4);
+    for (var p = start; p <= end; p++) {
+      html += '<button class="pg-btn' + (p === cur ? ' active' : '') + '" onclick="goToPage(\'' + section + '\',' + p + ')">' + p + '</button>';
+    }
+    html += '<button class="pg-btn" onclick="goToPage(\'' + section + '\',' + (cur + 1) + ')" ' + (cur >= totalPages ? 'disabled' : '') + '><i class="fa-solid fa-chevron-right"></i></button>';
+    html += '<span class="pg-info">' + total + ' total</span>';
+    html += '</div>';
+    return html;
+  }
+
+  function goToPage(section, p) {
+    if (section === 'pending')  _pendingPage  = p;
+    if (section === 'actioned') _actionedPage = p;
+    renderReports();
+    document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderReports() {
+    var allReports = REPORTS_DB.getAll();
+    var reports    = officerBarangay
+      ? allReports.filter(function(r){ return r.barangay === officerBarangay; })
+      : allReports;
+    var pending  = sortPending(reports.filter(function(r){ return r.status === 'pending'; }));
+    var actioned = reports.filter(function(r){ return r.status !== 'pending'; });
+    var counts = {
+      total:    reports.length,
+      pending:  pending.length,
+      approved: reports.filter(function(r){ return r.status === 'approved'; }).length,
+      rejected: reports.filter(function(r){ return r.status === 'rejected'; }).length,
+      critical: pending.filter(function(r){ return r.urgency === 'critical'; }).length
+    };
+
+    var sp = document.getElementById('stat-pending');
+    var sa = document.getElementById('stat-approved');
+    var st = document.getElementById('stat-total');
+    var sc = document.getElementById('stat-critical');
+    if (sp) sp.textContent = counts.pending;
+    if (sa) sa.textContent = counts.approved;
+    if (st) st.textContent = counts.total;
+    if (sc) sc.textContent = counts.critical;
+
+    var pc = document.getElementById('pending-container');
+    if (pc) {
+      if (pending.length === 0) {
+        pc.innerHTML = '<div style="text-align:center;padding:48px 32px;color:var(--muted);font-size:14px;"><i class="fa-solid fa-inbox" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:0.5;"></i><strong>No pending reports</strong><p style="margin:8px 0 0;font-size:13px;">All caught up! Check back later for new submissions.</p></div>';
+      } else {
+        var pTotalPages = Math.max(1, Math.ceil(pending.length / PAGE_SIZE));
+        if (_pendingPage > pTotalPages) _pendingPage = pTotalPages;
+        var pageP = pending.slice((_pendingPage - 1) * PAGE_SIZE, _pendingPage * PAGE_SIZE);
+        pc.innerHTML = pageP.map(function(r, i){ return buildPendingCard(r, i); }).join('') +
+          buildPagination(pending.length, pTotalPages, 'pending');
+      }
+    }
+
+    var ac = document.getElementById('actioned-container');
+    if (ac) {
+      if (actioned.length === 0) {
+        ac.innerHTML = '<div style="text-align:center;padding:40px 32px;color:var(--muted);font-size:13px;"><i class="fa-solid fa-circle-check" style="font-size:2rem;display:block;margin-bottom:10px;opacity:0.4;"></i>No approved or rejected reports yet. <p style="margin:6px 0 0;font-size:12px;opacity:0.8;">Your review history will appear here.</p></div>';
+      } else {
+        var aTotalPages = Math.max(1, Math.ceil(actioned.length / PAGE_SIZE));
+        if (_actionedPage > aTotalPages) _actionedPage = aTotalPages;
+        var pageA = actioned.slice((_actionedPage - 1) * PAGE_SIZE, _actionedPage * PAGE_SIZE);
+        ac.innerHTML = pageA.map(function(r){ return buildActionedCard(r); }).join('') +
+          buildPagination(actioned.length, aTotalPages, 'actioned');
+      }
+    }
+
+    if (_openDrawerId) {
+      var el = document.getElementById('drawer-' + _openDrawerId);
+      if (el) el.classList.add('open');
+    }
+  }
+
+  function openApproveModal(id) {
+    _pendingApproveId = id;
+    document.getElementById('modal-approve').classList.remove('hidden');
+  }
+
+  function closeApproveModal() {
+    _pendingApproveId = null;
+    document.getElementById('modal-approve').classList.add('hidden');
+  }
+
+  function confirmApprove() {
+    var report = REPORTS_DB.getById(_pendingApproveId);
+    if (report && _officerSession && report.citizenId === _officerSession.id) {
+      closeApproveModal();
+      alert('You cannot approve your own report.');
+      return;
+    }
+    REPORTS_DB.approve(_pendingApproveId, officerDisplayName);
+    closeApproveModal();
+    closeDrawer();
+    renderReports();
+  }
+
+  function openRejectModal(id) {
+    _pendingRejectId = id;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-notes').value  = '';
+    document.getElementById('modal-reject').classList.remove('hidden');
+  }
+
+  function closeRejectModal() {
+    _pendingRejectId = null;
+    document.getElementById('modal-reject').classList.add('hidden');
+  }
+
+  function confirmReject() {
+    var report = REPORTS_DB.getById(_pendingRejectId);
+    if (report && _officerSession && report.citizenId === _officerSession.id) {
+      closeRejectModal();
+      alert('You cannot reject your own report.');
+      return;
+    }
+    var reason = document.getElementById('reject-reason').value;
+    if (!reason) {
+      document.getElementById('reject-reason').style.borderColor = 'var(--red)';
+      return;
+    }
+    document.getElementById('reject-reason').style.borderColor = '';
+    var notes = document.getElementById('reject-notes').value.trim();
+    var fullReason = notes ? reason + ' — ' + notes : reason;
+    REPORTS_DB.reject(_pendingRejectId, fullReason, officerDisplayName);
+    closeRejectModal();
+    renderReports();
+  }
+
+  document.getElementById('modal-approve').addEventListener('click', function(e){
+    if (e.target === this) closeApproveModal();
+  });
+  document.getElementById('modal-reject').addEventListener('click', function(e){
+    if (e.target === this) closeRejectModal();
+  });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    renderReports();
+  });
+  setInterval(function(){
+    renderReports();
+  }, 3000);
+</script>
+
+<button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+<script src="js/shared.js"></script>
+</body>
+</html>

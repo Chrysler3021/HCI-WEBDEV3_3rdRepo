@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Map View — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .map-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 20px;
+    }
+    .map-toolbar {
+      display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+      border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap;
+    }
+    .map-toolbar-label { font-size: 12px; font-weight: 700; color: var(--text2); margin-right: 4px; }
+    .map-filter-btn {
+      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border); background: var(--surface); color: var(--text2);
+      cursor: pointer; transition: all 0.15s; appearance: none; font-family: inherit;
+    }
+    .map-filter-btn.active, .map-filter-btn:hover {
+      background: var(--primary-glow); border-color: var(--primary-tint); color: var(--primary);
+    }
+    #citizen-density-map { width: 100%; height: 460px; display: block; }
+    .legend-row {
+      display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 16px;
+      border-top: 1px solid var(--border); background: var(--surface2); font-size: 11px; font-weight: 600;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .density-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;">
+        <i class="fa-solid fa-user"></i> Citizen Portal
+      </span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="submit-report.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span> Submit Report</a>
+      <a href="my-reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> My Reports</a>
+      <a href="citizen-map.html" class="nav-item active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Map View</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span> Notifications <span class="nav-badge">3</span></a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span> My Profile</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebar-user-name">Citizen</div>
+          <div class="user-role" id="sidebar-user-role">Citizen</div>
+        </div>
+      </div>
+      <a href="#" class="logout-link" onclick="try{sessionStorage.removeItem('zc_session');}catch(e){} window.location.href='Login.html'; return false;"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn"><span></span><span></span><span></span></label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="citizen-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Map View</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="citizen-dashboard.html">Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">Map View</li>
+        </nav>
+        <h1>Map View</h1>
+        <p>View city report hotspots, approved routes, and collection status across barangays.</p>
+      </div>
+
+      <div class="density-stats">
+        <div class="stat-card stat-red">
+          <span class="stat-icon"><i class="fa-solid fa-fire"></i></span>
+          <div class="stat-num red">12</div>
+          <div class="stat-label">Active Hotspots</div>
+          <span class="stat-trend trend-down">↑ 5 today</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
+          <div class="stat-num blue">6</div>
+          <div class="stat-label">Trucks on Route</div>
+          <span class="stat-trend">In your barangay area</span>
+        </div>
+        <div class="stat-card stat-yellow">
+          <span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+          <div class="stat-num yellow">8</div>
+          <div class="stat-label">Pending Reports</div>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <div class="stat-num green">73%</div>
+          <div class="stat-label">Collection Coverage</div>
+        </div>
+      </div>
+
+      <div class="map-card">
+        <div class="map-toolbar">
+          <span class="map-toolbar-label">Layer:</span>
+          <button class="map-filter-btn active" data-layer="heatmap"><i class="fa-solid fa-fire"></i> Heatmap</button>
+          <button class="map-filter-btn" data-layer="pins"><i class="fa-solid fa-location-dot"></i> Report Pins</button>
+          <button class="map-filter-btn" data-layer="collected"><i class="fa-solid fa-circle-check"></i> Collected</button>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button class="map-filter-btn" id="zoom-in-btn">⊕ In</button>
+            <button class="map-filter-btn" id="zoom-out-btn">⊖ Out</button>
+          </div>
+        </div>
+        <div id="citizen-density-map"></div>
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-dot" style="background:#c0392b;"></span>Critical</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#c08a10;"></span>Urgent</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#2563eb;"></span>Approved</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#588157;"></span>Collected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var citizenMap, heatLayer, pinMarkers = [], collectedMarkers = [];
+  var REPORTS = [
+    { lat:6.9167, lng:122.0833, priority:'critical', loc:'Waterfront Road',     status:'pending'   },
+    { lat:6.9175, lng:122.0845, priority:'urgent',   loc:'Purok 2, Bagonsilang',status:'pending'   },
+    { lat:6.9155, lng:122.0820, priority:'critical', loc:'Near Rio Hondo Mosque',status:'pending'   },
+    { lat:6.9180, lng:122.0858, priority:'urgent',   loc:'Market Gate',          status:'approved'  },
+    { lat:6.9148, lng:122.0840, priority:'normal',   loc:'Purok 4, Rizal St.',   status:'pending'   },
+    { lat:6.9192, lng:122.0830, priority:'urgent',   loc:'School Alley',         status:'approved'  },
+    { lat:6.9160, lng:122.0860, priority:'normal',   loc:'Purok 6, Del Pilar',   status:'pending'   },
+    { lat:6.9140, lng:122.0815, priority:'critical', loc:'Riverside Embankment', status:'collected' },
+  ];
+  var PRIORITY_COLOR  = { critical:'#c0392b', urgent:'#c08a10', normal:'#2563eb', ok:'#588157' };
+  var STATUS_OVERRIDE = { collected:'#588157', approved:'#2563eb' };
+
+  function initCitizenMap() {
+    var rioHondo = { lat: 6.9162, lng: 122.0838 };
+    citizenMap = new google.maps.Map(document.getElementById('citizen-density-map'), {
+      center: rioHondo, zoom: 15,
+      mapTypeControl: false, streetViewControl: false, fullscreenControl: true,
+    });
+
+    var heatData = REPORTS.map(function(r) {
+      var w = r.priority === 'critical' ? 10 : r.priority === 'urgent' ? 6 : 3;
+      return { location: new google.maps.LatLng(r.lat, r.lng), weight: w };
+    });
+    heatLayer = new google.maps.visualization.HeatmapLayer({
+      data: heatData, map: citizenMap, radius: 35, opacity: 0.75,
+      gradient: ['rgba(0,0,0,0)','rgba(255,255,0,0.6)','rgba(255,140,0,0.8)','rgba(192,57,43,1)']
+    });
+
+    REPORTS.forEach(function(r) {
+      var color = STATUS_OVERRIDE[r.status] || PRIORITY_COLOR[r.priority] || '#588157';
+      var marker = new google.maps.Marker({
+        position: { lat: r.lat, lng: r.lng }, map: null, title: r.loc,
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
+      });
+      var infoWindow = new google.maps.InfoWindow({
+        content: '<div style="font-family:sans-serif;padding:3px 4px;min-width:150px;font-size:13px;">'
+          + '<strong>' + r.loc + '</strong><br>'
+          + '<span style="color:' + color + ';font-weight:600;text-transform:capitalize;">' + r.priority + ' · ' + r.status + '</span></div>'
+      });
+      marker.addListener('click', function() { infoWindow.open(citizenMap, marker); });
+      if (r.status === 'collected') { collectedMarkers.push(marker); } else { pinMarkers.push(marker); }
+    });
+
+    document.querySelectorAll('.map-filter-btn[data-layer]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.map-filter-btn[data-layer]').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        var layer = this.dataset.layer;
+        heatLayer.setMap(null);
+        pinMarkers.forEach(function(m) { m.setMap(null); });
+        collectedMarkers.forEach(function(m) { m.setMap(null); });
+        if (layer === 'heatmap') { heatLayer.setMap(citizenMap); pinMarkers.forEach(function(m) { m.setMap(citizenMap); }); }
+        else if (layer === 'pins') { pinMarkers.forEach(function(m) { m.setMap(citizenMap); }); }
+        else if (layer === 'collected') { collectedMarkers.forEach(function(m) { m.setMap(citizenMap); }); }
+      });
+    });
+
+    document.getElementById('zoom-in-btn').addEventListener('click', function() { citizenMap.setZoom(Math.min(citizenMap.getZoom() + 1, 20)); });
+    document.getElementById('zoom-out-btn').addEventListener('click', function() { citizenMap.setZoom(Math.max(citizenMap.getZoom() - 1, 3)); });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjk-ytOXREqMOXYyKc1_nRwiobzQV6dUU&libraries=visualization&callback=initCitizenMap" async defer></script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(sessionStorage.getItem('zc_session'));
+    if (!u) return;
+    var fullName = [u.firstName, u.middleName, u.lastName].filter(Boolean).join(' ') || u.name || 'Citizen';
+    var nameEl = document.getElementById('sidebar-user-name');
+    var roleEl = document.getElementById('sidebar-user-role');
+    if (nameEl) nameEl.textContent = fullName;
+    if (roleEl) roleEl.textContent = 'Citizen' + (u.barangay ? ' · ' + u.barangay : '');
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

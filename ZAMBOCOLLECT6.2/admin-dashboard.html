@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City Dashboard — ZamboCollect Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .chart-wrap { position: relative; width: 100%; }
+    .chart-wrap canvas { width: 100% !important; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="admin-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+    <div class="role-chip"><i class="fa-solid fa-gear"></i> Admin Portal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">City Admin</div>
+      <a href="admin-dashboard.html"   class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-building"></i></span>City Dashboard</a>
+      <a href="admin-citywide-map.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>City-Wide Map</a>
+      <a href="admin-all-reports.html"  class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>All Reports</a>
+      <a href="admin-barangays.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Manage Barangays</a>
+      <a href="admin-users.html"               class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users"></i></span>Users &amp; Accounts</a>
+      <a href="admin-driver-applications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-truck"></i></span>Driver Management</a>
+      <a href="admin-analytics.html"           class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-gear"></i></div>
+        <div>
+          <div class="user-name">Admin User</div>
+          <div class="user-role">City Administrator — Zamboanga City</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="admin-dashboard.html"><i class="fa-solid fa-building"></i> City Dashboard</a></li>
+          <li><a href="admin-citywide-map.html"><i class="fa-solid fa-map"></i> City-Wide Map</a></li>
+          <li><a href="admin-all-reports.html"><i class="fa-solid fa-clipboard-list"></i> All Reports</a></li>
+          <li><a href="admin-barangays.html"><i class="fa-solid fa-house"></i> Manage Barangays</a></li>
+          <li><a href="admin-users.html"><i class="fa-solid fa-users"></i> Users & Accounts</a></li>
+          <li><a href="admin-driver-applications.html"><i class="fa-solid fa-truck"></i> Driver Management</a></li>
+          <li><a href="admin-analytics.html"><i class="fa-solid fa-chart-bar"></i> System Analytics</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">City Dashboard</div>
+      <div class="topbar-right">
+        <a href="#" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="admin-users.html" class="topbar-btn primary">+ Create Officer</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>City Dashboard</h1>
+        <p>System-wide overview — Zamboanga City</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-house"></i></span>
+          <div class="stat-num green">98</div>
+          <div class="stat-label">Barangays</div>
+          <span class="stat-trend trend-up">All active</span>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,30 17,30 33,30 50,30 67,30 83,30 100,30 100,48 0,48"/>
+            <polyline points="0,30 17,30 33,30 50,30 67,30 83,30 100,30"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-yellow">
+          <span class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+          <div class="stat-num yellow">2,451</div>
+          <div class="stat-label">Active Reports</div>
+          <span class="stat-trend trend-up">↑ 124 today</span>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,38 17,33 33,28 50,20 67,24 83,16 100,10 100,48 0,48"/>
+            <polyline points="0,38 17,33 33,28 50,20 67,24 83,16 100,10"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-icon"><i class="fa-solid fa-truck"></i></span>
+          <div class="stat-num blue">34</div>
+          <div class="stat-label">Drivers Active</div>
+          <span class="stat-trend trend-up">↑ 3 vs yesterday</span>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,35 17,28 33,30 50,25 67,28 83,20 100,18 100,48 0,48"/>
+            <polyline points="0,35 17,28 33,30 50,25 67,28 83,20 100,18"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
+          <div class="stat-num green">91%</div>
+          <div class="stat-label">City Collection Rate</div>
+          <span class="stat-trend trend-up">↑ 1.8%</span>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,42 17,36 33,32 50,26 67,20 83,16 100,12 100,48 0,48"/>
+            <polyline points="0,42 17,36 33,32 50,26 67,20 83,16 100,12"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Secondary stats row -->
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card stat-blue">
+          <span class="stat-icon"><i class="fa-solid fa-id-card"></i></span>
+          <div class="stat-num blue">18,240</div>
+          <div class="stat-label">Verified Citizens</div>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,40 17,36 33,30 50,24 67,20 83,16 100,12 100,48 0,48"/>
+            <polyline points="0,40 17,36 33,30 50,24 67,20 83,16 100,12"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-yellow">
+          <span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+          <div class="stat-num yellow">143</div>
+          <div class="stat-label">Pending KYC</div>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,20 17,28 33,22 50,30 67,25 83,32 100,28 100,48 0,48"/>
+            <polyline points="0,20 17,28 33,22 50,30 67,25 83,32 100,28"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-icon"><i class="fa-solid fa-landmark"></i></span>
+          <div class="stat-num green">98</div>
+          <div class="stat-label">Officers Deployed</div>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,30 17,30 33,28 50,28 67,26 83,26 100,24 100,48 0,48"/>
+            <polyline points="0,30 17,30 33,28 50,28 67,26 83,26 100,24"/>
+          </svg>
+        </div>
+        <div class="stat-card stat-orange">
+          <span class="stat-icon"><i class="fa-solid fa-fire"></i></span>
+          <div class="stat-num orange">17</div>
+          <div class="stat-label">Active Hotspots</div>
+          <span class="stat-trend trend-down">↑ 4 new</span>
+          <svg class="stat-sparkline" viewBox="0 0 100 48" preserveAspectRatio="none">
+            <polygon points="0,38 17,32 33,35 50,28 67,22 83,18 100,15 100,48 0,48"/>
+            <polyline points="0,38 17,32 33,35 50,28 67,22 83,18 100,15"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- KYC Overview -->
+        <div class="card">
+          <div class="card-title">KYC Overview</div>
+
+          <div class="data-row">
+            <span class="data-row-label">Total Verified Citizens</span>
+            <span class="data-row-value text-green">18,240</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Pending KYC Applications</span>
+            <span class="data-row-value text-yellow">143</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">KYC Approval Rate</span>
+            <span class="data-row-value text-green">94.2%</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Rejected (this month)</span>
+            <span class="data-row-value text-red">28</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Avg. Review Time</span>
+            <span class="data-row-value">18 hrs</span>
+          </div>
+
+          <div class="notice yellow" style="margin-top:14px; margin-bottom:0;">
+            <span class="notice-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <span>Admin cannot approve KYC directly — handled by barangay officers.</span>
+          </div>
+        </div>
+
+        <!-- Top Barangays bar chart -->
+        <div class="card">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <div>Top Barangays by Report Volume</div>
+            <a href="admin-barangays.html" style="font-size:12px;font-weight:500;color:var(--primary);background:var(--primary-glow);padding:4px 10px;border-radius:6px;border:1px solid var(--primary-tint);">View All</a>
+          </div>
+
+          <div class="chart-wrap" style="height:240px;">
+            <canvas id="chartBarangays"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom row: recent activity + quick links -->
+      <div class="grid-2" style="margin-top:20px;">
+
+        <!-- Recent system activity -->
+        <div class="card">
+          <div class="card-title">Recent System Activity</div>
+          <div class="activity-feed">
+            <div class="activity-item">
+              <div class="activity-icon"><i class="fa-solid fa-landmark"></i></div>
+              <div class="activity-body">
+                <div class="activity-title">Officer account created — Barangay Guiwan</div>
+                <div class="activity-meta">Ana Ramos assigned · Mar 14 · 9:20 AM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon yellow"><i class="fa-solid fa-fire"></i></div>
+              <div class="activity-body">
+                <div class="activity-title">New hotspot detected — Canelar Market</div>
+                <div class="activity-meta">High priority · 47 reports in zone · Mar 14 · 8:05 AM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon blue"><i class="fa-solid fa-chart-bar"></i></div>
+              <div class="activity-body">
+                <div class="activity-title">System analytics export completed</div>
+                <div class="activity-meta">Mar 2025 PDF report generated · Mar 13 · 11:50 PM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="activity-body">
+                <div class="activity-title">Collection rate milestone — Guiwan hits 95%</div>
+                <div class="activity-meta">Best rate in Zamboanga City this week · Mar 13 · 6:40 PM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick access -->
+        <div class="card">
+          <div class="card-title">Quick Access</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <a href="admin-users.html" class="quick-access-card">
+              <span class="qac-icon"><i class="fa-solid fa-landmark"></i></span>
+              <span class="qac-label">Create Officer</span>
+            </a>
+            <a href="admin-all-reports.html" class="quick-access-card">
+              <span class="qac-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+              <span class="qac-label">All Reports</span>
+            </a>
+            <a href="admin-citywide-map.html" class="quick-access-card">
+              <span class="qac-icon"><i class="fa-solid fa-map"></i></span>
+              <span class="qac-label">City Map</span>
+            </a>
+            <a href="admin-analytics.html" class="quick-access-card">
+              <span class="qac-icon"><i class="fa-solid fa-chart-bar"></i></span>
+              <span class="qac-label">Analytics</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="profile-modal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar">U</div>
+      <div class="profile-modal-name">User Name</div>
+      <div class="profile-modal-role">Role</div>
+    </div>
+    <div class="profile-modal-body">
+      <!-- Details populated by JavaScript -->
+    </div>
+    <div class="profile-modal-footer">
+      <button class="profile-modal-btn profile-modal-btn-primary" onclick="handleEditProfile()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-danger" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+      <button class="profile-modal-btn profile-modal-btn-secondary" onclick="closeProfileModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/profile-modal.js"></script>
+<script src="js/shared.js"></script>
+<script>
+// Chart.js defaults
+Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#7a9475';
+Chart.defaults.plugins.legend.display = false;
+
+var chartColors = {
+  green: '#588157',
+  yellow: '#c08a10',
+  red: '#c0392b',
+  blue: '#2563eb',
+  border: '#dfe6db'
+};
+
+// Top Barangays by Report Volume
+(function() {
+  var ctx = document.getElementById('chartBarangays').getContext('2d');
+  var data = [483, 387, 322, 258, 225, 181, 142];
+  var colors = data.map(function(v) {
+    if (v >= 400) return chartColors.red;
+    if (v >= 300) return chartColors.yellow;
+    if (v >= 200) return chartColors.blue;
+    return chartColors.blue;
+  });
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Rio Hondo', 'Canelar', 'Guiwan', 'Tetuan', 'Sta. Cruz', 'Talon-talon', 'Pasonanca'],
+      datasets: [{
+        label: 'Reports',
+        data: data,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false,
+        barPercentage: 0.65
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(c) { return '  ' + c.parsed.y + ' reports'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false } },
+        y: {
+          grid: { color: chartColors.border, lineWidth: 0.8 },
+          border: { display: false },
+          ticks: { stepSize: 100 }
+        }
+      }
+    }
+  });
+}());
+</script>
+
+<button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+</body>
+</html>

@@ -1,0 +1,665 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* icon-wrap overrides for red/yellow states */
+    .notif-icon-wrap.red    { background: rgba(192,57,43,0.10); color: #c0392b; }
+    .notif-icon-wrap.yellow { background: rgba(192,138,16,0.10); color: #c08a10; }
+
+    .notif-tag.red    { background: #fff0f0; color: #c0392b; border: 1px solid #fecaca; }
+    .notif-tag.yellow { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .notif-tag.green  { border: 1px solid #bbf7d0; }
+    .notif-tag.blue   { border: 1px solid #bfdbfe; }
+    .notif-tag.sage   { background: rgba(163,177,138,0.18); color: #5c7242; border: 1px solid #c3d9a8; }
+
+    .empty-state {
+      text-align: center; padding: 52px 24px;
+      color: var(--muted); font-size: 14px;
+    }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+    .empty-state strong { display: block; font-size: 15px; color: var(--text); margin-bottom: 6px; }
+
+    .notif-item { cursor: pointer; }
+
+    /* ── Notification detail modal ── */
+    #notif-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 900;
+      background: rgba(0,0,0,0.48); align-items: flex-end; justify-content: center;
+      padding: 0;
+    }
+    #notif-modal-overlay.open { display: flex; }
+    @media (min-width: 540px) {
+      #notif-modal-overlay { align-items: center; padding: 16px; }
+    }
+
+    #notif-modal {
+      background: var(--surface); width: 100%; max-width: 520px;
+      border-radius: 20px 20px 0 0; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 -4px 40px rgba(0,0,0,0.18);
+      animation: slide-up 0.22s ease;
+    }
+    @media (min-width: 540px) {
+      #notif-modal { border-radius: 18px; animation: none; }
+    }
+    @keyframes slide-up {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .nmd-header {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 20px 20px 16px; border-bottom: 1.5px solid var(--border);
+      position: sticky; top: 0; background: var(--surface); z-index: 1;
+    }
+    .nmd-header-icon {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .nmd-header-text { flex: 1; min-width: 0; }
+    .nmd-title { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .nmd-time  { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .nmd-close {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .nmd-close:hover { border-color: var(--text); color: var(--text); }
+
+    .nmd-body { padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .nmd-section-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .nmd-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .nmd-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 9px 12px;
+    }
+    .nmd-box-lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .nmd-box-val { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+    .nmd-desc-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 14px;
+      font-size: 13px; color: var(--text); line-height: 1.6;
+    }
+
+    .nmd-photo {
+      border-radius: 10px; overflow: hidden;
+      border: 1.5px solid var(--border); cursor: zoom-in;
+    }
+    .nmd-photo img {
+      width: 100%; max-height: 220px; object-fit: cover;
+      display: block; transition: opacity 0.15s;
+    }
+    .nmd-photo img:hover { opacity: 0.88; }
+    .nmd-photo-none {
+      background: var(--surface2); border: 1.5px dashed var(--border);
+      border-radius: 10px; padding: 18px; text-align: center;
+      color: var(--muted); font-size: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .nmd-photo-none i { font-size: 1.6rem; }
+
+    .nmd-status-banner {
+      border-radius: 10px; padding: 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 600;
+    }
+    .nmd-status-banner.approved  { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
+    .nmd-status-banner.rejected  { background: #fff1f2; color: #dc2626; border: 1.5px solid #fecdd3; }
+    .nmd-status-banner.collected { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; }
+    .nmd-status-banner.submitted { background: #fefce8; color: #ca8a04; border: 1.5px solid #fde68a; }
+
+    .nmd-actions {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding-top: 14px; border-top: 1.5px solid var(--border);
+    }
+
+    /* Photo lightbox */
+    #nmd-lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 16px;
+    }
+    #nmd-lightbox.open { display: flex; }
+    #nmd-lightbox img { max-width: 100%; max-height: 90vh; border-radius: 10px; object-fit: contain; display: block; }
+    #nmd-lb-close {
+      position: fixed; top: 14px; right: 14px;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    #nmd-lb-close:hover { background: rgba(255,255,255,0.28); }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html"     class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="citizen-map.html"       class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html" class="nav-item active">
+        <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications
+        <span class="nav-badge" id="sidebar-badge" style="display:none;"></span>
+      </a>
+      <a href="my-profile.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarUserName">Juan dela Cruz</div>
+          <div class="user-role" id="sidebarUserRole">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span><span></span><span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="citizen-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">Notifications</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn">
+          <i class="fa-solid fa-bell"></i>
+          <span class="notif-badge" id="topbar-badge" style="display:none;"></span>
+        </a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="page-header">
+        <div class="page-header-left">
+          <nav class="breadcrumb" aria-label="breadcrumb">
+            <li class="breadcrumb-item"><a href="citizen-dashboard.html">Dashboard</a></li>
+            <li class="breadcrumb-sep">›</li>
+            <li class="breadcrumb-item active">Notifications</li>
+          </nav>
+          <h1>Notifications</h1>
+          <p>Updates on your reports and barangay activity.</p>
+        </div>
+        <div class="page-header-right">
+          <span class="unread-count" id="unread-label" style="display:none;"></span>
+          <a href="#" class="btn-ghost-sm" id="mark-all-btn" onclick="markAllRead(); return false;" style="display:none;">
+            <i class="fa-solid fa-check"></i> Mark all read
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-row" id="filter-row">
+        <a href="#" class="filter-chip active" data-filter="all"       onclick="setFilter('all',this);return false;">All</a>
+        <a href="#" class="filter-chip"        data-filter="reports"   onclick="setFilter('reports',this);return false;">Reports</a>
+        <a href="#" class="filter-chip"        data-filter="approved"  onclick="setFilter('approved',this);return false;">Approved</a>
+        <a href="#" class="filter-chip"        data-filter="rejected"  onclick="setFilter('rejected',this);return false;">Rejected</a>
+        <a href="#" class="filter-chip"        data-filter="collected" onclick="setFilter('collected',this);return false;">Collected</a>
+      </div>
+
+      <!-- Notification feed -->
+      <div id="notif-feed"></div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Notification detail modal ── -->
+<div id="notif-modal-overlay" onclick="closeNotifModal()">
+  <div id="notif-modal" onclick="event.stopPropagation()">
+    <div class="nmd-header" id="nmd-header">
+      <div class="nmd-header-icon" id="nmd-icon"></div>
+      <div class="nmd-header-text">
+        <div class="nmd-title" id="nmd-title"></div>
+        <div class="nmd-time"  id="nmd-time"></div>
+      </div>
+      <button class="nmd-close" onclick="closeNotifModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="nmd-body" id="nmd-body"></div>
+  </div>
+</div>
+
+<!-- Photo lightbox -->
+<div id="nmd-lightbox" onclick="closeLightbox()">
+  <button id="nmd-lb-close" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></button>
+  <img id="nmd-lb-img" src="" alt="Full photo" onclick="event.stopPropagation()" />
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/notifs.js"></script>
+<script src="js/complaints.js"></script>
+<script>
+  var _session     = null;
+  var _citizenId   = '';
+  var _citizenName = '';
+  var _activeFilter = 'all';
+
+  try {
+    _session     = JSON.parse(sessionStorage.getItem('zc_session'));
+    _citizenId   = _session ? (_session.id   || '') : '';
+    _citizenName = _session ? ((_session.firstName || '') + ' ' + (_session.lastName || '')).trim() : '';
+  } catch(e) {}
+
+  // ── Config per type ───────────────────────────────────────
+  var TYPE_CFG = {
+    submitted: { icon: 'fa-file-lines',    iconColor: 'sage',   tag: 'Submitted', tagColor: 'yellow' },
+    approved:  { icon: 'fa-clipboard-list',iconColor: 'blue',   tag: 'Approved',  tagColor: 'blue'   },
+    rejected:  { icon: 'fa-circle-xmark',  iconColor: 'red',    tag: 'Rejected',  tagColor: 'red'    },
+    collected: { icon: 'fa-circle-check',  iconColor: 'green',  tag: 'Collected', tagColor: 'green'  },
+    kyc:       { icon: 'fa-id-card',       iconColor: 'sage',   tag: 'KYC',       tagColor: 'sage'   },
+    system:    { icon: 'fa-bullhorn',      iconColor: 'sage',   tag: 'System',    tagColor: 'sage'   }
+  };
+
+  function _cfg(type) { return TYPE_CFG[type] || TYPE_CFG.system; }
+
+  // ── Date helpers ──────────────────────────────────────────
+  function _formatTime(iso) {
+    var d = new Date(iso);
+    var now = new Date();
+    var isToday = d.toDateString() === now.toDateString();
+    var yest = new Date(now); yest.setDate(now.getDate() - 1);
+    var isYesterday = d.toDateString() === yest.toDateString();
+    if (isToday) {
+      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+    if (isYesterday) return 'Yesterday';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function _groupLabel(iso) {
+    var d = new Date(iso);
+    var now = new Date();
+    var isToday = d.toDateString() === now.toDateString();
+    var yest = new Date(now); yest.setDate(now.getDate() - 1);
+    var isYesterday = d.toDateString() === yest.toDateString();
+    var weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+
+    if (isToday)     return 'Today — ' + now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (isYesterday) return 'Yesterday — ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (d >= weekAgo) return 'Earlier this week';
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  // ── Filter logic ──────────────────────────────────────────
+  var REPORT_TYPES = ['submitted', 'approved', 'rejected', 'collected'];
+
+  function _passesFilter(n, filter) {
+    if (filter === 'all')     return true;
+    if (filter === 'reports') return REPORT_TYPES.indexOf(n.type) !== -1;
+    return n.type === filter;
+  }
+
+  function setFilter(filter, el) {
+    _activeFilter = filter;
+    document.querySelectorAll('#filter-row .filter-chip').forEach(function(c) {
+      c.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+    renderFeed();
+  }
+
+  // ── Render ────────────────────────────────────────────────
+  function renderFeed() {
+    var all    = NOTIFS_DB.getForCitizen(_citizenId, _citizenName);
+    var shown  = all.filter(function(n) { return _passesFilter(n, _activeFilter); });
+    var unread = all.filter(function(n) { return !n.read; }).length;
+    var feed   = document.getElementById('notif-feed');
+
+    // Update badges
+    var sb = document.getElementById('sidebar-badge');
+    var tb = document.getElementById('topbar-badge');
+    var ul = document.getElementById('unread-label');
+    var mb = document.getElementById('mark-all-btn');
+    if (sb) { sb.textContent = unread; sb.style.display = unread > 0 ? '' : 'none'; }
+    if (tb) { tb.textContent = unread; tb.style.display = unread > 0 ? '' : 'none'; }
+    if (ul) { ul.textContent = '● ' + unread + ' unread'; ul.style.display = unread > 0 ? '' : 'none'; }
+    if (mb) { mb.style.display = unread > 0 ? '' : 'none'; }
+
+    // Update chip labels
+    var allCount = all.length;
+    document.querySelector('[data-filter="all"]').textContent    = 'All (' + allCount + ')';
+
+    if (!shown.length) {
+      feed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bell-slash"></i><strong>No notifications yet</strong>Your report updates will appear here when an officer approves, rejects, or a driver collects your report.</div>';
+      return;
+    }
+
+    // Group by date label
+    var groups = {};
+    var order  = [];
+    shown.forEach(function(n) {
+      var lbl = _groupLabel(n.timestamp);
+      if (!groups[lbl]) { groups[lbl] = []; order.push(lbl); }
+      groups[lbl].push(n);
+    });
+
+    var html = '';
+    order.forEach(function(lbl) {
+      html += '<div class="notif-group">';
+      html += '<div class="notif-group-label">' + lbl + '</div>';
+      html += '<div class="notif-list">';
+      groups[lbl].forEach(function(n) {
+        html += buildNotifItem(n);
+      });
+      html += '</div></div>';
+    });
+    feed.innerHTML = html;
+  }
+
+  function buildNotifItem(n) {
+    var cfg   = _cfg(n.type);
+    var unreadCls = n.read ? '' : ' unread';
+    var time  = _formatTime(n.timestamp);
+
+    // For collected notifications, check if a complaint already exists
+    var complainAction = '';
+    if (n.type === 'collected' && n.reportId) {
+      var alreadyComplained = typeof COMPLAINTS_DB !== 'undefined' && COMPLAINTS_DB.getByReportId(n.reportId);
+      if (!alreadyComplained) {
+        complainAction = '<div style="margin-top:8px;">' +
+          '<a href="submit-complaint.html?reportId=' + encodeURIComponent(n.reportId) + '" ' +
+             'style="font-size:12px;font-weight:700;color:#dc2626;text-decoration:none;' +
+                    'display:inline-flex;align-items:center;gap:5px;padding:5px 10px;' +
+                    'border-radius:6px;border:1.5px solid #fca5a5;background:#fef2f2;"' +
+             'onclick="event.stopPropagation();NOTIFS_DB.markRead(\'' + escHtml(n.id) + '\');">' +
+            '<i class="fa-solid fa-triangle-exclamation"></i> File a Complaint' +
+          '</a>' +
+        '</div>';
+      } else {
+        complainAction = '<div style="margin-top:8px;font-size:12px;color:#16a34a;display:flex;align-items:center;gap:5px;">' +
+          '<i class="fa-solid fa-circle-check"></i> Complaint submitted' +
+        '</div>';
+      }
+    }
+
+    return '<div class="notif-item' + unreadCls + '" onclick="onNotifClick(\'' + escHtml(n.id) + '\')">' +
+      '<div class="notif-icon-wrap ' + cfg.iconColor + '"><i class="fa-solid ' + cfg.icon + '"></i></div>' +
+      '<div class="notif-body">' +
+        '<div class="notif-title">' + escHtml(n.title) + '</div>' +
+        '<div class="notif-desc">'  + escHtml(n.desc)  + '</div>' +
+        complainAction +
+      '</div>' +
+      '<div class="notif-meta">' +
+        '<span class="notif-time">' + time + '</span>' +
+        '<span class="notif-tag ' + cfg.tagColor + '">' + cfg.tag + '</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Notification detail modal ─────────────────────────────
+
+  var WASTE_LABELS = {
+    household: 'Household', commercial: 'Commercial',
+    construction: 'Construction', hazardous: 'Hazardous', other: 'Other'
+  };
+  var URG_COLORS = { low:'#16a34a', medium:'#d97706', high:'#ea580c', critical:'#dc2626' };
+  var ICON_BG = {
+    sage:  'rgba(88,129,87,0.12)',  green: 'rgba(22,163,74,0.12)',
+    blue:  'rgba(37,99,235,0.12)', red:   'rgba(220,38,38,0.12)',
+    yellow:'rgba(202,138,4,0.12)'
+  };
+
+  function onNotifClick(id) {
+    NOTIFS_DB.markRead(id);
+    renderFeed();
+    var all = NOTIFS_DB.getAll();
+    var n = null;
+    for (var i = 0; i < all.length; i++) { if (all[i].id === id) { n = all[i]; break; } }
+    if (n) openNotifDetail(n);
+  }
+
+  function openNotifDetail(n) {
+    var cfg = _cfg(n.type);
+    var report = (n.reportId && typeof REPORTS_DB !== 'undefined') ? REPORTS_DB.getById(n.reportId) : null;
+
+    // Header
+    var iconBg = ICON_BG[cfg.iconColor] || 'rgba(88,129,87,0.12)';
+    var iconFg = { sage:'#5c7242', green:'#16a34a', blue:'#2563eb', red:'#dc2626', yellow:'#ca8a04' }[cfg.iconColor] || '#5c7242';
+    document.getElementById('nmd-icon').style.cssText = 'background:' + iconBg + ';color:' + iconFg + ';';
+    document.getElementById('nmd-icon').innerHTML = '<i class="fa-solid ' + cfg.icon + '"></i>';
+    document.getElementById('nmd-title').textContent = n.title;
+    document.getElementById('nmd-time').textContent  = new Date(n.timestamp).toLocaleString('en-US', {
+      year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit'
+    });
+
+    var body = '';
+
+    // ── Status banner ──
+    var bannerIcon = { submitted:'fa-hourglass-half', approved:'fa-circle-check', rejected:'fa-circle-xmark', collected:'fa-truck' };
+    var bannerMsg  = {
+      submitted: 'Your report is now pending officer review.',
+      approved:  'Your report was approved and a driver has been assigned.',
+      rejected:  'Your report was not approved. See the reason below.',
+      collected: 'The waste has been collected. Thank you for helping keep our city clean!'
+    };
+    body += '<div class="nmd-status-banner ' + (n.type||'submitted') + '">' +
+      '<i class="fa-solid ' + (bannerIcon[n.type]||'fa-bell') + '" style="font-size:18px;flex-shrink:0;"></i>' +
+      '<span>' + (bannerMsg[n.type] || n.desc) + '</span>' +
+    '</div>';
+
+    if (report) {
+      // ── Report details grid ──
+      var urg = report.urgency || 'low';
+      body += '<div>' +
+        '<div class="nmd-section-lbl"><i class="fa-solid fa-circle-info"></i> Report Details</div>' +
+        '<div class="nmd-grid">' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Report ID</div><div class="nmd-box-val">#' + escHtml(report.id) + '</div></div>' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Submitted</div><div class="nmd-box-val">' + escHtml(report.dateStr || '—') + '</div></div>' +
+          '<div class="nmd-box" style="grid-column:1/-1;"><div class="nmd-box-lbl">Location</div><div class="nmd-box-val">' + escHtml(report.location) + '</div></div>' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Barangay</div><div class="nmd-box-val">' + escHtml(report.barangay) + '</div></div>' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Waste Type</div><div class="nmd-box-val">' + (WASTE_LABELS[report.wasteType] || 'Other') + '</div></div>' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Urgency</div><div class="nmd-box-val" style="color:' + (URG_COLORS[urg]||'#16a34a') + ';">' + (urg.charAt(0).toUpperCase()+urg.slice(1)) + '</div></div>' +
+          '<div class="nmd-box"><div class="nmd-box-lbl">Status</div><div class="nmd-box-val">' + (report.status.charAt(0).toUpperCase()+report.status.slice(1)) + '</div></div>' +
+        '</div>' +
+      '</div>';
+
+      // ── Type-specific details ──
+      if (n.type === 'approved' && (report.approvedBy || report.assignedDriver)) {
+        body += '<div>' +
+          '<div class="nmd-section-lbl"><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> Approval Details</div>' +
+          '<div class="nmd-grid">' +
+            (report.approvedBy   ? '<div class="nmd-box"><div class="nmd-box-lbl">Approved By</div><div class="nmd-box-val">' + escHtml(report.approvedBy) + '</div></div>' : '') +
+            (report.approvedDate ? '<div class="nmd-box"><div class="nmd-box-lbl">Approved On</div><div class="nmd-box-val">' + escHtml(report.approvedDate) + '</div></div>' : '') +
+            (report.assignedDriver ? '<div class="nmd-box" style="grid-column:1/-1;background:#f0fdf4;border-color:#bbf7d0;"><div class="nmd-box-lbl" style="color:#16a34a;">Assigned Driver</div><div class="nmd-box-val" style="color:#15803d;"><i class="fa-solid fa-truck" style="font-size:11px;margin-right:5px;"></i>' + escHtml(report.assignedDriver) + '</div></div>' : '') +
+          '</div>' +
+        '</div>';
+      }
+
+      if (n.type === 'rejected' && report.rejectionReason) {
+        body += '<div>' +
+          '<div class="nmd-section-lbl"><i class="fa-solid fa-circle-xmark" style="color:#dc2626;"></i> Rejection Details</div>' +
+          '<div class="nmd-grid">' +
+            (report.rejectedBy   ? '<div class="nmd-box"><div class="nmd-box-lbl">Rejected By</div><div class="nmd-box-val">' + escHtml(report.rejectedBy) + '</div></div>' : '') +
+            (report.rejectedDate ? '<div class="nmd-box"><div class="nmd-box-lbl">Rejected On</div><div class="nmd-box-val">' + escHtml(report.rejectedDate) + '</div></div>' : '') +
+            '<div class="nmd-box" style="grid-column:1/-1;background:#fff1f2;border-color:#fecdd3;"><div class="nmd-box-lbl" style="color:#dc2626;">Reason</div><div class="nmd-box-val" style="color:#dc2626;">' + escHtml(report.rejectionReason) + '</div></div>' +
+          '</div>' +
+        '</div>';
+      }
+
+      if (n.type === 'collected') {
+        body += '<div>' +
+          '<div class="nmd-section-lbl"><i class="fa-solid fa-truck" style="color:#2563eb;"></i> Collection Details</div>' +
+          '<div class="nmd-grid">' +
+            (report.collectedBy   ? '<div class="nmd-box"><div class="nmd-box-lbl">Collected By</div><div class="nmd-box-val">' + escHtml(report.collectedBy) + '</div></div>' : '') +
+            (report.collectedDate ? '<div class="nmd-box"><div class="nmd-box-lbl">Collected On</div><div class="nmd-box-val">' + escHtml(report.collectedDate) + '</div></div>' : '') +
+          '</div>' +
+        '</div>';
+
+        // Collection proof photo
+        body += '<div>' +
+          '<div class="nmd-section-lbl"><i class="fa-solid fa-camera" style="color:#2563eb;"></i> Collection Proof Photo</div>' +
+          (report.collectionPhoto
+            ? '<div class="nmd-photo" onclick="openLightbox(\'' + escHtml(report.collectionPhoto) + '\')"><img src="' + report.collectionPhoto + '" alt="Collection proof" onerror="this.parentNode.outerHTML=\'<div class=nmd-photo-none><i class=fa-solid\\ fa-image></i><span>Photo not available</span></div>\'"></div>'
+            : '<div class="nmd-photo-none"><i class="fa-solid fa-image"></i><span>No proof photo taken</span></div>') +
+        '</div>';
+      }
+
+      // ── Description ──
+      if (report.description) {
+        body += '<div>' +
+          '<div class="nmd-section-lbl"><i class="fa-solid fa-comment-dots"></i> Your Description</div>' +
+          '<div class="nmd-desc-box">"' + escHtml(report.description) + '"</div>' +
+        '</div>';
+      }
+
+      // ── Original report photo ──
+      body += '<div>' +
+        '<div class="nmd-section-lbl"><i class="fa-solid fa-camera"></i> Your Submitted Photo</div>' +
+        (report.photo
+          ? '<div class="nmd-photo" onclick="openLightbox(\'' + escHtml(report.photo) + '\')"><img src="' + report.photo + '" alt="Report photo" onerror="this.parentNode.outerHTML=\'<div class=nmd-photo-none><i class=fa-solid\\ fa-image></i><span>Photo not available</span></div>\'"></div>'
+          : '<div class="nmd-photo-none"><i class="fa-solid fa-image"></i><span>No photo was submitted</span></div>') +
+      '</div>';
+    } else {
+      // No report linked — just show the description text
+      body += '<div class="nmd-desc-box">' + escHtml(n.desc) + '</div>';
+    }
+
+    // ── Action buttons ──
+    var actions = '';
+    if (n.type === 'collected' && n.reportId) {
+      var alreadyComplained = typeof COMPLAINTS_DB !== 'undefined' && COMPLAINTS_DB.getByReportId(n.reportId);
+      if (!alreadyComplained) {
+        actions += '<a href="submit-complaint.html?reportId=' + encodeURIComponent(n.reportId) + '" ' +
+          'style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;background:#fff1f2;color:#dc2626;border:1.5px solid #fca5a5;font-size:13px;font-weight:600;text-decoration:none;">' +
+          '<i class="fa-solid fa-triangle-exclamation"></i> File a Complaint</a>';
+      }
+    }
+    if (n.type === 'rejected') {
+      actions += '<a href="submit-report.html" ' +
+        'style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;background:var(--primary);color:#fff;border:none;font-size:13px;font-weight:600;text-decoration:none;">' +
+        '<i class="fa-solid fa-rotate-right"></i> Submit New Report</a>';
+    }
+    actions += '<a href="my-reports.html" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);font-size:13px;font-weight:600;text-decoration:none;">' +
+      '<i class="fa-solid fa-clipboard-list"></i> My Reports</a>';
+
+    body += '<div class="nmd-actions">' + actions + '</div>';
+
+    document.getElementById('nmd-body').innerHTML = body;
+    document.getElementById('notif-modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeNotifModal() {
+    document.getElementById('notif-modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function openLightbox(src) {
+    document.getElementById('nmd-lb-img').src = src;
+    document.getElementById('nmd-lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('nmd-lightbox').classList.remove('open');
+    document.getElementById('nmd-lb-img').src = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeLightbox(); closeNotifModal(); }
+  });
+
+  function markAllRead() {
+    NOTIFS_DB.markAllRead(_citizenId, _citizenName);
+    renderFeed();
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Sidebar / role link ───────────────────────────────────
+  (function () {
+    try {
+      var u = _session;
+      if (!u) return;
+      var fullName = [u.firstName, u.middleName, u.lastName].filter(Boolean).join(' ');
+      var nameEl = document.getElementById('sidebarUserName');
+      var roleEl = document.getElementById('sidebarUserRole');
+      if (nameEl) nameEl.textContent = fullName || 'Citizen';
+      if (roleEl) roleEl.textContent = 'Citizen · ' + (u.barangay || 'Zamboanga City');
+      if (!u.role) return;
+      var sec = document.getElementById('role-back-section');
+      if (!sec) return;
+      var lnk = document.getElementById('role-back-link');
+      var ico = document.getElementById('role-back-icon');
+      var txt = document.getElementById('role-back-text');
+      if (u.role === 'officer') {
+        sec.style.display = '';
+        lnk.href = 'officer-dashboard.html';
+        ico.className = 'fa-solid fa-landmark';
+        txt.textContent = 'Officer View';
+      } else if (u.role === 'driver') {
+        sec.style.display = '';
+        lnk.href = 'dashboard-driver.html';
+        ico.className = 'fa-solid fa-truck';
+        txt.textContent = 'Driver View';
+      }
+    } catch(e) {}
+  })();
+
+  // Initial render
+  renderFeed();
+</script>
+</body>
+</html>
