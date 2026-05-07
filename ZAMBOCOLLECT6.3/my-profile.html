@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — ZamboCollect Citizen Portal</title>
+  <link rel="stylesheet" href="css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+  /* ── Toast ─────────────────────────────────────────────── */
+  .citizen-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1e293b; color: #fff; border-radius: 10px;
+    padding: 11px 20px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 9px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 20000; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0;
+    white-space: nowrap;
+  }
+  .citizen-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .citizen-toast.toast-green i { color: #4ade80; }
+  .citizen-toast.toast-yellow i { color: #fbbf24; }
+  .citizen-toast.toast-red i { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar">
+    <a href="citizen-dashboard.html" class="sidebar-logo">
+      <div class="logo-mark"><i class="fa-solid fa-trash-can"></i></div>
+      <span class="logo-text">ZamboCollect</span>
+    </a>
+
+    <div style="padding: 10px 18px 0;">
+      <span class="badge-sage" style="font-size:11px; padding: 4px 10px;"><i class="fa-solid fa-user"></i> Citizen Portal</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="citizen-dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Dashboard</a>
+      <a href="submit-report.html"     class="nav-item"><span class="nav-icon"><i class="fa-solid fa-file-lines"></i></span>Submit Report</a>
+      <a href="my-reports.html"        class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Reports</a>
+      <a href="citizen-map.html"          class="nav-item"><span class="nav-icon"><i class="fa-solid fa-map"></i></span>Map View</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="notifications.html"    class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell"></i></span>Notifications<span class="nav-badge">3</span></a>
+      <a href="my-profile.html"       class="nav-item active"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</a>
+    </div>
+
+    <div class="sidebar-section" id="role-back-section" style="display:none;">
+      <div class="sidebar-label">Portal</div>
+      <a href="#" class="nav-item" id="role-back-link">
+        <span class="nav-icon"><i id="role-back-icon" class="fa-solid fa-landmark"></i></span>
+        <span id="role-back-text">Back to Portal</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fa-solid fa-circle-user"></i></div>
+        <div>
+          <div class="user-name" id="sidebarUserName">Juan dela Cruz</div>
+          <div class="user-role" id="sidebarUserRole">Citizen · Barangay Rio Hondo</div>
+        </div>
+      </div>
+      <a href="Login.html" class="logout-link"><span><i class="fa-solid fa-right-from-bracket"></i></span> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <div class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="mobile-nav-menu">
+        <ul>
+          <li><a href="citizen-dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+          <li><a href="submit-report.html"><i class="fa-solid fa-file-lines"></i> Submit Report</a></li>
+          <li><a href="my-reports.html"><i class="fa-solid fa-clipboard-list"></i> My Reports</a></li>
+          <li><a href="citizen-map.html"><i class="fa-solid fa-map"></i> Map View</a></li>
+          <li id="mobile-nav-kyc-item"><a href="kyc-verification.html"><i class="fa-solid fa-id-card"></i> KYC Verification</a></li>
+          <li><a href="notifications.html"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+          <li><a href="my-profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+          <li><a href="Login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        </ul>
+      </nav>
+      <div class="topbar-title">My Profile</div>
+      <div class="topbar-right">
+        <a href="notifications.html" class="topbar-btn"><i class="fa-solid fa-bell"></i> <span class="notif-badge">3</span></a>
+        <a href="submit-report.html" class="topbar-btn primary">+ New Report</a>
+      </div>
+    </div>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <div class="page-header">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <li class="breadcrumb-item"><a href="citizen-dashboard.html">Dashboard</a></li>
+          <li class="breadcrumb-sep">›</li>
+          <li class="breadcrumb-item active">My Profile</li>
+        </nav>
+        <h1>My Profile</h1>
+        <p>Manage your account information, verification status, and preferences.</p>
+      </div>
+
+      <!-- ── Profile Hero Banner ── -->
+      <div class="profile-hero">
+        <div style="position:relative;flex-shrink:0;width:76px;height:76px;">
+          <div class="profile-avatar" style="cursor:pointer;overflow:hidden;" onclick="document.getElementById('profile-photo-input').click()" title="Change profile photo">
+            <img id="profile-photo-img" src="" alt="Profile" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" />
+            <i id="profile-photo-icon" class="fa-solid fa-circle-user"></i>
+            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" onchange="handleProfilePhotoUpload(event)" />
+          </div>
+          <div style="position:absolute;bottom:0;right:0;background:#588157;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #fff;pointer-events:none;z-index:2;">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+        </div>
+
+        <div class="profile-info">
+          <h2 id="profileHeroName">Juan dela Cruz</h2>
+          <div class="subtitle" id="profileHeroSubtitle">Citizen · Barangay Rio Hondo, Zamboanga City</div>
+          <div class="profile-badges">
+            <span class="badge badge-citizen"><i class="fa-solid fa-user"></i> Citizen</span>
+            <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> KYC Pending</span>
+            <span class="badge-sage"><i class="fa-solid fa-location-dot"></i> <span id="profileBarangayBadge">Rio Hondo</span></span>
+          </div>
+        </div>
+
+        <!-- Stats (hidden on small screens via CSS) -->
+        <div class="profile-stat-row">
+          <div class="profile-stat">
+            <div class="profile-stat-num">7</div>
+            <div class="profile-stat-label">Reports</div>
+          </div>
+          <div class="profile-stat-divider"></div>
+          <div class="profile-stat">
+            <div class="profile-stat-num">5</div>
+            <div class="profile-stat-label">Collected</div>
+          </div>
+          <div class="profile-stat-divider"></div>
+          <div class="profile-stat">
+            <div class="profile-stat-num">91%</div>
+            <div class="profile-stat-label">Success Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Two-column grid ── -->
+      <div class="grid-2">
+
+        <!-- LEFT COLUMN -->
+        <div>
+
+          <!-- Account Information -->
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-id-card"></i> Account Information
+              <span style="font-size:11px; font-weight:500; color:var(--muted);">Read-only</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Full Name</div>
+              <div class="locked-field">
+                <span id="profileFullName">Juan dela Cruz</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Email Address</div>
+              <div class="locked-field">
+                <span id="profileEmail">juan.delacruz@email.com</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Contact Number</div>
+              <div class="locked-field">
+                <span id="profilePhone">09XX-XXX-XXXX</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Barangay</div>
+              <div class="locked-field">
+                <span id="profileBarangay">Barangay Rio Hondo</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Complete Address</div>
+              <div class="locked-field">
+                <span id="profileAddress">123 Riverside St., Zamboanga City</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label">Member Since</div>
+              <div class="locked-field">
+                <span id="profileMemberSince">March 1, 2025</span>
+                <span class="lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+              </div>
+            </div>
+
+            <div class="lock-notice">
+              <span class="lock-notice-icon"><i class="fa-solid fa-lock"></i></span>
+              Account details are locked after KYC verification. To update your name, use the <strong>Re-verify to Edit</strong> button below.
+            </div>
+
+            <!-- Re-verify name button -->
+            <button onclick="document.getElementById('reverify-modal').style.display='flex'"
+              style="width:100%;margin-top:10px;background:#fffbeb;border:1.5px solid #f0d070;color:#b45309;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;">
+              <i class="fa-solid fa-rotate"></i> Request Name Change via Re-verification
+            </button>
+          </div>
+
+          <!-- Notification Preferences -->
+          <div class="card section-gap">
+            <div class="card-title"><i class="fa-solid fa-bell"></i> Notification Preferences</div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-label">
+                <h4>Report Status Updates</h4>
+                <p>Get notified when your report is approved or collected</p>
+              </div>
+              <label>
+                <input type="checkbox" class="toggle-input" checked />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-label">
+                <h4>KYC Alerts</h4>
+                <p>Reminders and updates about your verification status</p>
+              </div>
+              <label>
+                <input type="checkbox" class="toggle-input" checked />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-label">
+                <h4>Barangay Announcements</h4>
+                <p>Schedule changes and community cleanup notices</p>
+              </div>
+              <label>
+                <input type="checkbox" class="toggle-input" checked />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-label">
+                <h4>Driver Dispatch Alerts</h4>
+                <p>Know when a driver is assigned to your report</p>
+              </div>
+              <label>
+                <input type="checkbox" class="toggle-input" />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+            <div class="toggle-wrap">
+              <div class="toggle-label">
+                <h4>Weekly Summary</h4>
+                <p>A weekly digest of your reports and barangay activity</p>
+              </div>
+              <label>
+                <input type="checkbox" class="toggle-input" />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+          </div>
+
+          <!-- Change Password -->
+          <div class="card section-gap">
+            <div class="card-title"><i class="fa-solid fa-lock"></i> Change Password</div>
+
+            <div class="field-row">
+              <div class="field-label">Current Password</div>
+              <input type="password" id="cp-current" placeholder="Enter current password"
+                style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;box-sizing:border-box;" />
+            </div>
+
+            <div class="field-row" style="margin-top:10px;">
+              <div class="field-label">New Password</div>
+              <input type="password" id="cp-new" placeholder="New password" oninput="cpStrength(this.value)"
+                style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;box-sizing:border-box;" />
+              <div style="margin-top:5px;height:4px;border-radius:2px;background:#f3f4f6;overflow:hidden;">
+                <div id="cp-strength-bar" style="height:100%;border-radius:2px;width:0%;transition:width 0.3s,background 0.3s;"></div>
+              </div>
+              <div id="cp-strength-label" style="font-size:11px;color:#9ca3af;margin-top:3px;min-height:16px;"></div>
+            </div>
+
+            <div class="field-row" style="margin-top:10px;">
+              <div class="field-label">Confirm Password</div>
+              <input type="password" id="cp-confirm" placeholder="Confirm new password"
+                style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;box-sizing:border-box;" />
+            </div>
+
+            <div id="cp-msg" style="display:none;font-size:12px;border-radius:8px;padding:8px 12px;margin-top:8px;"></div>
+
+            <button onclick="doChangePassword()"
+              style="width:100%;margin-top:12px;background:#588157;border:none;color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;">
+              <i class="fa-solid fa-key"></i> Update Password
+            </button>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+
+          <!-- Activity Summary -->
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Activity Summary</div>
+
+            <div class="mini-stats">
+              <div class="mini-stat">
+                <div class="mini-stat-num">7</div>
+                <div class="mini-stat-label">Total Reports</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num" style="color:var(--yellow);">2</div>
+                <div class="mini-stat-label">Pending</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num" style="color:var(--blue);">4</div>
+                <div class="mini-stat-label">Approved</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num">5</div>
+                <div class="mini-stat-label">Collected</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num" style="color:var(--red);">1</div>
+                <div class="mini-stat-label">Critical</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num">91%</div>
+                <div class="mini-stat-label">Success Rate</div>
+              </div>
+            </div>
+
+            <a href="my-reports.html" class="btn-kyc-full" style="margin-top:8px;">
+              <i class="fa-solid fa-clipboard-list"></i> View All My Reports
+            </a>
+          </div>
+
+          <!-- KYC / Verification Status -->
+          <div class="card section-gap">
+            <div class="card-title"><i class="fa-solid fa-id-card"></i> Verification Status</div>
+
+            <div class="status-row">
+              <span class="status-row-label">Account Status</span>
+              <span id="kyc-account-status-badge" class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending</span>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">KYC Submission</span>
+              <span id="kyc-submission-val" class="status-row-value">Not Submitted</span>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">Government ID</span>
+              <span id="kyc-govid-val" class="status-row-value">—</span>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">Selfie with ID</span>
+              <span id="kyc-selfie-val" class="status-row-value">—</span>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">Officer Review</span>
+              <span id="kyc-review-val" class="status-row-value">Awaiting submission</span>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">Assigned Officer</span>
+              <span id="kyc-officer-val" class="status-row-value">Barangay Rio Hondo</span>
+            </div>
+
+            <!-- Verified confirmation banner (hidden until verified) -->
+            <div id="kyc-verified-banner" style="display:none;margin-top:12px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:#15803d;font-weight:600;">
+              <i class="fa-solid fa-circle-check" style="font-size:14px;"></i>
+              Your identity is fully verified. All features are unlocked.
+            </div>
+
+            <a id="kyc-complete-btn" href="kyc-verification.html" class="btn-kyc-full">
+              <i class="fa-solid fa-id-card"></i> Complete KYC Verification →
+            </a>
+          </div>
+
+          <!-- Upgrade to Driver -->
+          <div class="card section-gap" style="border-color:#bfdbfe;background:linear-gradient(135deg,#eff6ff 0%,#f8faff 100%);">
+            <div class="card-title" style="color:#1d4ed8;"><i class="fa-solid fa-truck"></i> Driver Account</div>
+            <div style="font-size:13px;color:#3b5fa0;line-height:1.6;margin-bottom:12px;">
+              Verified citizens can apply for a <strong>Driver Account</strong> to join waste collection operations and respond to barangay reports.
+            </div>
+            <a href="upgrade-to-driver.html" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.2s;">
+              <i class="fa-solid fa-truck"></i> Apply for Driver Account
+            </a>
+          </div>
+
+          <!-- Recent Reports (quick view) -->
+          <div class="card section-gap">
+            <div class="card-title">
+              <i class="fa-solid fa-clock"></i> Recent Reports
+              <a href="my-reports.html" style="font-size:12px; font-weight:500; color:var(--primary); background:var(--primary-glow); padding:4px 10px; border-radius:6px; border:1px solid var(--primary-tint); text-decoration:none;">View All</a>
+            </div>
+
+            <div class="status-row">
+              <span class="status-row-label">#RPT-384 — Pasonanca Rd.</span>
+              <span class="badge badge-verified">Collected</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row-label">#RPT-382 — Canelar Market</span>
+              <span class="badge badge-citizen">Approved</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row-label">#RPT-381 — Rio Hondo Bridge</span>
+              <span class="badge badge-pending">Pending</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row-label">#RPT-378 — Sta. Cruz Wharf</span>
+              <span class="badge badge-verified">Collected</span>
+            </div>
+          </div>
+
+        
+        
+
+<!-- Re-verification Modal -->
+<div id="reverify-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+
+  <!-- Hidden radio inputs for modal steps -->
+  <input type="radio" name="rkyc" id="rkyc1" checked hidden />
+  <input type="radio" name="rkyc" id="rkyc2" hidden />
+  <input type="radio" name="rkyc" id="rkyc3" hidden />
+
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,0.2);overflow:hidden;">
+
+    <!-- Modal Header -->
+    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-bottom:1.5px solid #f0d070;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;color:#1a1a1a;"><i class="fa-solid fa-rotate" style="color:#b45309;margin-right:7px;"></i>Re-verify to Edit Name</div>
+        <div style="font-size:12px;color:#92400e;margin-top:2px;">Complete identity check to update your full name</div>
+      </div>
+      <button onclick="document.getElementById('reverify-modal').style.display='none';document.getElementById('rkyc1').checked=true;"
+        style="background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:4px;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Modal Stepper -->
+    <div style="padding:20px 24px 0;display:flex;gap:0;align-items:flex-start;">
+      <div id="rstep1" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;">
+        <div id="rcirc1" style="width:30px;height:30px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#6b7280;background:#fff;transition:all 0.3s;z-index:1;">1</div>
+        <span style="font-size:10px;color:#6b7280;font-weight:500;">Scan ID</span>
+        <div style="position:absolute;top:15px;left:calc(50% + 15px);width:calc(100% - 30px);height:2px;background:#e5e7eb;"></div>
+      </div>
+      <div id="rstep2" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;">
+        <div id="rcirc2" style="width:30px;height:30px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#6b7280;background:#fff;transition:all 0.3s;z-index:1;">2</div>
+        <span style="font-size:10px;color:#6b7280;font-weight:500;">Selfie</span>
+        <div style="position:absolute;top:15px;left:calc(50% + 15px);width:calc(100% - 30px);height:2px;background:#e5e7eb;"></div>
+      </div>
+      <div id="rstep3" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div id="rcirc3" style="width:30px;height:30px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#6b7280;background:#fff;transition:all 0.3s;z-index:1;">3</div>
+        <span style="font-size:10px;color:#6b7280;font-weight:500;">New Name</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Scan ID -->
+    <div id="rpanel1" style="padding:20px 24px 24px;">
+      <div style="border:2px dashed #d1d5db;border-radius:12px;background:#f9fafb;padding:24px 16px;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+        <input type="file" accept="image/*" capture="environment" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10;" onchange="previewReverifyImage(this, 'rkyc-id-preview', 'rkyc-id-content')" />
+        <div id="rkyc-id-content" style="transition:opacity 0.2s;">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#588157,#A3B18A);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;box-shadow:0 4px 12px rgba(88,129,87,0.28);">
+            <i class="fa-solid fa-id-card" style="color:#fff;font-size:1.1rem;"></i>
+          </div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px;">Scan Your ID</h4>
+          <p style="font-size:12px;color:#6b7280;line-height:1.5;">Open camera to capture your government-issued ID.<br/>Lay it flat on a well-lit surface.</p>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#588157;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;margin-top:10px;">
+            <i class="fa-solid fa-camera"></i> Open Camera
+          </div>
+        </div>
+        <img id="rkyc-id-preview" src="" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:5;" />
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        <button onclick="document.getElementById('reverify-modal').style.display='none'" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Cancel</button>
+        <label for="rkyc2" style="flex:2;padding:10px;background:#588157;color:#fff;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;">Continue →</label>
+      </div>
+    </div>
+
+    <!-- Step 2: Selfie -->
+    <div id="rpanel2" style="padding:20px 24px 24px;display:none;">
+      <div style="border:2px dashed #bfdbfe;border-radius:12px;background:#eff6ff;padding:24px 16px;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+        <input type="file" accept="image/*" capture="user" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10;" onchange="previewReverifyImage(this, 'rkyc-selfie-preview', 'rkyc-selfie-content')" />
+        <div id="rkyc-selfie-content" style="transition:opacity 0.2s;">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;box-shadow:0 4px 12px rgba(37,99,235,0.25);">
+            <i class="fa-solid fa-face-smile" style="color:#fff;font-size:1.1rem;"></i>
+          </div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px;">Take a Selfie with Your ID</h4>
+          <p style="font-size:12px;color:#6b7280;line-height:1.5;">Hold your ID clearly beside your face.<br/>Both must be fully visible in the frame.</p>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;margin-top:10px;">
+            <i class="fa-solid fa-camera"></i> Open Front Camera
+          </div>
+        </div>
+        <img id="rkyc-selfie-preview" src="" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:5;" />
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        <label for="rkyc1" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;">← Back</label>
+        <label for="rkyc3" style="flex:2;padding:10px;background:#588157;color:#fff;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;">Continue →</label>
+      </div>
+    </div>
+
+    <!-- Step 3: New Name -->
+    <div id="rpanel3" style="padding:20px 24px 24px;display:none;">
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;font-size:12px;color:#15803d;margin-bottom:14px;display:flex;align-items:center;gap:7px;">
+        <i class="fa-solid fa-circle-check"></i> Identity verified. You can now update your full name.
+      </div>
+      
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#1a1a1a;display:block;margin-bottom:6px;">First Name *</label>
+        <input type="text" id="ncr-firstName" placeholder="First name" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;" />
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">As it appears on your ID.</div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#1a1a1a;display:block;margin-bottom:6px;">Middle Initial</label>
+        <input type="text" id="ncr-middleInitial" placeholder="e.g., D, M" maxlength="2" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;" />
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">Optional. A single letter (A-Z) or up to 2 characters.</div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#1a1a1a;display:block;margin-bottom:6px;">Last Name *</label>
+        <input type="text" id="ncr-lastName" placeholder="Last name" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:#1a1a1a;outline:none;" />
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">As it appears on your ID.</div>
+      </div>
+
+      <div style="background:#fffbeb;border:1px solid #f0d070;border-radius:8px;padding:9px 12px;font-size:11px;color:#92400e;margin-bottom:14px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> This change will be reviewed by your barangay officer and may take 24–48 hours.
+      </div>
+      <div style="display:flex;gap:8px;">
+        <label for="rkyc2" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;">← Back</label>
+        <button id="ncr-submit-btn" onclick="submitNameChangeRequest()" style="flex:2;padding:10px;background:#588157;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Source Sans 3',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <i class="fa-solid fa-paper-plane"></i> Submit Name Change
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script>
+var reverifyImages = { id: null, selfie: null };
+
+function previewReverifyImage(input, previewId, contentId) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById(previewId).src = e.target.result;
+    document.getElementById(previewId).style.display = 'block';
+    document.getElementById(contentId).style.opacity = '0';
+    if (previewId.includes('id')) {
+      reverifyImages.id = e.target.result;
+    } else {
+      reverifyImages.selfie = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitNameChangeRequest() {
+  var user = ZC_DB.getSession();
+  if (!user) {
+    showToast('<i class="fa-solid fa-triangle-exclamation"></i>', 'You must be logged in to request a name change.', 'toast-yellow');
+    return;
+  }
+
+  var firstName = document.getElementById('ncr-firstName').value.trim();
+  var middleInitial = document.getElementById('ncr-middleInitial').value.trim();
+  var lastName = document.getElementById('ncr-lastName').value.trim();
+
+  if (!firstName || !lastName) {
+    showToast('<i class="fa-solid fa-triangle-exclamation"></i>', 'First name and last name are required.', 'toast-yellow');
+    return;
+  }
+
+  if (middleInitial && !/^[a-zA-Z]{1,2}$/.test(middleInitial)) {
+    showToast('<i class="fa-solid fa-triangle-exclamation"></i>', 'Middle initial must be 1-2 letters only.', 'toast-yellow');
+    return;
+  }
+
+  var result = ZC_DB.submitNameChangeRequest({
+    userId: user.id,
+    firstName: firstName,
+    middleName: middleInitial,
+    lastName: lastName,
+    idImage: reverifyImages.id,
+    selfieImage: reverifyImages.selfie
+  });
+
+  if (result.ok) {
+    showToast('<i class="fa-solid fa-circle-check"></i>', 'Name change request submitted successfully!', 'toast-green');
+    document.getElementById('reverify-modal').style.display = 'none';
+    document.getElementById('rkyc1').checked = true;
+    
+    // Reset form
+    document.getElementById('ncr-firstName').value = '';
+    document.getElementById('ncr-middleInitial').value = '';
+    document.getElementById('ncr-lastName').value = '';
+    
+    // Reset images
+    reverifyImages = { id: null, selfie: null };
+    document.getElementById('rkyc-id-preview').style.display = 'none';
+    document.getElementById('rkyc-id-preview').src = '';
+    document.getElementById('rkyc-id-content').style.opacity = '1';
+    document.getElementById('rkyc-selfie-preview').style.display = 'none';
+    document.getElementById('rkyc-selfie-preview').src = '';
+    document.getElementById('rkyc-selfie-content').style.opacity = '1';
+  } else {
+    showToast('<i class="fa-solid fa-circle-xmark"></i>', 'Error: ' + (result.error || 'Failed to submit request.'), 'toast-red');
+  }
+}
+
+(function () {
+  var user = ZC_DB.getSession();
+  if (!user) return;
+
+  // ── Pull live record from localStorage (has latest kycStatus) ──
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('zc_users')) || []; } catch(e) {}
+  var liveUser = null;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].id === user.id) { liveUser = users[i]; break; }
+  }
+  var kycStatus = liveUser ? (liveUser.kycStatus || 'pending') : (user.kycStatus || 'pending');
+
+  var fullName = [user.firstName, user.middleName, user.lastName]
+    .filter(Boolean).join(' ');
+
+  function setText(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  var barangay = user.barangay || '';
+
+  setText('sidebarUserName',    fullName);
+  setText('sidebarUserRole',    'Citizen · ' + barangay);
+  setText('profileHeroName',    fullName);
+  setText('profileHeroSubtitle','Citizen · ' + barangay + ', Zamboanga City');
+  setText('profileBarangayBadge', barangay.replace(/^Barangay\s*/i, ''));
+  setText('profileFullName',    fullName);
+  setText('profileEmail',       user.email || '');
+  setText('profilePhone',       user.phone || '');
+  setText('profileBarangay',    barangay);
+  setText('profileAddress',     user.fullAddress || user.address || '');
+
+  if (user.createdAt) {
+    var d = new Date(user.createdAt);
+    setText('profileMemberSince', d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  }
+
+  if (user.profilePhoto) {
+    var pi = document.getElementById('profile-photo-img');
+    var ic = document.getElementById('profile-photo-icon');
+    if (pi) { pi.src = user.profilePhoto; pi.style.display = ''; }
+    if (ic) ic.style.display = 'none';
+  }
+
+  // ── KYC status card — update dynamically based on real kycStatus ──
+  if (kycStatus === 'verified') {
+    // Hide the "Complete KYC Verification" button
+    var kycBtn = document.getElementById('kyc-complete-btn');
+    if (kycBtn) kycBtn.style.display = 'none';
+
+    // Hide mobile nav KYC link
+    var mobileKyc = document.getElementById('mobile-nav-kyc-item');
+    if (mobileKyc) mobileKyc.style.display = 'none';
+
+    // Show verified banner
+    var banner = document.getElementById('kyc-verified-banner');
+    if (banner) banner.style.display = 'flex';
+
+    // Account status badge → Verified
+    var statusBadge = document.getElementById('kyc-account-status-badge');
+    if (statusBadge) {
+      statusBadge.className = 'badge badge-verified';
+      statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verified';
+    }
+
+    // Hero badge — swap KYC Pending → Verified
+    var heroBadges = document.querySelectorAll('.profile-badges .badge-pending');
+    heroBadges.forEach(function(b) {
+      if (b.textContent.indexOf('KYC') !== -1) {
+        b.className = 'badge badge-verified';
+        b.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verified';
+      }
+    });
+
+    // Submission / ID / Selfie / Review rows → Approved
+    setText('kyc-submission-val', '\u2713 Submitted');
+    var submVal = document.getElementById('kyc-submission-val');
+    if (submVal) { submVal.style.color = 'var(--primary)'; submVal.style.fontWeight = '600'; }
+
+    var govId = document.getElementById('kyc-govid-val');
+    if (govId) { govId.textContent = '\u2713 ' + (liveUser && liveUser.kycIdType ? liveUser.kycIdType.charAt(0).toUpperCase() + liveUser.kycIdType.slice(1) : 'Government ID'); govId.style.color = 'var(--primary)'; govId.style.fontWeight = '600'; }
+
+    var selfieVal = document.getElementById('kyc-selfie-val');
+    if (selfieVal) { selfieVal.textContent = '\u2713 Approved'; selfieVal.style.color = 'var(--primary)'; selfieVal.style.fontWeight = '600'; }
+
+    var reviewVal = document.getElementById('kyc-review-val');
+    if (reviewVal) { reviewVal.textContent = '\u2713 Approved'; reviewVal.style.color = 'var(--primary)'; reviewVal.style.fontWeight = '600'; }
+
+  } else if (kycStatus === 'pending' && liveUser && liveUser.kycSubmittedAt) {
+    // Submitted but awaiting review
+    setText('kyc-submission-val', 'Submitted — Under Review');
+    setText('kyc-review-val', 'Pending Officer Review');
+  }
+})();
+
+function handleProfilePhotoUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX = 512, w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+
+      var session = ZC_DB.getSession();
+      if (!session) return;
+      var users = JSON.parse(localStorage.getItem('zc_users') || '[]');
+      for (var i = 0; i < users.length; i++) {
+        if (users[i].id === session.id) {
+          users[i].profilePhoto = dataUrl;
+          localStorage.setItem('zc_users', JSON.stringify(users));
+          session.profilePhoto = dataUrl;
+          sessionStorage.setItem('zc_session', JSON.stringify(session));
+          break;
+        }
+      }
+
+      var pi = document.getElementById('profile-photo-img');
+      var ic = document.getElementById('profile-photo-icon');
+      if (pi) { pi.src = dataUrl; pi.style.display = ''; }
+      if (ic) ic.style.display = 'none';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function cpStrength(val) {
+  var bar = document.getElementById('cp-strength-bar');
+  var lbl = document.getElementById('cp-strength-label');
+  if (!val) { bar.style.width = '0%'; lbl.textContent = ''; return; }
+  var score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  var i = score > 0 ? score - 1 : 0;
+  var colors = ['#c0392b','#c08a10','#2563eb','#588157'];
+  var labels = ['Weak','Fair','Good','Strong'];
+  bar.style.width      = ['25%','50%','75%','100%'][i];
+  bar.style.background = colors[i];
+  lbl.textContent      = labels[i];
+  lbl.style.color      = colors[i];
+}
+
+function doChangePassword() {
+  var cur  = document.getElementById('cp-current').value;
+  var nw   = document.getElementById('cp-new').value;
+  var conf = document.getElementById('cp-confirm').value;
+  var msg  = document.getElementById('cp-msg');
+
+  function showMsg(text, ok) {
+    msg.style.display    = 'block';
+    msg.style.background = ok ? '#f0fdf4' : '#fef2f2';
+    msg.style.border     = '1px solid ' + (ok ? '#bbf7d0' : '#fecaca');
+    msg.style.color      = ok ? '#15803d' : '#b91c1c';
+    msg.innerHTML = (ok ? '<i class="fa-solid fa-circle-check"></i> ' : '<i class="fa-solid fa-circle-xmark"></i> ') + text;
+  }
+
+  if (!cur || !nw || !conf) { showMsg('All fields are required.', false); return; }
+  if (nw.length < 8)        { showMsg('New password must be at least 8 characters.', false); return; }
+  if (nw !== conf)          { showMsg('Passwords do not match.', false); return; }
+
+  var session = ZC_DB.getSession();
+  if (!session) { showMsg('Session expired. Please log in again.', false); return; }
+
+  var result = ZC_DB.changePassword(session.id, cur, nw);
+  if (result.ok) {
+    showMsg('Password updated successfully!', true);
+    document.getElementById('cp-current').value = '';
+    document.getElementById('cp-new').value     = '';
+    document.getElementById('cp-confirm').value = '';
+    cpStrength('');
+  } else {
+    showMsg(result.error || 'Failed to update password.', false);
+  }
+}
+</script>
+
+<!-- Modal step JS -->
+<script>
+  document.querySelectorAll('[name="rkyc"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var panels = [document.getElementById('rpanel1'), document.getElementById('rpanel2'), document.getElementById('rpanel3')];
+      var circles = [document.getElementById('rcirc1'), document.getElementById('rcirc2'), document.getElementById('rcirc3')];
+      var idx = parseInt(this.id.replace('rkyc','')) - 1;
+      panels.forEach(function(p,i){ p.style.display = i===idx ? 'block' : 'none'; });
+      circles.forEach(function(c,i){
+        if(i < idx){ c.style.background='#588157';c.style.borderColor='#588157';c.style.color='#fff';c.innerHTML='<i class="fa-solid fa-check" style="font-size:10px;"></i>'; }
+        else if(i===idx){ c.style.background='#fff';c.style.borderColor='#588157';c.style.color='#588157';c.innerHTML=String(i+1); }
+        else { c.style.background='#fff';c.style.borderColor='#d1d5db';c.style.color='#6b7280';c.innerHTML=String(i+1); }
+      });
+    });
+  });
+</script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(sessionStorage.getItem('zc_session'));
+    if (!u || !u.role) return;
+    var sec = document.getElementById('role-back-section');
+    if (!sec) return;
+    var lnk = document.getElementById('role-back-link');
+    var ico = document.getElementById('role-back-icon');
+    var txt = document.getElementById('role-back-text');
+    if (u.role === 'officer') {
+      sec.style.display = '';
+      lnk.href = 'officer-dashboard.html';
+      ico.className = 'fa-solid fa-landmark';
+      txt.textContent = 'Officer View';
+    } else if (u.role === 'driver') {
+      sec.style.display = '';
+      lnk.href = 'dashboard-driver.html';
+      ico.className = 'fa-solid fa-truck';
+      txt.textContent = 'Driver View';
+    }
+  } catch (e) {}
+})();
+</script>
+
+<!-- ── Toast ── -->
+<div id="citizen-toast" class="citizen-toast toast-green">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="citizen-toast-msg">Done.</span>
+</div>
+
+<script>
+function showToast(iconHtml, msg, cls) {
+  var t = document.getElementById('citizen-toast');
+  t.className = 'citizen-toast ' + (cls || 'toast-green');
+  var icon = t.querySelector('i');
+  if (icon) icon.remove();
+  t.insertAdjacentHTML('afterbegin', iconHtml + ' ');
+  document.getElementById('citizen-toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+</script>
+
+</body>
+</html>
